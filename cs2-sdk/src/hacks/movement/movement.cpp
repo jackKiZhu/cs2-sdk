@@ -29,6 +29,4 @@ void CMovement::Run() {
     if (!(pawn->m_pEntity()->m_flags() & 0x1)) {
         return;
 	}
-
-
 }
