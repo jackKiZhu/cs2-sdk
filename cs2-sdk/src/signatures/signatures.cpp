@@ -31,7 +31,7 @@ namespace signatures {
 
     CSigScan GetCSGOInput("CCSGOInput", CConstants::CLIENT_LIB,
                           {
-#ifdef _WIN32 
+#ifdef _WIN32
                               {SDK_SIG("48 8D 0D ? ? ? ? E8 ? ? ? ? 66 0F 6F 05"), [](CPointer& ptr) { ptr.Absolute(3, 0); }},
 #elif __linux__
                               {SDK_SIG("4C 8D 35 ? ? ? ? 48 8D 55 D4"), [](CPointer& ptr) { ptr.Absolute(3, 0).Dereference(1); }},
@@ -67,4 +67,14 @@ namespace signatures {
                                          {SDK_SIG("E8 ? ? ? ? 41 C7 45 ? ? ? ? ? 4C 89 F7"), [](CPointer& ptr) { ptr.Absolute(1, 0); }},
 #endif
                                      });
+
+    CSigScan GetFunctions("CSAC::GetFunctions", CConstants::CLIENT_LIB, 
+        {
+            {SDK_SIG("48 89 4C 24 ? 48 83 EC ? 48 8B 44 24 ? 48 83 78 ? ? 74 ? 48 8B 44 24")},
+        });
+
+   CSigScan CSVCMsg_UserMessage_Setup("CSVCMsg_UserMessage_t::Setup", CConstants::CLIENT_LIB,
+                          {
+                              {SDK_SIG("40 53 57 41 56 48 83 EC ? 49 8B 00")},
+                          });
 }  // namespace signatures
