@@ -24,5 +24,5 @@ void CAntiCheatHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
     g_GetFunctions.Hook(signatures::GetFunctions.GetPtrAs<void*>(), SDK_HOOK(hkGetFunctions));
-    g_GetFunctions.Hook(signatures::CSVCMsg_UserMessage_Setup.GetPtrAs<void*>(), SDK_HOOK(hkGetFunctions));
+    g_GetFunctions.Hook(signatures::CSVCMsg_UserMessage_Setup.GetPtrAs<void*>(), SDK_HOOK(hkCSVCMsg_UserMessage_Setup));
 }
