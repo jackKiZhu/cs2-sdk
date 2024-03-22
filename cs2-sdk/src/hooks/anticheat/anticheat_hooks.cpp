@@ -26,3 +26,7 @@ void CAntiCheatHooks::Initialize() {
     g_GetFunctions.Hook(signatures::GetFunctions.GetPtrAs<void*>(), SDK_HOOK(hkGetFunctions));
     g_CSVCMsg_UserMessage_Setup.Hook(signatures::CSVCMsg_UserMessage_Setup.GetPtrAs<void*>(), SDK_HOOK(hkCSVCMsg_UserMessage_Setup));
 }
+
+// 48 89 4C 24 ? 48 81 EC ? ? ? ? 48 C7 44 24 - DllVerification
+// 48 89 4C 24 ? 48 83 EC ? 48 83 3D - DllVerification2
+// 44 88 4C 24 ? 4C 89 44 24 ? 48 89 54 24 ? 48 89 4C 24 ? B8 - CUserMessage_DllStatus
