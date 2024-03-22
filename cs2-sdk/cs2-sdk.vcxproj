@@ -128,6 +128,7 @@
     <ClCompile Include="src\cache\entities\player.cpp" />
     <ClCompile Include="src\cache\entities\gun.cpp" />
     <ClCompile Include="src\hacks\esp\esp.cpp" />
+    <ClCompile Include="src\hacks\movement\movement.cpp" />
     <ClCompile Include="src\hooks\render\vulkan\vulkan_hooks.cpp" />
     <ClCompile Include="src\math\math.cpp" />
     <ClCompile Include="src\math\types\transform.cpp" />
@@ -245,6 +246,7 @@
     <ClInclude Include="include\constants\constants.hpp" />
     <ClInclude Include="include\fnv\fnv1a.hpp" />
     <ClInclude Include="include\hacks\esp\esp.hpp" />
+    <ClInclude Include="include\hacks\movement\movement.hpp" />
     <ClInclude Include="include\hooks\game\game_hooks.hpp" />
     <ClInclude Include="include\hooks\hooks.hpp" />
     <ClInclude Include="include\hooks\input\input_hooks.hpp" />
