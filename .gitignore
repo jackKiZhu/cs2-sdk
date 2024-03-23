@@ -5,3 +5,6 @@ bin/*
 binlinux/*
 
 obj/*
+cs2-sdk/.vscode/settings.json\
+execs/*
+/cs2-sdk/.vscode
