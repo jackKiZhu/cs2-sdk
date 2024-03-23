@@ -98,6 +98,8 @@ void CMenu::RenderMainMenu() {
 
         ImGui::Checkbox("Three-dimensional boxes", &g_Vars.m_Use3DBoxes);
 
+        ImGui::SeparatorText("Miscellaneous");
+
         if (ImGui::Button("Unload", {-FLT_MIN, 0})) CInstance::Get().FreeLibrary();
     }
     ImGui::End();

@@ -30,5 +30,4 @@ void CMovement::Run() {
         return;
 	}
 
-
 }
