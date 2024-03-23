@@ -45,12 +45,18 @@ static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, V
     CESP::Get().Update();
 }
 
+static CHook g_CreateMove;
+static bool hkCreateMove(void* rcx, unsigned int sequence_number, int* a3) {
+    return g_CreateMove.CallOriginal<bool>(rcx, sequence_number, a3);
+}
+
 void CGameHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
     CMatchCache::Get().Initialize();
 
     g_MouseInputEnabled.VHook(CCSGOInput::Get(), platform::Constant(13, 14), SDK_HOOK(hkMouseInputEnabled));
+    // g_CreateMove.VHook(CCSGOInput::Get(), platform::Constant(16, 17), SDK_HOOK(hkCreateMove));
     g_OnAddEntity.VHook(CGameEntitySystem::Get(), platform::Constant(14, 15), SDK_HOOK(hkOnAddEntity));
     g_OnRemoveEntity.VHook(CGameEntitySystem::Get(), platform::Constant(15, 16), SDK_HOOK(hkOnRemoveEntity));
     g_GetMatricesForView.Hook(signatures::GetMatricesForView.GetPtrAs<void*>(), SDK_HOOK(hkGetMatricesForView));
