@@ -88,6 +88,7 @@ void CMenu::RenderMainMenu() {
         ImGui::SeparatorText("Visuals");
 
         ImGui::Checkbox("Players box", &g_Vars.m_PlayerBoxes);
+        ImGui::Checkbox("Draw team", &g_Vars.m_Team);
         ImGui::Checkbox("Players name", &g_Vars.m_PlayerNames);
         ImGui::Checkbox("Players healthbar", &g_Vars.m_PlayerHealthBar);
 

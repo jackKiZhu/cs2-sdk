@@ -42,6 +42,9 @@ void CCachedPlayer::DrawESP() {
     CCSPlayerController* controller = Get();
     C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
 
+    const bool isEnemy = IsEnemyWithTeam(cachedLocalPlayer->GetTeam());
+    if (g_Vars.m_Team && !isEnemy) return;
+
     if (g_Vars.m_PlayerBoxes) {
         DrawBoundingBox([this, cachedLocalPlayer]() {
             if (IsLocalPlayer()) {

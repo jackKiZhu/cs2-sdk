@@ -8,6 +8,7 @@ struct Vars_t {
     bool m_WeaponBoxes;
     bool m_ChickenBoxes;
 
+    bool m_Team;
     bool m_PlayerBoxes;
     bool m_PlayerNames;
     bool m_PlayerHealthBar;

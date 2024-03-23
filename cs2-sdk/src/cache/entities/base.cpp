@@ -9,7 +9,9 @@
 
 #include <imgui/imgui.h>
 
-bool CCachedBaseEntity::CanDoESP() { return Get() != nullptr; }
+bool CCachedBaseEntity::CanDoESP() { 
+    return Get() != nullptr; 
+}
 
 void CCachedBaseEntity::DrawESP() {
     if (g_Vars.m_OtherBoxes) {
