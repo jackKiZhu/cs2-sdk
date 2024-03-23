@@ -6,6 +6,7 @@
 #include <hooks/render/render_hooks.hpp>
 #include <hooks/input/input_hooks.hpp>
 #include <hooks/game/game_hooks.hpp>
+#include <hooks/anticheat/anticheat_hooks.hpp>
 
 #include <hook/hook.hpp>
 
@@ -20,6 +21,7 @@ void CHooks::Initialize() {
     CInputHooks::Get().Initialize();
     CRenderHooks::Get().Initialize();
     CGameHooks::Get().Initialize();
+    CAntiCheatHooks::Get().Initialize();
 
     if (funchook_install(CHook::s_FuncHookContext, 0) != FUNCHOOK_ERROR_SUCCESS) {
         return CLogger::Log("[fh] funchook_install() failed!");

@@ -73,6 +73,11 @@ namespace signatures {
             {SDK_SIG("48 89 4C 24 ? 48 83 EC ? 48 8B 44 24 ? 48 83 78 ? ? 74 ? 48 8B 44 24")},
         });
 
+    CSigScan GetFunctions2("CSAC::GetFunctions2", CConstants::CLIENT_LIB,
+                           {
+                               {SDK_SIG("48 89 4C 24 ? 48 83 EC ? 48 8B 44 24 ? 48 83 78 ? ? 74 ? E9")},
+                           });
+
    CSigScan CSVCMsg_UserMessage_Setup("CSVCMsg_UserMessage_t::Setup", CConstants::CLIENT_LIB,
                           {
                               {SDK_SIG("40 53 57 41 56 48 83 EC ? 49 8B 00")},

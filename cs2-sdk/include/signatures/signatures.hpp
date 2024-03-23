@@ -9,5 +9,6 @@ namespace signatures {
     extern CSigScan GetHitboxSet;
     extern CSigScan HitboxToWorldTransforms;
     extern CSigScan GetFunctions;
+    extern CSigScan GetFunctions2;
     extern CSigScan CSVCMsg_UserMessage_Setup;
 }  // namespace signatures

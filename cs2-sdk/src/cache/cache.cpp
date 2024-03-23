@@ -14,7 +14,7 @@
 
 #include <bindings/baseentity.hpp>
 
-#define SDK_ENABLE_CACHE_LOGGING
+//#define SDK_ENABLE_CACHE_LOGGING
 
 void CMatchCache::Initialize() {
     CLogger::Log("[game] engine build number: {}", CEngineClient::Get()->GetEngineBuildNumber());
