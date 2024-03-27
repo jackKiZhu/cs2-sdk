@@ -11,4 +11,6 @@ namespace signatures {
     extern CSigScan GetFunctions;
     extern CSigScan GetFunctions2;
     extern CSigScan CSVCMsg_UserMessage_Setup;
+    extern CSigScan GetSequenceNumber;
+    extern CSigScan GetUserCmd;
 }  // namespace signatures

@@ -82,4 +82,14 @@ namespace signatures {
                           {
                               {SDK_SIG("40 53 57 41 56 48 83 EC ? 49 8B 00")},
                           });
+
+   CSigScan GetSequenceNumber("CCSGOInput::GetSequenceNumber", CConstants::CLIENT_LIB,
+                            {
+                                {SDK_SIG("48 8B 0D ? ? ? ? E9 ? ? ? ? CC CC CC CC 48 89 5C 24 ? 57 48 83 EC ? 49 8B 00")},
+                            });
+
+      CSigScan GetUserCmd("GetUserCmd", CConstants::CLIENT_LIB,
+                              {
+                                  {SDK_SIG("40 57 48 83 EC ? 41 8B F8")},
+                              });
 }  // namespace signatures

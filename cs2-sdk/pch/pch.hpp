@@ -18,3 +18,12 @@
 #include <link.h>
 #include <string.h>
 #endif
+
+#define STR_MERGE_IMPL(a, b) a##b
+#define STR_MERGE(a, b) STR_MERGE_IMPL(a, b)
+#define PAD(size) std::byte STR_MERGE(_pad, __COUNTER__)[size]
+#define MEMBER(type, name, offset) \
+    struct {                       \
+        PAD(offset);               \
+        type name;                 \
+    }

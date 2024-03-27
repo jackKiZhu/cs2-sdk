@@ -12,6 +12,10 @@
 #include <math/math.hpp>
 #include <hook/hook.hpp>
 
+#include <cache/entities/player.hpp>
+#include <bindings/playercontroller.hpp>
+#include <bindings/playerpawn.hpp>
+
 #include <interfaces/gameentitysystem.hpp>
 #include <interfaces/source2client.hpp>
 
@@ -46,8 +50,42 @@ static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, V
 }
 
 static CHook g_CreateMove;
-static bool hkCreateMove(void* rcx, unsigned int sequence_number, int* a3) {
-    return g_CreateMove.CallOriginal<bool>(rcx, sequence_number, a3);
+static bool hkCreateMove(CCSGOInput* rcx, int slot, int* a3) {
+    const bool result = g_CreateMove.CallOriginal<bool>(rcx, slot, a3);
+
+    static auto GetSequenceNumber = signatures::GetSequenceNumber.GetPtrAs<uint32_t(*)(void*, int)>();
+    if (!GetSequenceNumber) return result;
+
+    static auto GetUserCmd = signatures::GetUserCmd.GetPtrAs<CUserCmd* (*)(void*, int, int, bool)>();
+    if (!GetUserCmd) return result;
+
+    CUserCmd* cmd = GetUserCmd(rcx, 0, GetSequenceNumber(nullptr, 0), true);
+    //CUserCmd* cmd = rcx->GetUserCmd()
+    if (!cmd) return result;
+
+    CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
+    if (!cachedLocal) return result;
+
+    CCSPlayerController* controller = cachedLocal->Get();
+    if (!controller) return result;
+
+    C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
+    if (!pawn) return result;
+
+    CBaseUserCmdPB* baseCmd = cmd->baseCmd;
+    if (!baseCmd) return result;
+
+    CMsgQAngle* msgAngle = baseCmd->msgAngle;
+    if (!msgAngle) return result;
+
+    CLogger::Log("[CreateMove] sequence: {} ({} {} {})", 
+        rcx->sequenceNumber, 
+        msgAngle->viewangles.x,
+        msgAngle->viewangles.y,
+        msgAngle->viewangles.z
+    );
+
+    return false;
 }
 
 void CGameHooks::Initialize() {
@@ -56,7 +94,7 @@ void CGameHooks::Initialize() {
     CMatchCache::Get().Initialize();
 
     g_MouseInputEnabled.VHook(CCSGOInput::Get(), platform::Constant(13, 14), SDK_HOOK(hkMouseInputEnabled));
-    // g_CreateMove.VHook(CCSGOInput::Get(), platform::Constant(16, 17), SDK_HOOK(hkCreateMove));
+    g_CreateMove.VHook(CCSGOInput::Get(), platform::Constant(15, 16), SDK_HOOK(hkCreateMove));
     g_OnAddEntity.VHook(CGameEntitySystem::Get(), platform::Constant(14, 15), SDK_HOOK(hkOnAddEntity));
     g_OnRemoveEntity.VHook(CGameEntitySystem::Get(), platform::Constant(15, 16), SDK_HOOK(hkOnRemoveEntity));
     g_GetMatricesForView.Hook(signatures::GetMatricesForView.GetPtrAs<void*>(), SDK_HOOK(hkGetMatricesForView));
