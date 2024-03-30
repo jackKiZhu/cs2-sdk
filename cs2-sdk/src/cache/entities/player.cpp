@@ -14,7 +14,7 @@
 
 #include <imgui/imgui_internal.h>
 
-bool CCachedPlayer::CanDoESP() {
+bool CCachedPlayer::IsValid() {
     CCSPlayerController* controller = Get();
     if (!controller || !controller->m_bPawnIsAlive()) {
         return false;

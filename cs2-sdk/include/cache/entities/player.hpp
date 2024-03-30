@@ -12,7 +12,7 @@ class CCachedPlayer : public CCachedBaseEntity {
 
     auto Get() const { return CCachedBaseEntity::Get<CCSPlayerController>(); }
 
-    bool CanDoESP() override;
+    bool IsValid() override;
     void DrawESP() override;
     void CalculateDrawInfo() override;
 

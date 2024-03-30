@@ -6,7 +6,7 @@
 
 #include <bindings/hostage.hpp>
 
-bool CCachedCaptive::CanDoESP() {
+bool CCachedCaptive::IsValid() {
     C_Hostage* hostage = Get();
     if (!hostage || hostage->m_leader().IsValid()) {
         return false;

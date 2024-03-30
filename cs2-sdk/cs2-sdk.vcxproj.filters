@@ -66,6 +66,8 @@
     <ClCompile Include="src\cache\entities\captive.cpp" />
     <ClCompile Include="src\hacks\movement\movement.cpp" />
     <ClCompile Include="src\hooks\anticheat\anticheat_hooks.cpp" />
+    <ClCompile Include="sdk\src\interfaces\enginetrace.cpp" />
+    <ClCompile Include="src\hacks\aimbot\aimbot.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -152,5 +154,9 @@
     <ClInclude Include="sdk\include\bindings\hostage.hpp" />
     <ClInclude Include="include\hacks\movement\movement.hpp" />
     <ClInclude Include="include\hooks\anticheat\anticheat_hooks.hpp" />
+    <ClInclude Include="sdk\include\bindings\weapon.hpp" />
+    <ClInclude Include="sdk\include\bindings\baseflex.hpp" />
+    <ClInclude Include="sdk\include\interfaces\enginetrace.hpp" />
+    <ClInclude Include="include\hacks\aimbot\aimbot.hpp" />
   </ItemGroup>
 </Project>

@@ -15,7 +15,7 @@ void CESP::Render() {
     const auto& cachedEntities = CMatchCache::GetCachedEntities();
     for (const auto& it : cachedEntities) {
         const auto& cachedEntity = it.second;
-        if (!cachedEntity->CanDoESP() || !IsEnabled()) {
+        if (!IsEnabled() || !cachedEntity->IsValid()) {
             cachedEntity->InvalidateDrawInfo();
             continue;
         }
@@ -30,7 +30,7 @@ void CESP::Update() {
     const auto& cachedEntities = CMatchCache::GetCachedEntities();
     for (const auto& it : cachedEntities) {
         const auto& cachedEntity = it.second;
-        if (!cachedEntity->CanDoESP() || !IsEnabled()) {
+        if (!IsEnabled() || !cachedEntity->IsValid()) {
             cachedEntity->InvalidateDrawInfo();
             continue;
         }

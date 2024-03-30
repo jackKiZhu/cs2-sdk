@@ -22,7 +22,7 @@ void CMovement::Run() {
         return;
     }
 
-    C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
+    C_CSPlayerPawn* pawn = controller->m_hPawn().Get();
     if (!pawn || pawn->IsObserverPawn()) {
         return;
     }

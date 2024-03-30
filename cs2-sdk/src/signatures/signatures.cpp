@@ -92,4 +92,48 @@ namespace signatures {
                               {
                                   {SDK_SIG("40 57 48 83 EC ? 41 8B F8")},
                               });
+
+            CSigScan SetViewAngles("SetViewAngles", CConstants::CLIENT_LIB,
+                          {
+                              {SDK_SIG("85 D2 0F 85 ? ? ? ? 57")},
+                          });
+
+
+    CSigScan CanFire("C_BasePlayerWeapon::CanFire", CConstants::CLIENT_LIB,
+                             {
+                                 {SDK_SIG("40 53 48 83 EC ? 48 8B 41 ? 48 8B D9 48 8D 4C 24 ? 8B 50 ? E8 ? ? ? ? F3 0F 10 05")},
+                             });
+
+        CSigScan GetEngineTrace("GetEngineTrace", CConstants::CLIENT_LIB,
+                     {
+                         {SDK_SIG("4C 8B 3D ? ? ? ? 24 C9 0C 49 66 0F 7F 45"), [](CPointer& ptr) { ptr.Absolute(3, 0).Dereference(); }},
+                     });
+
+        CSigScan TraceShape("CEngineTrace::TraceShape", CConstants::CLIENT_LIB,
+                                {
+                                    {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 48 89 4C 24 ? 55 41 54 41 55 41 56 41 57 48 8D AC 24")},
+                                });
+
+                CSigScan TraceShape2("CEngineTrace::TraceShape2", CConstants::CLIENT_LIB,
+                            {
+                                {SDK_SIG("4C 8B DC 49 89 5B ? 49 89 6B ? 49 89 73 ? 57 41 56 41 57 48 81 EC")},
+                            });
+
+        // E8 ? ? ? ? 48 85 C0 74 ? 44 38 60
+        // 48 63 41 ? 48 8B 0D
+        CSigScan GetSurfaceData("GetSurfaceData", CConstants::CLIENT_LIB,
+                            {
+                                {SDK_SIG("48 63 41 ? 48 8B 0D")},
+                            });
+
+        CSigScan GameTraceCtor("GameTraceCtor", CConstants::CLIENT_LIB,
+                                {
+                                    {SDK_SIG("48 89 5C 24 ? 57 48 83 EC ? 48 8B D9 33 FF 48 8B 0D")},
+                                });
+
+        CSigScan CTraceFilter("CTraceFilter", CConstants::CLIENT_LIB,
+                               {
+                {SDK_SIG("48 8D 05 ? ? ? ? 44 89 75 ? 48 89 45 ? 44 89 75 ? C7 45 ? ? ? ? ? 44 88 65 ? C6 45 ? ? 48 89 75"),
+                 [](CPointer& ptr) { ptr.Absolute(3, 0); }},
+                               });
 }  // namespace signatures

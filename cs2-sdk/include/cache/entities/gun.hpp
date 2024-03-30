@@ -9,6 +9,6 @@ class CCachedGun : public CCachedBaseEntity {
    public:
     Type GetType() const override { return Type::GUN; }
 
-    bool CanDoESP() override;
+    bool IsValid() override;
     void DrawESP() override;
 };

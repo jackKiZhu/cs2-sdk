@@ -21,7 +21,7 @@ void CInputHooks::Initialize() {
 void CInputHooks::Shutdown() {
     SDK_LOG_PROLOGUE();
 
-    CMenu::Get().Shutdown();
+    // CMenu::Get().Shutdown();
 
 #ifdef _WIN32
     CWndProcHooks::Get().Shutdown();

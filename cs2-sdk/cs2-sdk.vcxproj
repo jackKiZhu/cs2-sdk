@@ -118,6 +118,7 @@
     <ClCompile Include="sdk\src\interfaces\engineclient.cpp" />
     <ClCompile Include="sdk\src\interfaces\gameentitysystem.cpp" />
     <ClCompile Include="sdk\src\interfaces\gameresourceservice.cpp" />
+    <ClCompile Include="sdk\src\interfaces\enginetrace.cpp" />
     <ClCompile Include="sdk\src\interfaces\schemasystem.cpp" />
     <ClCompile Include="sdk\src\interfaces\source2client.cpp" />
     <ClCompile Include="sdk\src\types\handle.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="src\cache\entities\hen.cpp" />
     <ClCompile Include="src\cache\entities\player.cpp" />
     <ClCompile Include="src\cache\entities\gun.cpp" />
+    <ClCompile Include="src\hacks\aimbot\aimbot.cpp" />
     <ClCompile Include="src\hacks\esp\esp.cpp" />
     <ClCompile Include="src\hacks\movement\movement.cpp" />
     <ClCompile Include="src\hooks\anticheat\anticheat_hooks.cpp" />
@@ -246,6 +248,7 @@
     <ClInclude Include="include\cache\entities\gun.hpp" />
     <ClInclude Include="include\constants\constants.hpp" />
     <ClInclude Include="include\fnv\fnv1a.hpp" />
+    <ClInclude Include="include\hacks\aimbot\aimbot.hpp" />
     <ClInclude Include="include\hacks\esp\esp.hpp" />
     <ClInclude Include="include\hacks\movement\movement.hpp" />
     <ClInclude Include="include\hooks\anticheat\anticheat_hooks.hpp" />
@@ -300,6 +303,7 @@
     <ClInclude Include="libs\imgui\imstb_truetype.h" />
     <ClInclude Include="pch\pch.hpp" />
     <ClInclude Include="sdk\include\bindings\baseentity.hpp" />
+    <ClInclude Include="sdk\include\bindings\baseflex.hpp" />
     <ClInclude Include="sdk\include\bindings\collisionproperty.hpp" />
     <ClInclude Include="sdk\include\bindings\entityidentity.hpp" />
     <ClInclude Include="sdk\include\bindings\hitbox.hpp" />
@@ -308,11 +312,13 @@
     <ClInclude Include="sdk\include\bindings\entityinstance.hpp" />
     <ClInclude Include="sdk\include\bindings\gamescenenode.hpp" />
     <ClInclude Include="sdk\include\bindings\playerpawn.hpp" />
+    <ClInclude Include="sdk\include\bindings\weapon.hpp" />
     <ClInclude Include="sdk\include\input\ccsgoinput.hpp" />
     <ClInclude Include="sdk\include\interfaces\cvar.hpp" />
     <ClInclude Include="sdk\include\interfaces\engineclient.hpp" />
     <ClInclude Include="sdk\include\interfaces\gameentitysystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\gameresourceservice.hpp" />
+    <ClInclude Include="sdk\include\interfaces\enginetrace.hpp" />
     <ClInclude Include="sdk\include\interfaces\inputsystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\schemasystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\source2client.hpp" />

@@ -14,6 +14,8 @@ struct Vars_t {
     bool m_PlayerHealthBar;
 
     bool m_Use3DBoxes;
+
+    bool m_EnableAimbot;
 };
 
 extern Vars_t g_Vars;

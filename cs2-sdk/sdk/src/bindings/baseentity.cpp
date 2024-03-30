@@ -128,3 +128,24 @@ int C_BaseEntity::HitboxToWorldTransforms(CHitBoxSet* hitBoxSet, CTransform* hit
     return signatures::HitboxToWorldTransforms.GetPtr().Call<int (*)(void*, CHitBoxSet*, CTransform*, int)>(this, hitBoxSet, hitboxToWorld,
                                                                                                             1024);
 }
+
+bool C_BaseEntity::GetHitboxPosition(int i, Vector& out) {    
+    constexpr int MAX_HITBOXES = 64;
+
+    CHitBoxSet* hitboxSet = GetHitboxSet(0);
+    if (!hitboxSet) return false;
+
+    CHitBox* hitbox = hitboxSet->m_HitBoxes().AtPtr(i);
+    if (!hitbox) return false;
+
+    CTransform hitBoxTransforms[MAX_HITBOXES];
+    int hitBoxCount = HitboxToWorldTransforms(hitboxSet, hitBoxTransforms);
+    if (!hitBoxCount) return false;
+
+    const matrix3x4_t hitBoxMatrix = hitBoxTransforms[i].ToMatrix();
+    Vector worldMins, worldMaxs;
+    CMath::Get().TransformAABB(hitBoxMatrix, hitbox->m_vMinBounds(), hitbox->m_vMaxBounds(), worldMins, worldMaxs);
+
+    out = (worldMins + worldMaxs) * 0.5f;
+    return true; 
+}

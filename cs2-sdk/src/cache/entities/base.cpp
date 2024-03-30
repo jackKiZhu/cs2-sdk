@@ -9,7 +9,7 @@
 
 #include <imgui/imgui.h>
 
-bool CCachedBaseEntity::CanDoESP() { 
+bool CCachedBaseEntity::IsValid() { 
     return Get() != nullptr; 
 }
 

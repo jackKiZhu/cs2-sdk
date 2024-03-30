@@ -19,7 +19,7 @@ void CMenu::Render() {
     if (ImGui::IsKeyPressed(ImGuiKey_Insert, false)) {
         Toggle(!IsOpen());
     } else if (ImGui::IsKeyPressed(ImGuiKey_End, false)) {
-        return CInstance::Get().FreeLibrary();
+        return Shutdown(), CInstance::Get().FreeLibrary();
     }
 
     RenderWatermark();
@@ -88,7 +88,7 @@ void CMenu::RenderMainMenu() {
         ImGui::SeparatorText("Visuals");
 
         ImGui::Checkbox("Players box", &g_Vars.m_PlayerBoxes);
-        ImGui::Checkbox("Draw team", &g_Vars.m_Team);
+        ImGui::Checkbox("Ignore team", &g_Vars.m_Team);
         ImGui::Checkbox("Players name", &g_Vars.m_PlayerNames);
         ImGui::Checkbox("Players healthbar", &g_Vars.m_PlayerHealthBar);
 
@@ -97,11 +97,12 @@ void CMenu::RenderMainMenu() {
         ImGui::Checkbox("Hostages box", &g_Vars.m_HostageBoxes);
         ImGui::Checkbox("Others box", &g_Vars.m_OtherBoxes);
 
-        ImGui::Checkbox("Three-dimensional boxes", &g_Vars.m_Use3DBoxes);
+        ImGui::Checkbox("3D boxes", &g_Vars.m_Use3DBoxes);
 
         ImGui::SeparatorText("Miscellaneous");
+        ImGui::Checkbox("Aimbot", &g_Vars.m_EnableAimbot);
 
-        if (ImGui::Button("Unload", {-FLT_MIN, 0})) CInstance::Get().FreeLibrary();
+        if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CInstance::Get().FreeLibrary();
     }
     ImGui::End();
 }

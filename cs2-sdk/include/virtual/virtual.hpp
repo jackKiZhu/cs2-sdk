@@ -10,3 +10,8 @@ namespace vt {
         return GetMethod(base, index).Call<T (*)(void*, Args...)>(base.Get<void*>(), std::forward<Args>(args)...);
     }
 }  // namespace vt
+
+#define VIRTUAL_METHOD(returnType, name, index, args, argsRaw) \
+	returnType name args { \
+		return vt::CallMethod<returnType>(this, index, argsRaw); \
+	}

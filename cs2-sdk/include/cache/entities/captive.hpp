@@ -12,6 +12,6 @@ class CCachedCaptive : public CCachedBaseEntity {
 
     auto Get() const { return CCachedBaseEntity::Get<C_Hostage>(); }
 
-    bool CanDoESP() override;
+    bool IsValid() override;
     void DrawESP() override;
 };

@@ -44,3 +44,11 @@ void CMath::TransformAABB(const matrix3x4_t& transform, const Vector& minsIn, co
     minsOut = worldCenter - worldExtent;
     maxsOut = worldCenter + worldExtent;
 }
+
+Vector CMath::CalculateAngle(const Vector& src, const Vector& dst) const { return (dst - src).ToAngle(); }
+
+float CMath::Fov(const Vector& angSrc, const Vector& angDst) const { 
+    Vector delta = (angSrc - angDst);
+    delta.NormalizeAngle();
+    return std::hypotf(delta.x, delta.y);
+}

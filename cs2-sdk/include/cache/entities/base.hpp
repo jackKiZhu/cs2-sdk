@@ -27,7 +27,7 @@ class CCachedBaseEntity {
     auto GetSerial() const { return m_Handle.GetSerialNumber(); }
 
     // Used by ESP.
-    virtual bool CanDoESP();
+    virtual bool IsValid();
     virtual void DrawESP();
     virtual void InvalidateDrawInfo();
     virtual void CalculateDrawInfo();

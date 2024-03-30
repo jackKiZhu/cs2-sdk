@@ -6,7 +6,7 @@
 
 #include <bindings/baseentity.hpp>
 
-bool CCachedGun::CanDoESP() {
+bool CCachedGun::IsValid() {
     C_BaseEntity* weapon = Get();
     if (!weapon || weapon->m_hOwnerEntity().IsValid()) {
         return false;

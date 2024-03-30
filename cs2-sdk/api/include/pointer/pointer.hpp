@@ -39,7 +39,7 @@ class CPointer {
 
     CPointer& Offset(int offset);
     CPointer& Absolute(int preAbs, int postAbs);
-    CPointer& Dereference(int count);
+    CPointer& Dereference(int count = 1);
 
    private:
     void LogInvalid() const;
