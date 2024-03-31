@@ -16,6 +16,10 @@ struct Vars_t {
     bool m_Use3DBoxes;
 
     bool m_EnableAimbot;
+    float m_aimFov = 30.f;
+    float m_aimSmooth = 0.15f;
+
+    bool m_EnableTriggerbot;
 };
 
 extern Vars_t g_Vars;

@@ -36,7 +36,7 @@
     <ClCompile Include="src\memory\memory.cpp" />
     <ClCompile Include="src\sigscan\sigscan.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
-    <ClCompile Include="sdk\src\input\ccsgoinput.cpp" />
+    <ClCompile Include="sdk\src\interfaces\ccsgoinput.cpp" />
     <ClCompile Include="src\hooks\game\game_hooks.cpp" />
     <ClCompile Include="sdk\src\sdl\sdl.cpp" />
     <ClCompile Include="sdk\src\interfaces\inputsystem.cpp" />
@@ -68,6 +68,9 @@
     <ClCompile Include="src\hooks\anticheat\anticheat_hooks.cpp" />
     <ClCompile Include="sdk\src\interfaces\enginetrace.cpp" />
     <ClCompile Include="src\hacks\aimbot\aimbot.cpp" />
+    <ClCompile Include="sdk\src\interfaces\globalvars.cpp" />
+    <ClCompile Include="sdk\src\bindings\playercontroller.cpp" />
+    <ClCompile Include="sdk\src\bindings\weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -112,7 +115,7 @@
     <ClInclude Include="include\stb\stb.hh" />
     <ClInclude Include="include\sigscan\sigscan.hpp" />
     <ClInclude Include="api\include\pointer\pointer.hpp" />
-    <ClInclude Include="sdk\include\input\ccsgoinput.hpp" />
+    <ClInclude Include="sdk\include\interfaces\ccsgoinput.hpp" />
     <ClInclude Include="include\signatures\signatures.hpp" />
     <ClInclude Include="include\hooks\game\game_hooks.hpp" />
     <ClInclude Include="sdk\include\sdl\sdl.hpp" />
@@ -158,5 +161,6 @@
     <ClInclude Include="sdk\include\bindings\baseflex.hpp" />
     <ClInclude Include="sdk\include\interfaces\enginetrace.hpp" />
     <ClInclude Include="include\hacks\aimbot\aimbot.hpp" />
+    <ClInclude Include="sdk\include\interfaces\globalvars.hpp" />
   </ItemGroup>
 </Project>

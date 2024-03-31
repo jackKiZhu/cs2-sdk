@@ -2,7 +2,6 @@
 
 #include <math/types/vector.hpp>
 
-class CCSGOInput;
 class C_CSPlayerPawn;
 
 class CAimbot {
@@ -14,6 +13,7 @@ class CAimbot {
 
     bool IsEnabled();
 
-    void Run(CCSGOInput* input);
+    void Run();
     void RCS(Vector& angles, C_CSPlayerPawn* pawn);
+    Vector Smooth(const Vector& from, const Vector& to);
 };

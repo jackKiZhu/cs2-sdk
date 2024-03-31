@@ -4,6 +4,7 @@
 #include <bindings/weapon.hpp>
 
 #include <interfaces/schemasystem.hpp>
+#include <interfaces/globalvars.hpp>
 
 bool C_CSPlayerPawnBase::IsPlayerPawn() {
     static CSchemaClassInfo* playerPawnClass =
@@ -17,8 +18,15 @@ bool C_CSPlayerPawnBase::IsObserverPawn() {
     return Schema_DynamicBinding() == observerPawnClass;
 }
 
-C_BasePlayerWeapon* C_BasePlayerPawn::GetActiveWeapon() { 
-    CPlayerWeaponServices* weaponServices = m_pWeaponServices();
+C_CSWeaponBaseGun* C_BasePlayerPawn::GetActiveWeapon() { 
+    CCSPlayer_WeaponServices* weaponServices = m_pWeaponServices();
     if (!weaponServices) return nullptr;
-    return weaponServices->m_hActiveWeapon().Get();
+    return static_cast<C_CSWeaponBaseGun*>(weaponServices->m_hActiveWeapon().Get());
+}
+
+bool C_CSPlayerPawnBase::CanAttack(const float serverTime) { 
+    if (CCSPlayer_WeaponServices* weaponServices = m_pWeaponServices(); weaponServices)
+        if (m_bWaitForNoAttack() || weaponServices->m_flNextAttack() > serverTime) 
+            return false;
+    return true;
 }

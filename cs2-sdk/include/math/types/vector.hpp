@@ -44,7 +44,7 @@ class Vector {
         z = std::remainder(z, 360.f);
     }
 
-    Vector NormalizeAngle_() const {
+    Vector NormalizedAngle() const {
 		Vector vec = *this;
         vec.NormalizeAngle();
 		return vec;
@@ -73,7 +73,7 @@ class Vector {
 		z /= length;
 	}
 
-    Vector Normalize_() const {
+    Vector Normalized() const {
 		Vector vec = *this;
 		vec.Normalize();
 		return vec;
@@ -106,7 +106,7 @@ class Vector {
 		return angle;
 	}
 
-    Vector ToVector(Vector* right, Vector* up) const {
+    Vector ToVector(Vector* right = nullptr, Vector* up = nullptr) const {
         const float 
             sp = std::sin(x * (M_PI / 180.f)),
             cp = std::cos(x * (M_PI / 180.f)),

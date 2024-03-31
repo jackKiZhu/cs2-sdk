@@ -2,6 +2,20 @@
 
 #define MAX_SPLITSCREEN_PLAYERS 150
 
+enum Buttons {
+    IN_ATTACK = 1 << 0,
+    IN_JUMP = 1 << 1,
+    IN_DUCK = 1 << 2,
+    IN_FORWARD = 1 << 3,
+    IN_BACK = 1 << 4,
+    IN_USE = 1 << 5,
+    IN_MOVELEFT = 1 << 9,
+    IN_MOVERIGHT = 1 << 10,
+    IN_ATTACK2 = 1 << 11,
+    IN_SCORE = 1 << 16,
+    IN_BULLRUSH = 1 << 22
+};
+
 struct ButtonState_t {
     PAD(0x8);
     uint64_t value;
@@ -128,14 +142,19 @@ class CCSGOInput {
     bool inThirdperson; // 0x5201 (0x1)
     PAD(0x22); // 0x5202 (0x22)
     int sequenceNumber; // 0x5224 (0x4)
-    int dword5428; // 0x5228 (0x4)
-    PAD(20); // 0x522C (0x14)
-    PAD(0x24); // 0x5240 (0x24)
-    int16_t mouseDx; // 0x5264 (0x2)
-    PAD(0x2); // 0x5266 (0x2)
-    int16_t mouseDy; // 0x5268 (0x2)
+    int prevSequenceNumber; // 0x5228 (0x4)
+    PAD(0x4); // 0x522C (0x4)
+    double platFloatTime; // 0x5230 (0x8)
+    uint64_t buttonsHeld; // 0x5238 (0x8)
+    uint64_t buttonsChanged; // 0x5240 (0x8)
+    uint64_t buttonsScroll; // 0x5248 (0x8)
+    uint64_t buttonsUnk; // 0x5250 (0x8)
+    PAD(0x10); // 0x5258 (0x10)
+    int16_t mouseDx; // 0x5268 (0x2)
     PAD(0x2); // 0x526A (0x2)
-    PAD(0x124); // 0x526C (0x124)
+    int16_t mouseDy; // 0x526C (0x2)
+    PAD(0x2); // 0x526E (0x2)
+    PAD(0x120); // 0x5270 (0x124)
     Vector viewAngles; // 0x5390 (0xC)
 
     CUserCmd* GetUserCmd();

@@ -38,6 +38,12 @@ namespace signatures {
 #endif
                           });
 
+    // '%s:  %f tick(%d) curtime(%f)'
+    CSigScan GetGlobalVars("GlobalVars", CConstants::CLIENT_LIB,
+                          {
+                               {SDK_SIG("48 89 0D ?? ?? ?? ?? 48 89 41"), [](CPointer& ptr) { ptr.Absolute(3, 0).Dereference(); }},
+                          });
+
     CSigScan GetMatricesForView("CRenderGameSystem::GetMatricesForView", CConstants::CLIENT_LIB,
                                 {
 #ifdef _WIN32
@@ -83,11 +89,6 @@ namespace signatures {
                               {SDK_SIG("40 53 57 41 56 48 83 EC ? 49 8B 00")},
                           });
 
-   CSigScan GetSequenceNumber("CCSGOInput::GetSequenceNumber", CConstants::CLIENT_LIB,
-                            {
-                                {SDK_SIG("48 8B 0D ? ? ? ? E9 ? ? ? ? CC CC CC CC 48 89 5C 24 ? 57 48 83 EC ? 49 8B 00")},
-                            });
-
       CSigScan GetUserCmd("GetUserCmd", CConstants::CLIENT_LIB,
                               {
                                   {SDK_SIG("40 57 48 83 EC ? 41 8B F8")},
@@ -104,7 +105,7 @@ namespace signatures {
                                  {SDK_SIG("40 53 48 83 EC ? 48 8B 41 ? 48 8B D9 48 8D 4C 24 ? 8B 50 ? E8 ? ? ? ? F3 0F 10 05")},
                              });
 
-        CSigScan GetEngineTrace("GetEngineTrace", CConstants::CLIENT_LIB,
+        CSigScan GetEngineTrace("EngineTrace", CConstants::CLIENT_LIB,
                      {
                          {SDK_SIG("4C 8B 3D ? ? ? ? 24 C9 0C 49 66 0F 7F 45"), [](CPointer& ptr) { ptr.Absolute(3, 0).Dereference(); }},
                      });

@@ -4,6 +4,7 @@
 
 class C_CSPlayerPawnBase;
 class C_CSPlayerPawn;
+class C_CSWeaponBaseGun;
 
 class CBasePlayerController : public C_BaseEntity {
    public:

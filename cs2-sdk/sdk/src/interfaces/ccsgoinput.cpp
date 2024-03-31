@@ -1,11 +1,11 @@
 #include "pch.hpp"
 
 #include <math/types/vector.hpp>
-#include <input/ccsgoinput.hpp>
 
 #include <signatures/signatures.hpp>
 
 #include <interfaces/cvar.hpp>
+#include <interfaces/ccsgoinput.hpp>
 
 CCSGOInput* CCSGOInput::Get() {
     static auto inst = signatures::GetCSGOInput.GetPtrAs<CCSGOInput*>();
@@ -24,7 +24,7 @@ void ValidateUserCmd(const Vector& original, CUserCmd* cmd, CCSGOInputHistoryEnt
     static ConVar* sensitivity = CCVar::Get()->GetCvarByName("sensitivity");
     if (!m_pitch || !m_yaw || !sensitivity) return;
 
-    const Vector delta = (entry->pViewCmd->viewangles - original).NormalizeAngle_();
+    const Vector delta = (entry->pViewCmd->viewangles - original).NormalizedAngle();
     if (delta.IsZero()) return;
     
     const float pitch = m_pitch->GetValue<float>();

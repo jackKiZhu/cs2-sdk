@@ -57,6 +57,15 @@ bool C_BaseEntity::IsHostage() {
     return Schema_DynamicBinding() == hostageClass;
 }
 
+bool C_BaseEntity::IsPlayerPawn() { 
+    static CSchemaClassInfo* basePlayerPawnClass =
+        CSchemaSystem::Get()->FindTypeScopeForModule(CConstants::CLIENT_LIB)->FindDeclaredClass("C_BasePlayerPawn");
+    CSchemaClassInfo* entClass = Schema_DynamicBinding();
+    if (!entClass) return false;
+
+    return entClass->InheritsFrom(basePlayerPawnClass);
+}
+
 bool C_BaseEntity::CalculateBBoxByCollision(BBox_t& out) {
     CGameSceneNode* node = m_pGameSceneNode();
     if (!node) return false;

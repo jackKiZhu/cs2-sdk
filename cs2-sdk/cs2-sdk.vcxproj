@@ -111,14 +111,17 @@
     <ClCompile Include="api\src\hook\hook.cpp" />
     <ClCompile Include="api\src\module\module.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
+    <ClCompile Include="sdk\src\bindings\weapon.cpp" />
     <ClCompile Include="sdk\src\bindings\baseentity.cpp" />
     <ClCompile Include="sdk\src\bindings\entityinstance.cpp" />
+    <ClCompile Include="sdk\src\bindings\playercontroller.cpp" />
     <ClCompile Include="sdk\src\bindings\playerpawn.cpp" />
     <ClCompile Include="sdk\src\interfaces\cvar.cpp" />
     <ClCompile Include="sdk\src\interfaces\engineclient.cpp" />
     <ClCompile Include="sdk\src\interfaces\gameentitysystem.cpp" />
     <ClCompile Include="sdk\src\interfaces\gameresourceservice.cpp" />
     <ClCompile Include="sdk\src\interfaces\enginetrace.cpp" />
+    <ClCompile Include="sdk\src\interfaces\globalvars.cpp" />
     <ClCompile Include="sdk\src\interfaces\schemasystem.cpp" />
     <ClCompile Include="sdk\src\interfaces\source2client.cpp" />
     <ClCompile Include="sdk\src\types\handle.cpp" />
@@ -219,7 +222,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="sdk\src\input\ccsgoinput.cpp" />
+    <ClCompile Include="sdk\src\interfaces\ccsgoinput.cpp" />
     <ClCompile Include="sdk\src\interfaces\inputsystem.cpp" />
     <ClCompile Include="sdk\src\sdl\sdl.cpp" />
     <ClCompile Include="src\entry.cpp" />
@@ -313,12 +316,13 @@
     <ClInclude Include="sdk\include\bindings\gamescenenode.hpp" />
     <ClInclude Include="sdk\include\bindings\playerpawn.hpp" />
     <ClInclude Include="sdk\include\bindings\weapon.hpp" />
-    <ClInclude Include="sdk\include\input\ccsgoinput.hpp" />
+    <ClInclude Include="sdk\include\interfaces\ccsgoinput.hpp" />
     <ClInclude Include="sdk\include\interfaces\cvar.hpp" />
     <ClInclude Include="sdk\include\interfaces\engineclient.hpp" />
     <ClInclude Include="sdk\include\interfaces\gameentitysystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\gameresourceservice.hpp" />
     <ClInclude Include="sdk\include\interfaces\enginetrace.hpp" />
+    <ClInclude Include="sdk\include\interfaces\globalvars.hpp" />
     <ClInclude Include="sdk\include\interfaces\inputsystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\schemasystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\source2client.hpp" />

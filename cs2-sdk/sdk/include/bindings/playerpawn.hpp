@@ -1,10 +1,9 @@
 #pragma once
 
 #include <bindings/baseflex.hpp>
-// #include <bindings/weapon.hpp>
 
-class CPlayerWeaponServices;
-class C_BasePlayerWeapon;
+class CCSPlayer_WeaponServices;
+class C_CSWeaponBaseGun;
 
 class C_BaseCombatCharacter : public C_BaseFlex {
    public:
@@ -13,20 +12,24 @@ class C_BaseCombatCharacter : public C_BaseFlex {
 
 class C_BasePlayerPawn : public C_BaseCombatCharacter {
    public:
-    SCHEMA(CPlayerWeaponServices*, m_pWeaponServices, "C_BasePlayerPawn", "m_pWeaponServices");
+    SCHEMA(CCSPlayer_WeaponServices*, m_pWeaponServices, "C_BasePlayerPawn", "m_pWeaponServices");
 
-    C_BasePlayerWeapon* GetActiveWeapon();
+    C_CSWeaponBaseGun* GetActiveWeapon();
 };
 
 class C_CSPlayerPawnBase : public C_BasePlayerPawn {
    public:
     SCHEMA(int, m_iShotsFired, "C_CSPlayerPawnBase", "m_iShotsFired");
+    SCHEMA(int, m_ArmorValue, "C_CSPlayerPawnBase", "m_ArmorValue");
     SCHEMA(bool, m_bIsScoped, "C_CSPlayerPawnBase", "m_bIsScoped");
     SCHEMA(bool, m_bIsDefusing, "C_CSPlayerPawnBase", "m_bIsDefusing");
+    SCHEMA(bool, m_bIsGrabbingHostage, "C_CSPlayerPawnBase", "m_bIsGrabbingHostage");
     SCHEMA(bool, m_bGunGameImmunity, "C_CSPlayerPawnBase", "m_bGunGameImmunity");
+    SCHEMA(bool, m_bWaitForNoAttack, "C_CSPlayerPawnBase", "m_bWaitForNoAttack");
 
     bool IsPlayerPawn();
     bool IsObserverPawn();
+    bool CanAttack(const float serverTime);
 };
 
 class C_CSPlayerPawn : public C_CSPlayerPawnBase {

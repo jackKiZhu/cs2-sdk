@@ -18,6 +18,7 @@ class C_BaseEntity : public CEntityInstance {
     bool IsPlantedC4();
     bool IsChicken();
     bool IsHostage();
+    bool IsPlayerPawn();
 
     bool CalculateBBoxByCollision(BBox_t& out);
     bool CalculateBBoxByHitbox(BBox_t& out);
@@ -31,6 +32,7 @@ class C_BaseEntity : public CEntityInstance {
     SCHEMA(CCollisionProperty*, m_pCollision, "C_BaseEntity", "m_pCollision");
     SCHEMA(uint8_t, m_iTeamNum, "C_BaseEntity", "m_iTeamNum");
     SCHEMA(int, m_iHealth, "C_BaseEntity", "m_iHealth");
+    SCHEMA_EXTENDED(void*, GetVData, CConstants::CLIENT_LIB, "C_BaseEntity", "m_nSubclassID", 0x8);
 
     VIRTUAL_METHOD(void, GetEyePos, 160, (Vector* angles), angles);
     VIRTUAL_METHOD(void, GetEyeAngles, 161, (Vector* angles), angles);

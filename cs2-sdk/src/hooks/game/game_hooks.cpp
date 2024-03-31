@@ -21,7 +21,7 @@
 #include <interfaces/source2client.hpp>
 #include <interfaces/engineclient.hpp>
 #include <interfaces/enginetrace.hpp>
-#include <input/ccsgoinput.hpp>
+#include <interfaces/ccsgoinput.hpp>
 
 #include <hacks/aimbot/aimbot.hpp>
 
@@ -101,7 +101,7 @@ static CHook g_SetViewAngles;
 static void hkSetViewAngles(CCSGOInput* rcx, int subtick) {
     g_SetViewAngles.CallOriginal<void>(rcx, subtick);
 
-    CAimbot::Get().Run(rcx);
+    CAimbot::Get().Run();
 }
 
 void CGameHooks::Initialize() {

@@ -99,8 +99,12 @@ void CMenu::RenderMainMenu() {
 
         ImGui::Checkbox("3D boxes", &g_Vars.m_Use3DBoxes);
 
-        ImGui::SeparatorText("Miscellaneous");
+        ImGui::SeparatorText("Aimbot");
         ImGui::Checkbox("Aimbot", &g_Vars.m_EnableAimbot);
+        ImGui::SliderAngle("Aimbot FOV", &g_Vars.m_aimFov, 0.f, 180.f);
+        ImGui::SliderFloat("Aimbot smooth", &g_Vars.m_aimSmooth, 0.f, 1.f);
+
+        ImGui::Checkbox("Triggerbot", &g_Vars.m_EnableTriggerbot);
 
         if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CInstance::Get().FreeLibrary();
     }
