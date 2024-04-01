@@ -41,7 +41,7 @@ namespace signatures {
     // '%s:  %f tick(%d) curtime(%f)'
     CSigScan GetGlobalVars("GlobalVars", CConstants::CLIENT_LIB,
                           {
-                               {SDK_SIG("48 89 0D ?? ?? ?? ?? 48 89 41"), [](CPointer& ptr) { ptr.Absolute(3, 0).Dereference(); }},
+                               {SDK_SIG("48 89 0D ? ? ? ? 48 89 41"), [](CPointer& ptr) { ptr.Absolute(3, 0); }},
                           });
 
     CSigScan GetMatricesForView("CRenderGameSystem::GetMatricesForView", CConstants::CLIENT_LIB,

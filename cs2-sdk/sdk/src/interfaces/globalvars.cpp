@@ -4,6 +4,6 @@
 #include <signatures/signatures.hpp>
 
 CGlobalVars* CGlobalVars::Get() { 
-    static auto inst = signatures::GetGlobalVars.GetPtrAs<CGlobalVars*>();
-    return inst;
+    static auto inst = signatures::GetGlobalVars.GetPtrAs<CGlobalVars**>();
+    return *inst;
 }
