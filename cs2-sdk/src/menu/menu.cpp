@@ -101,8 +101,11 @@ void CMenu::RenderMainMenu() {
 
         ImGui::SeparatorText("Aimbot");
         ImGui::Checkbox("Aimbot", &g_Vars.m_EnableAimbot);
-        ImGui::SliderAngle("Aimbot FOV", &g_Vars.m_aimFov, 0.f, 180.f);
+        ImGui::SliderFloat("Aimbot FOV", &g_Vars.m_aimFov, 0.f, 180.f);
         ImGui::SliderFloat("Aimbot smooth", &g_Vars.m_aimSmooth, 0.f, 1.f);
+        ImGui::SliderFloat("kp", &g_Vars.m_kp, 0.f, 1.f);
+        ImGui::SliderFloat("ki", &g_Vars.m_ki, 0.f, 1.f);
+        ImGui::SliderFloat("damp", &g_Vars.m_damp, 0.f, 1.f);
 
         ImGui::Checkbox("Triggerbot", &g_Vars.m_EnableTriggerbot);
 

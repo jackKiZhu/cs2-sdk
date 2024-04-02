@@ -61,7 +61,7 @@ void CAimbot::Run() {
     const auto& cachedEntities = CMatchCache::GetCachedEntities();
     CCachedPlayer* target = nullptr;
 
-    RCS(input->viewAngles, localPawn);
+    // RCS(input->viewAngles, localPawn);
 
     Vector aimAngle = input->viewAngles;
 
@@ -95,13 +95,19 @@ void CAimbot::Run() {
         }
     }
 
+    const float mouseLength = std::hypot(input->mouseDx, input->mouseDy);
+
     const bool shouldAim = currentFov <= g_Vars.m_aimFov && 
         (input->buttonsHeld & IN_ATTACK || input->buttonsHeld & IN_ATTACK2);
 
     if (target && shouldAim) {
         input->viewAngles = Smooth(input->viewAngles, aimAngle);
-
-
+        CLogger::Log("Mouse: {} {} {}", input->mouseDx, input->mouseDy, mouseLength);
+    }
+    else
+    {
+        pid[0].Reset();
+        pid[1].Reset();
     }
 }
 
@@ -124,8 +130,15 @@ void CAimbot::RCS(Vector& angles, C_CSPlayerPawn* pawn) {
 }
 
 Vector CAimbot::Smooth(const Vector& from, const Vector& to) { 
-    const Vector delta = (to - from).NormalizedAngle(); 
-    return (from + delta * g_Vars.m_aimSmooth).NormalizedAngle();
+    const PIDConfig_t pidCfg { 
+        .m_kp = g_Vars.m_kp * 0.3f, 
+        .m_ki = g_Vars.m_ki * 0.3f, 
+        .m_kd = 0.f, 
+        .m_damp = 1.f - g_Vars.m_damp
+    };
+
+    Vector delta = (to - from).NormalizedAngle(); 
+    delta.x = pid[0].Step(delta.x, 0.015f, pidCfg);
+    delta.y = pid[1].Step(delta.y, 0.015f, pidCfg);
+    return (from + delta).NormalizedAngle();
 }
-
-

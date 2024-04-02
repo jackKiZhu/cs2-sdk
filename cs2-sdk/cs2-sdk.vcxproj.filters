@@ -162,5 +162,6 @@
     <ClInclude Include="sdk\include\interfaces\enginetrace.hpp" />
     <ClInclude Include="include\hacks\aimbot\aimbot.hpp" />
     <ClInclude Include="sdk\include\interfaces\globalvars.hpp" />
+    <ClInclude Include="include\hacks\aimbot\pid.hpp" />
   </ItemGroup>
 </Project>

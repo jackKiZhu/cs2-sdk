@@ -18,6 +18,9 @@ struct Vars_t {
     bool m_EnableAimbot;
     float m_aimFov = 30.f;
     float m_aimSmooth = 0.15f;
+    float m_kp = 0.06f;
+    float m_ki = 0.175f;
+    float m_damp = 0.45f;
 
     bool m_EnableTriggerbot;
 };

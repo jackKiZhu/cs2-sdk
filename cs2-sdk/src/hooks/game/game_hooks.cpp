@@ -55,13 +55,9 @@ static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, V
 
 static CHook g_CreateMove;
 static void hkCreateMove(CCSGOInput* rcx, int slot, char active) {
-
-    //CLogger::Log("Viewangles: {} {} {}", rcx->viewAngles.x, rcx->viewAngles.y, rcx->viewAngles.z);
-
-    //rcx->viewAngles.y += 1.f;
-    //rcx->viewAngles.NormalizeAngle();
-
     g_CreateMove.CallOriginal<bool>(rcx, slot, active);
+
+    CLogger::Log("CreateMove5: {}", rcx->sequenceNumber);
 
     #if 0
 
@@ -97,9 +93,20 @@ static void hkCreateMove(CCSGOInput* rcx, int slot, char active) {
     #endif
 }
 
+static CHook g_CreateMove2;
+static bool hkCreateMove2(CCSGOInput* rcx, int slot, void* a3) {
+    bool ret = g_CreateMove2.CallOriginal<bool>(rcx, slot, a3);
+
+    CLogger::Log("CreateMove15: {}", rcx->sequenceNumber);
+
+    return ret;
+}
+
 static CHook g_SetViewAngles;
 static void hkSetViewAngles(CCSGOInput* rcx, int subtick) {
     g_SetViewAngles.CallOriginal<void>(rcx, subtick);
+
+    CLogger::Log("SetViewAngles: {}", rcx->sequenceNumber);
 
     CAimbot::Get().Run();
 }
@@ -111,6 +118,7 @@ void CGameHooks::Initialize() {
 
     g_MouseInputEnabled.VHook(CCSGOInput::Get(), platform::Constant(13, 14), SDK_HOOK(hkMouseInputEnabled));
     g_CreateMove.VHook(CCSGOInput::Get(), platform::Constant(5, 5), SDK_HOOK(hkCreateMove));
+    g_CreateMove2.VHook(CCSGOInput::Get(), platform::Constant(15, 15), SDK_HOOK(hkCreateMove2));
     g_SetViewAngles.VHook(CCSGOInput::Get(), platform::Constant(7, 7), SDK_HOOK(hkSetViewAngles));
     g_OnAddEntity.VHook(CGameEntitySystem::Get(), platform::Constant(14, 15), SDK_HOOK(hkOnAddEntity));
     g_OnRemoveEntity.VHook(CGameEntitySystem::Get(), platform::Constant(15, 16), SDK_HOOK(hkOnRemoveEntity));
