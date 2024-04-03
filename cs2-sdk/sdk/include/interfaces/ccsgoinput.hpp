@@ -28,24 +28,26 @@ static_assert(sizeof(ButtonState_t) == 0x20);
 
 // reading is the same as in here: "F3 41 0F 10 47 ? 83 C9"
 struct CSubtickMove {
-    float when; // 0x0
-    uint64_t button; // 0x4
-    float analog_forward_delta; // 0xC
-    float analog_sidemove_delta; // 0x10
-}; // Size: 0x14
+    float when; // 0x0 [0.f - 1.f]
+    PAD(0x4); // 0x4
+    uint64_t lastPressedButtons; // 0x8
+    float analog_forward_delta; // 0x10 acts weirdly
+    float analog_sidemove_delta; // 0x14 acts weirdly
+}; // Size: 0x18
 
+#pragma pack(push, 1)
 struct CMoveData {
     uint64_t buttonsHeld; // 0x0
     uint64_t buttonsChanged; // 0x8
     uint64_t buttonsScroll; // 0x10
-    uint64_t buttonsUnk; // 0x18
+    uint64_t prevButtonsHeld; // 0x18
     Vector moves; // 0x20
     int32_t mouseDx; // 0x2C
     int32_t mouseDy; // 0x30
     uint32_t subtickCount; // 0x34 
     CSubtickMove subtickMoves[12]; // 0x38
-    float unk; // 0x128 seems to be the subtick fraction, not sure
-}; // Size: 0x12C
+}; // Size: 0x158
+#pragma pack(pop)
 
 class CBasePB {
    public:
@@ -132,6 +134,9 @@ class CUserCmd {
     CCSGOUserCmdPB csgoUserCmd; // 0x20 (0x10)
     CBaseUserCmdPB* baseCmd; // 0x30 (0x8)
 
+    // 0x70 = realtime
+    /// 0x50  = button,s
+
  #if 0
     PAD(0x18); // 0x38 (0x18)
     uint64_t qword50; // 0x50 (0x8)
@@ -165,20 +170,24 @@ class CCSGOInput {
     bool inThirdperson; // 0x5201 (0x1)
     PAD(0x22); // 0x5202 (0x22)
     int sequenceNumber; // 0x5224 (0x4)
-    int prevSequenceNumber; // 0x5228 (0x4)
+    int sequenceNumber2;   // 0x5228 (0x4)
     PAD(0x4); // 0x522C (0x4)
     double platFloatTime; // 0x5230 (0x8)
+    #if 0
     uint64_t buttonsHeld; // 0x5238 (0x8)
     uint64_t buttonsChanged; // 0x5240 (0x8)
     uint64_t buttonsScroll; // 0x5248 (0x8)
-    uint64_t buttonsUnk; // 0x5250 (0x8)
-    PAD(0xC); // 0x5258 (0xC)
-    int16_t mouseDx; // 0x5264 (0x2)
-    PAD(0x2); // 0x5266 (0x2)
-    int16_t mouseDy; // 0x5268 (0x2)
-    PAD(0x2); // 0x526A (0x2)
-    PAD(0x124); // 0x526C (0x124)
+    uint64_t buttonsHeld2; // 0x5250 (0x8)
+    Vector moves; // 0x5258 (0xC)
+    int32_t mouseDx; // 0x5264 (0x4)s
+    int32_t mouseDy;  // 0x5268 (0x4)
+    uint32_t scrollAmount; // 0x526C (0x4)
+    PAD(0x120); // 0x526C (0x124)
+    #else
+    CMoveData moveData; // 0x5238 (0x158)
+    #endif
     Vector viewAngles; // 0x5390 (0xC)
+    int handle; // -1
 
     CUserCmd* GetUserCmd();
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);
