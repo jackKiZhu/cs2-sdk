@@ -46,6 +46,8 @@ struct CMoveData {
     int32_t mouseDy; // 0x30
     uint32_t subtickCount; // 0x34 
     CSubtickMove subtickMoves[12]; // 0x38
+    Vector viewangles;               // 0x158
+    float time;                     // 0x164
 }; // Size: 0x158
 #pragma pack(pop)
 
@@ -168,7 +170,9 @@ class CCSGOInput {
     CUserCmd commands[MAX_SPLITSCREEN_PLAYERS]; // 0x250 (0x4FB0)
     PAD(0x1); // 0x5200 (0x1)
     bool inThirdperson; // 0x5201 (0x1)
-    PAD(0x22); // 0x5202 (0x22)
+    PAD(0x6);
+    Vector tihrdPersonAngle;  // 0x5208
+    PAD(0x10);
     int sequenceNumber; // 0x5224 (0x4)
     int sequenceNumber2;   // 0x5228 (0x4)
     PAD(0x4); // 0x522C (0x4)
@@ -186,8 +190,6 @@ class CCSGOInput {
     #else
     CMoveData moveData; // 0x5238 (0x158)
     #endif
-    Vector viewAngles; // 0x5390 (0xC)
-    int handle; // -1
 
     CUserCmd* GetUserCmd();
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);

@@ -1,0 +1,83 @@
+import "types.genny"
+
+struct CBasePB 0x18
+{}
+
+struct CCmdQAngle : CBasePB
+{
+    Angle value
+}
+
+struct CCmdVector : CBasePB
+{
+    Vector4D value
+}
+
+struct CCSGOInterpolationInfo : CBasePB
+{
+    float fraction
+    int src_tick
+    int dst_tick
+}
+
+
+struct CCSGOInputHistoryEntryPB : CBasePB
+{
+    CCmdQAngle* view_cmd
+    CCmdVector* shoot_origin_cmd
+    CCmdVector* target_head_origin_cmd
+    CCmdVector* target_abs_origin_cmd
+    CCmdQAngle* target_view_cmd
+    CCSGOInterpolationInfo* cl_interp
+    CCSGOInterpolationInfo* sv_interp0
+    CCSGOInterpolationInfo* sv_interp1
+    CCSGOInterpolationInfo* player_interp
+    int render_tick_count
+    float render_tick_fraction
+    int player_tick_count
+    float player_tick_fraction
+    int frame_number
+    int target_ent_index
+}
+
+struct CCSGOUserCmdPB
+{
+    int32_t tick_count
+    void* input_history @ 0x8
+}
+
+struct ButtonState_t
+{
+    void* vtable
+    uint64_t value
+    uint64_t value_changed
+    uint64_t value_scroll
+}
+
+struct CBaseUserCmdPB : CBasePB
+{
+    char pad_0x18[0x20]; // 0x18
+    ButtonState_t* buttons;                 // 0x20
+    CCmdQAngle* cmd_view;                   // 0x40
+    int command_number;                     // 0x48
+    int tick_count;                         // 0x4C
+    float forward_move;                     // 0x50
+    float side_move;                        // 0x54
+    float up_move;                          // 0x58
+    int32_t impulse;                        // 0x5C
+    int32_t weapon_select;                  // 0x60
+    int32_t random_seed;                    // 0x64
+    int32_t moused_x;                       // 0x68
+    int32_t moused_y;                       // 0x6C
+    uint32_t consumed_server_angle_changes; // 0x74
+    int32_t cmd_flags;                      // 0x78
+    uint32_t pawn_entity;                   // 0x7C
+};
+
+struct CUserCmd 0x88
+{
+    CCSGOUserCmdPB user_cmd @ 0x20
+    CBaseUserCmdPB* base_cmd;
+    ButtonState_t buttons @ 0x48
+    double cmd_time @ 0x70
+}

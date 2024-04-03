@@ -1,0 +1,60 @@
+type int8_t 1 [[i8]]
+type uint8_t 1 [[u8]]
+type byte 1 [[u8]]
+
+type uint16_t 2 [[u16]]
+type ushort 2 [[u16]]
+type int16_t 2 [[i16]]
+type short 2 [[i16]]
+
+type int32_t 4 [[i32]]
+type int 4 [[i32]]
+type uint32_t 4 [[u32]]
+
+type uintptr_t 8 [[u64]]
+type int64_t 8 [[i64]]
+type uint64_t 8 [[u64]]
+
+type float 4 [[f32]]
+type double 8 [[f64]]
+
+type str 8 [[utf8*]]
+type wstr 8 [[utf16*]]
+
+type bool 1 [[bool]]
+type char 1
+type wchar_t 2
+
+type void 0
+
+struct Vector2D 
+{
+    float x
+    float y
+}
+
+struct Vector3D
+{
+    float x
+    float y
+    float z
+}
+
+struct Vector3 : Vector3D
+{
+    
+}
+
+struct Vector4D : Vector3D
+{
+    float w
+}
+
+struct Angle
+{
+    float x
+    float y
+    float z
+}
+
+type Bitflag32 4 [[u32]]
