@@ -56,8 +56,7 @@ struct ButtonState_t
 
 struct CBaseUserCmdPB : CBasePB
 {
-    char pad_0x18[0x20]; // 0x18
-    ButtonState_t* buttons;                 // 0x20
+    ButtonState_t* buttons @ 0x38
     CCmdQAngle* cmd_view;                   // 0x40
     int command_number;                     // 0x48
     int tick_count;                         // 0x4C
