@@ -24,7 +24,7 @@ void ValidateUserCmd(const Vector& original, CUserCmd* cmd, CCSGOInputHistoryEnt
     static ConVar* sensitivity = CCVar::Get()->GetCvarByName("sensitivity");
     if (!m_pitch || !m_yaw || !sensitivity) return;
 
-    const Vector delta = (entry->pViewCmd->viewangles - original).NormalizedAngle();
+    const Vector delta = (entry->pViewCmd->viewAngles - original).NormalizedAngle();
     if (delta.IsZero()) return;
     
     const float pitch = m_pitch->GetValue<float>();

@@ -55,6 +55,11 @@ static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, V
 
 static CHook g_CreateMove;
 static void hkCreateMove(CCSGOInput* rcx, int slot, char active) {
+    if (rcx->moveData.buttonsHeld & IN_ATTACK) {
+        rcx->moveData.prevButtonsHeld = rcx->moveData.buttonsHeld;
+        rcx->moveData.buttonsScroll |= IN_JUMP;
+    }
+
     g_CreateMove.CallOriginal<bool>(rcx, slot, active);
 
     CLogger::Log("CreateMove5: {}", rcx->sequenceNumber);

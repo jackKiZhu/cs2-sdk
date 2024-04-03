@@ -46,7 +46,7 @@ struct CMoveData {
     int32_t mouseDy; // 0x30
     uint32_t subtickCount; // 0x34 
     CSubtickMove subtickMoves[12]; // 0x38
-    Vector viewangles;               // 0x158
+    Vector viewAngles;               // 0x158
     float time;                     // 0x164
 }; // Size: 0x158
 #pragma pack(pop)
@@ -58,7 +58,7 @@ class CBasePB {
 
 class CMsgQAngle : public CBasePB {
    public:
-    Vector viewangles; // 0x18 (0xC)
+    Vector viewAngles; // 0x18 (0xC)
 }; // Size: 0x24
 
 class CMsgVector : public CBasePB {
@@ -156,7 +156,7 @@ class CUserCmd {
         for (int i = 0; i < csgoUserCmd.tickcount; i++) {
             CCSGOInputHistoryEntryPB* entry = csgoUserCmd.GetInputHistoryEntry(i);
             if (!entry || !entry->pViewCmd) continue;
-            entry->pViewCmd->viewangles = angle;
+            entry->pViewCmd->viewAngles = angle;
         }
     }
 }; // Size: 0x88 

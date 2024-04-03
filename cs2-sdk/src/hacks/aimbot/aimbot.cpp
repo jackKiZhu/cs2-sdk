@@ -42,14 +42,14 @@ void CAimbot::Run() {
     localPawn->GetEyePos(&localPos);
 
     if (g_Vars.m_EnableTriggerbot) {
-        const Vector end = localPos + input->viewAngles.ToVector().Normalized() * 4096.f;
+        const Vector end = localPos + input->moveData.viewAngles.ToVector().Normalized() * 4096.f;
         GameTrace_t trace;
         if (CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace)) {
             if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) {
                 C_CSPlayerPawn* hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);
                 //if (hitPawn->m_iTeamNum() != hitPawn->m_iTeamNum()) {
-                if (!(input->buttonsHeld & IN_ATTACK)) input->buttonsChanged |= IN_ATTACK;
-			    input->buttonsHeld |= IN_ATTACK;
+       //         if (!(input->moveData.buttonsHeld & IN_ATTACK)) input->buttonsChanged |= IN_ATTACK;
+			    //input->buttonsHeld |= IN_ATTACK;
 				//}
             }
         }
@@ -63,7 +63,7 @@ void CAimbot::Run() {
 
     // RCS(input->viewAngles, localPawn);
 
-    Vector aimAngle = input->viewAngles;
+    Vector aimAngle = input->moveData.viewAngles;
 
     float currentFov = std::numeric_limits<float>::max();
     for (const auto& it : cachedEntities) {
@@ -87,7 +87,7 @@ void CAimbot::Run() {
         if (trace.fraction < 0.97f) continue;  // visibility
 
         const Vector angle = CMath::Get().CalculateAngle(localPos, pos);
-        const float fov = CMath::Get().Fov(input->viewAngles, angle);
+        const float fov = CMath::Get().Fov(input->moveData.viewAngles, angle);
         if (fov < currentFov) {
             target = cachedPlayer;
             aimAngle = angle;
@@ -95,14 +95,14 @@ void CAimbot::Run() {
         }
     }
 
-    const float mouseLength = std::hypot(input->mouseDx, input->mouseDy);
+    const float mouseLength = std::hypot(input->moveData.mouseDx, input->moveData.mouseDy);
 
     const bool shouldAim = currentFov <= g_Vars.m_aimFov && 
-        (input->buttonsHeld & IN_ATTACK || input->buttonsHeld & IN_ATTACK2);
+        (input->moveData.buttonsHeld & IN_ATTACK || input->moveData.buttonsHeld & IN_ATTACK2);
 
     if (target && shouldAim) {
-        input->viewAngles = Smooth(input->viewAngles, aimAngle);
-        CLogger::Log("Mouse: {} {} {}", input->mouseDx, input->mouseDy, mouseLength);
+        input->moveData.viewAngles = Smooth(input->moveData.viewAngles, aimAngle);
+        CLogger::Log("Mouse: {} {} {}", input->moveData.mouseDx, input->moveData.mouseDy, mouseLength);
     }
     else
     {
