@@ -26,21 +26,27 @@
 #include <hacks/aimbot/aimbot.hpp>
 
 static CHook g_MouseInputEnabled;
-static bool hkMouseInputEnabled(void* rcx) { return CMenu::Get().IsOpen() ? false : g_MouseInputEnabled.CallOriginal<bool>(rcx); }
+
+static bool hkMouseInputEnabled(void* rcx) {
+    return CMenu::Get().IsOpen() ? false : g_MouseInputEnabled.CallOriginal<bool>(rcx);
+}
 
 static CHook g_OnAddEntity;
+
 static void* hkOnAddEntity(void* rcx, CEntityInstance* inst, CBaseHandle handle) {
     CMatchCache::Get().AddEntity(inst, handle);
     return g_OnAddEntity.CallOriginal<void*>(rcx, inst, handle);
 }
 
 static CHook g_OnRemoveEntity;
+
 static void* hkOnRemoveEntity(void* rcx, CEntityInstance* inst, CBaseHandle handle) {
     CMatchCache::Get().RemoveEntity(inst, handle);
     return g_OnRemoveEntity.CallOriginal<void*>(rcx, inst, handle);
 }
 
 static CHook g_GetMatricesForView;
+
 static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, VMatrix* pViewToProjection, VMatrix* pWorldToProjection,
                                  VMatrix* pWorldToPixels) {
     g_GetMatricesForView.CallOriginal<void>(rcx, view, pWorldToView, pViewToProjection, pWorldToProjection, pWorldToPixels);
@@ -54,21 +60,39 @@ static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, V
 }
 
 static CHook g_CreateMove;
-static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
 
-    if (rcx->moveData.buttonsHeld & IN_ATTACK)
+static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
+    /*if (rcx->moveData.buttonsHeld & IN_ATTACK)
         rcx->moveData.buttonsHeld |= IN_JUMP;
     if (rcx->moveData.buttonsScroll & IN_ATTACK)
 		rcx->moveData.buttonsScroll |= IN_JUMP;
     if (rcx->moveData.prevButtonsHeld & IN_ATTACK)
         rcx->moveData.prevButtonsHeld |= IN_JUMP;
     if (rcx->moveData.buttonsChanged & IN_ATTACK) 
-        rcx->moveData.buttonsChanged |= IN_JUMP;
+        rcx->moveData.buttonsChanged |= IN_JUMP;*/
 
-    for (uint32_t i = 0; i < rcx->moveData.subtickCount; ++i) {
+    if (rcx->sub_tick_moves->buttonsHeld & IN_ATTACK)
+        rcx->sub_tick_moves->buttonsHeld |= IN_JUMP;
+    if (rcx->sub_tick_moves->prevButtonsHeld & IN_ATTACK)
+        rcx->sub_tick_moves->prevButtonsHeld |= IN_JUMP;
+    /*
+    if (rcx->sub_tick_moves->buttonsScroll & IN_ATTACK) rcx->sub_tick_moves->buttonsScroll |= IN_JUMP;
+    if (rcx->sub_tick_moves->buttonsChanged & IN_ATTACK) rcx->sub_tick_moves->buttonsChanged |= IN_JUMP;
+    */
+
+    /*for (uint32_t i = 0; i < rcx->moveData.subtickCount; ++i) {
         CSubtickMove move = rcx->moveData.subtickMoves[i];
         if (move.lastPressedButtons & IN_ATTACK) 
             move.lastPressedButtons |= IN_JUMP;
+    }*/
+
+    for (uint32_t i = 0; i < rcx->total_subtick_data; ++i) {
+        auto subtickData = &rcx->sub_tick_moves[i];
+        for (auto j = 0; j < subtickData->subtickCount; ++j) {
+            auto& move = subtickData->subtickMoves[j];
+            if (move.lastPressedButtons & IN_ATTACK)
+                move.lastPressedButtons |= IN_JUMP;
+        }
     }
 
     // setup subticks moves here
@@ -86,12 +110,13 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     //}
 
     if (rcx->moveData.buttonsChanged || rcx->moveData.buttonsHeld || rcx->moveData.buttonsScroll || rcx->moveData.prevButtonsHeld) {
-                CLogger::Log("PreCreateMove5: {}:{} [{}, {}, {}, {}]", rcx->sequenceNumber, subtick, rcx->moveData.buttonsChanged,
-                             rcx->moveData.buttonsHeld, rcx->moveData.buttonsScroll, rcx->moveData.prevButtonsHeld);
+        CLogger::Log("PreCreateMove5: {}:{} [{}, {}, {}, {}]", rcx->sequenceNumber, subtick, rcx->moveData.buttonsChanged,
+                     rcx->moveData.buttonsHeld, rcx->moveData.buttonsScroll, rcx->moveData.prevButtonsHeld);
     }
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
-
+    if (rcx->sub_tick_moves->buttonsHeld & IN_ATTACK)
+        rcx->sub_tick_moves->buttonsHeld |= IN_JUMP;
     if (rcx->moveData.buttonsChanged || rcx->moveData.buttonsHeld || rcx->moveData.buttonsScroll || rcx->moveData.prevButtonsHeld) {
         CLogger::Log("PostCreateMove5: {}:{} [{}, {}, {}, {}]\n", rcx->sequenceNumber, subtick, rcx->moveData.buttonsChanged,
                      rcx->moveData.buttonsHeld,
@@ -174,7 +199,7 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
 [cs2-sdk] CreateMove15: 13265 [0, 0, 0, 0]
     */
 
-    #if 0
+#if 0
 
     static auto GetSequenceNumber = signatures::GetSequenceNumber.GetPtrAs<int (*)(void*, int)>();
     if (!GetSequenceNumber) return;
@@ -205,10 +230,11 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
 
     C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
     if (!pawn) return;
-    #endif
+#endif
 }
 
 static CHook g_CreateMove2;
+
 static bool hkCreateMove2(CCSGOInput* rcx, int subtick, void* a3) {
     bool ret = g_CreateMove2.CallOriginal<bool>(rcx, subtick, a3);
 
@@ -216,6 +242,7 @@ static bool hkCreateMove2(CCSGOInput* rcx, int subtick, void* a3) {
 }
 
 static CHook g_SetViewAngles;
+
 static void hkSetViewAngles(CCSGOInput* rcx, int subtick) {
     g_SetViewAngles.CallOriginal<void>(rcx, subtick);
 

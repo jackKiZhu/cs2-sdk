@@ -37,6 +37,11 @@ struct CMoveData 0x168
     float time
 }
 
+struct CMoveDataArray
+{
+    CMoveData data[12]
+}
+
 struct CClientInput 0x6000
 {
     CUserCmd cmd[150] @ 0x250
@@ -52,5 +57,5 @@ struct CClientInput 0x6000
     uint32_t last_switch_weapon_tick @ 0x53a0
 
     uint32_t total_subtick_data @ 0x5428
-    CMoveData* sub_tick_moves @ 0x5430
+    CMoveDataArray* sub_tick_moves @ 0x5430
 }

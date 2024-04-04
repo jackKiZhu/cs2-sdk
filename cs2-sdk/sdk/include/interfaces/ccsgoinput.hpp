@@ -190,6 +190,17 @@ class CCSGOInput {
     #else
     CMoveData moveData; // 0x5238 (0x158)
     #endif
+    uint32_t last_switch_weapon_tick;  // 0x53a0
+   private:
+    char pad_53a4[0x84];
+
+   public:
+    uint32_t total_subtick_data;  // 0x5428
+   private:
+    char pad_542c[0x4];
+
+   public:
+    CMoveData* sub_tick_moves;  // 0x5430
 
     CUserCmd* GetUserCmd();
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);
