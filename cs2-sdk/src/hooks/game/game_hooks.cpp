@@ -54,15 +54,125 @@ static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, V
 }
 
 static CHook g_CreateMove;
-static void hkCreateMove(CCSGOInput* rcx, int slot, char active) {
-    if (rcx->moveData.buttonsHeld & IN_ATTACK) {
-        rcx->moveData.prevButtonsHeld = rcx->moveData.buttonsHeld;
-        rcx->moveData.buttonsScroll |= IN_JUMP;
+static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
+
+    if (rcx->moveData.buttonsHeld & IN_ATTACK)
+        rcx->moveData.buttonsHeld |= IN_JUMP;
+    if (rcx->moveData.buttonsScroll & IN_ATTACK)
+		rcx->moveData.buttonsScroll |= IN_JUMP;
+    if (rcx->moveData.prevButtonsHeld & IN_ATTACK)
+        rcx->moveData.prevButtonsHeld |= IN_JUMP;
+    if (rcx->moveData.buttonsChanged & IN_ATTACK) 
+        rcx->moveData.buttonsChanged |= IN_JUMP;
+
+    for (uint32_t i = 0; i < rcx->moveData.subtickCount; ++i) {
+        CSubtickMove move = rcx->moveData.subtickMoves[i];
+        if (move.lastPressedButtons & IN_ATTACK) 
+            move.lastPressedButtons |= IN_JUMP;
     }
 
-    g_CreateMove.CallOriginal<bool>(rcx, slot, active);
+    // setup subticks moves here
+    //if (subtick) {
+    //    // this is overriden in CClientInput::UpdateInputs
+    //    if (true || rcx->moveData.buttonsChanged & IN_ATTACK) {
+    //        rcx->moveData.buttonsHeld |= IN_JUMP;
+    //        rcx->moveData.buttonsScroll |= IN_JUMP;
+    //        for (uint32_t i = 0; i < rcx->moveData.subtickCount; ++i) {
+    //            CSubtickMove move = rcx->moveData.subtickMoves[i];
+    //            move.lastPressedButtons = rcx->moveData.buttonsHeld;
+    //            *(uint32_t*)(&move.analog_forward_delta) = 1;
+    //        }
+    //    }
+    //}
 
-    CLogger::Log("CreateMove5: {}", rcx->sequenceNumber);
+    if (rcx->moveData.buttonsChanged || rcx->moveData.buttonsHeld || rcx->moveData.buttonsScroll || rcx->moveData.prevButtonsHeld) {
+                CLogger::Log("PreCreateMove5: {}:{} [{}, {}, {}, {}]", rcx->sequenceNumber, subtick, rcx->moveData.buttonsChanged,
+                             rcx->moveData.buttonsHeld, rcx->moveData.buttonsScroll, rcx->moveData.prevButtonsHeld);
+    }
+
+    g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
+
+    if (rcx->moveData.buttonsChanged || rcx->moveData.buttonsHeld || rcx->moveData.buttonsScroll || rcx->moveData.prevButtonsHeld) {
+        CLogger::Log("PostCreateMove5: {}:{} [{}, {}, {}, {}]\n", rcx->sequenceNumber, subtick, rcx->moveData.buttonsChanged,
+                     rcx->moveData.buttonsHeld,
+                     rcx->moveData.buttonsScroll, rcx->moveData.prevButtonsHeld);
+    }
+
+    /*
+[cs2-sdk] CreateMove15: 13259 [0, 0, 0, 0]
+[cs2-sdk] CreateMove5: 13259 [0, 0, 0, 0]
+[cs2-sdk] SetViewAngles: 13259 [0, 0, 0, 0]
+
+[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
+[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
+[cs2-sdk] SetViewAngles: 13260 [0, 1, 0, 1]
+
+[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
+[cs2-sdk] SetViewAngles: 13261 [0, 1, 0, 1]
+
+[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
+[cs2-sdk] SetViewAngles: 13262 [0, 1, 0, 1]
+
+[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
+[cs2-sdk] SetViewAngles: 13263 [0, 1, 0, 1]
+
+[cs2-sdk] CreateMove15: 13264 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13264 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13264 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13264 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13264 [0, 1, 0, 1]
+[cs2-sdk] CreateMove5: 13264 [0, 1, 0, 1]
+[cs2-sdk] CreateMove15: 13264 [0, 0, 1, 1]
+[cs2-sdk] CreateMove5: 13264 [0, 0, 1, 1]
+[cs2-sdk] CreateMove15: 13264 [0, 0, 1, 1]
+[cs2-sdk] CreateMove5: 13264 [0, 0, 1, 1]
+[cs2-sdk] CreateMove15: 13264 [0, 0, 1, 1]
+[cs2-sdk] CreateMove5: 13264 [0, 0, 1, 1]
+[cs2-sdk] SetViewAngles: 13264 [0, 0, 0, 0]
+
+[cs2-sdk] CreateMove15: 13265 [0, 0, 0, 0]
+    */
 
     #if 0
 
@@ -99,10 +209,8 @@ static void hkCreateMove(CCSGOInput* rcx, int slot, char active) {
 }
 
 static CHook g_CreateMove2;
-static bool hkCreateMove2(CCSGOInput* rcx, int slot, void* a3) {
-    bool ret = g_CreateMove2.CallOriginal<bool>(rcx, slot, a3);
-
-    CLogger::Log("CreateMove15: {}", rcx->sequenceNumber);
+static bool hkCreateMove2(CCSGOInput* rcx, int subtick, void* a3) {
+    bool ret = g_CreateMove2.CallOriginal<bool>(rcx, subtick, a3);
 
     return ret;
 }
@@ -111,7 +219,8 @@ static CHook g_SetViewAngles;
 static void hkSetViewAngles(CCSGOInput* rcx, int subtick) {
     g_SetViewAngles.CallOriginal<void>(rcx, subtick);
 
-    CLogger::Log("SetViewAngles: {}", rcx->sequenceNumber);
+    //CLogger::Log("SetViewAngles: {} [{}, {}, {}, {}]", rcx->sequenceNumber, rcx->moveData.buttonsChanged, rcx->moveData.buttonsHeld,
+    //             rcx->moveData.buttonsScroll, rcx->moveData.prevButtonsHeld);
 
     CAimbot::Get().Run();
 }

@@ -23,8 +23,11 @@ bool CAimbot::IsEnabled() {
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
     if (!cachedLocal || !cachedLocal->IsValid()) return false;
     CCSPlayerController* localController = cachedLocal->Get();
+    if (!localController) return false;
     C_CSPlayerPawnBase* localPawn = localController->m_hPawn().Get();
+    if (!localPawn) return false;
     C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
+    if (!weapon) return false;
     //if (!weapon || !weapon->CanPrimaryAttack(1, 0.f)) return false;
     if (weapon->m_nNextPrimaryAttackTick() >= localController->m_nTickBase()) return false;
     return true;
