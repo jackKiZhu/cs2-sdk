@@ -87,9 +87,9 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     }*/
 
     for (uint32_t i = 0; i < rcx->total_subtick_data; ++i) {
-        auto subtickData = &rcx->sub_tick_moves[i];
-        for (auto j = 0; j < subtickData->subtickCount; ++j) {
-            auto& move = subtickData->subtickMoves[j];
+        auto& subtickData = rcx->sub_tick_moves[i];
+        for (auto j = 0; j < subtickData.subtickCount; ++j) {
+            auto& move = subtickData.subtickMoves[j];
             if (move.lastPressedButtons & IN_ATTACK)
                 move.lastPressedButtons |= IN_JUMP;
         }
