@@ -35,37 +35,55 @@ bool CModule::Retrieve() {
 }
 
 uintptr_t CModule::GetInterface(uint32_t versionHash) {
-    uintptr_t rv = 0;
-    if (m_Handle) {
-        CPointer pCreateInterface = GetProcAddress("CreateInterface");
-        if (!pCreateInterface.IsValid()) {
-            return rv;
-        }
+    if (!m_Handle) {
+        return 0;
+    }
 
+    CPointer pCreateInterface = GetProcAddress("CreateInterface");
+    if (!pCreateInterface.IsValid()) {
+        return 0;
+    }
+
+    if (_interfaces.empty()) {
         // Used internally to register classes.
         struct InterfaceReg {
             std::add_pointer_t<uintptr_t()> m_CreateFn;
             const char* m_pName;
-            InterfaceReg* m_pNext;  // For the global list.
+            InterfaceReg* m_pNext; // For the global list.
         };
 
-        InterfaceReg* s_pInterfaceRegs =
+        const InterfaceReg* s_pInterfaceRegs =
 #ifdef _WIN32
-            pCreateInterface.Absolute(3, 0).Dereference(1).Get<InterfaceReg*>()
+            pCreateInterface.Absolute(3, 0).Dereference(1).Get<InterfaceReg*>();
 #elif __linux__
-            pCreateInterface.Absolute(1, 0).Absolute(19, 0).Dereference(1).Get<InterfaceReg*>()
+                pCreateInterface.Absolute(1, 0).Absolute(19, 0).Dereference(1).Get<InterfaceReg*>();
 #endif
-            ;
+
+        // save extra search
+        std::uintptr_t rv = 0;
 
         for (; s_pInterfaceRegs; s_pInterfaceRegs = s_pInterfaceRegs->m_pNext) {
-            if (FNV1A::Hash(s_pInterfaceRegs->m_pName) == versionHash) {
-                rv = s_pInterfaceRegs->m_CreateFn();
-                break;
+            auto hashedName         = FNV1A::Hash(s_pInterfaceRegs->m_pName);
+            const auto address      = s_pInterfaceRegs->m_CreateFn();
+            _interfaces[hashedName] = address;
+
+            if (hashedName == versionHash) {
+                rv = address;
             }
+        }
+
+        if (rv) {
+            return rv;
         }
     }
 
-    return rv;
+    const auto it = _interfaces.find(versionHash);
+    if (it != _interfaces.end()) {
+        return it->second;
+    }
+
+    // or just throw exception here?
+    return 0;
 }
 
 uintptr_t CModule::GetProcAddress(const char* procName) {
@@ -82,31 +100,32 @@ uintptr_t CModule::GetProcAddress(const char* procName) {
 }
 
 uintptr_t CModule::FindPattern(const std::span<const int>& pattern) const {
-    uintptr_t rv = 0;
-    if (m_Handle) {
-        uint8_t* bytes = reinterpret_cast<uint8_t*>(m_Begin);
+    
+    if (!m_Handle) {
+        return 0;
+    }
 
-        // Faster than pattern[] in debug builds because of _STL_VERIFY.
-        const int* patternData = pattern.data();
-        const size_t patternSize = pattern.size();
+    // Faster than pattern[] in debug builds because of _STL_VERIFY.
+    const int* patternData   = pattern.data();
+    const size_t patternSize = pattern.size();
 
-        for (size_t i = 0; i < m_Size - patternSize; ++i) {
-            bool found = true;
-            for (size_t j = 0; j < patternSize; ++j) {
-                if (bytes[i + j] != patternData[j] && patternData[j] != -1) {
-                    found = false;
-                    break;
-                }
-            }
+    auto* start = reinterpret_cast<uint8_t*>(m_Begin);
+    auto* end   = reinterpret_cast<uint8_t*>(m_Begin + m_Size - patternSize);
 
-            if (found) {
-                rv = reinterpret_cast<uintptr_t>(&bytes[i]);
-                break;
-            }
+    for (std::uint8_t* current = start; current <= end; ++current) {
+        current = std::find(current, end, patternData[0]);
+
+        if (current == end) {
+            break;
+        }
+
+        if (std::equal(pattern.begin() + 1, pattern.end(), current + 1,
+                       [](auto opt, auto byte) { return opt == -1 || opt == byte; })) {
+            return {uintptr_t(current)};
         }
     }
 
-    return rv;
+    return 0;
 }
 
 void CModule::InitializeHandle() {

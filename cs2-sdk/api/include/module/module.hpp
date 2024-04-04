@@ -29,4 +29,6 @@ class CModule {
 
     // Used for pattern scanning.
     uintptr_t m_Begin, m_Size;
+
+    std::unordered_map<std::uint32_t, std::uintptr_t> _interfaces {};
 };

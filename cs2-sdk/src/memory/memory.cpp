@@ -36,7 +36,7 @@ ModulePtr_t& CMemory::GetModuleInternal(const char* libName) {
 CPointer CMemory::GetInterfaceInternal(const char* libName, const char* version) {
     CPointer rv = 0;
 
-    auto& library = CMemory::GetModuleInternal(libName);
+    const auto& library = CMemory::GetModuleInternal(libName);
     if (!library) {
         CLogger::Log("[interface] Couldn't retrieve {} because {} was not loaded", version, libName);
         return rv;
@@ -51,7 +51,7 @@ CPointer CMemory::GetInterfaceInternal(const char* libName, const char* version)
 CPointer CMemory::GetProcAddressInternal(const char* libName, const char* procName) {
     CPointer rv = 0;
 
-    auto& library = CMemory::GetModuleInternal(libName);
+    const auto& library = CMemory::GetModuleInternal(libName);
     if (!library) {
         CLogger::Log("[export] Couldn't retrieve {} because {} was not loaded.", procName, libName);
         return rv;
