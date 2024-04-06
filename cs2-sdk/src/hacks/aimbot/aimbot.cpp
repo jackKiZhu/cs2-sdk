@@ -35,6 +35,7 @@ bool CAimbot::IsEnabled() {
 
 void CAimbot::Run() {
     CCSGOInput* input = CCSGOInput::Get();
+    CMoveData& lastMove = *input->subtickMoves.end();
     if (!IsEnabled()) return;
 
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
@@ -50,6 +51,9 @@ void CAimbot::Run() {
         if (CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace)) {
             if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) {
                 C_CSPlayerPawn* hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);
+
+                lastMove.Scroll(IN_ATTACK);
+
                 //if (hitPawn->m_iTeamNum() != hitPawn->m_iTeamNum()) {
        //         if (!(input->moveData.buttonsHeld & IN_ATTACK)) input->buttonsChanged |= IN_ATTACK;
 			    //input->buttonsHeld |= IN_ATTACK;
@@ -90,7 +94,7 @@ void CAimbot::Run() {
         if (trace.fraction < 0.97f) continue;  // visibility
 
         const Vector angle = CMath::Get().CalculateAngle(localPos, pos);
-        const float fov = CMath::Get().Fov(input->moveData.viewAngles, angle);
+        const float fov = CMath::Get().Fov(lastMove.viewAngles, angle);
         if (fov < currentFov) {
             target = cachedPlayer;
             aimAngle = angle;
@@ -98,14 +102,14 @@ void CAimbot::Run() {
         }
     }
 
-    const float mouseLength = std::hypot(input->moveData.mouseDx, input->moveData.mouseDy);
+    const float mouseLength = std::hypot(lastMove.mouseDx, lastMove.mouseDy);
 
     const bool shouldAim = currentFov <= g_Vars.m_aimFov && 
-        (input->moveData.buttonsHeld & IN_ATTACK || input->moveData.buttonsHeld & IN_ATTACK2);
+        (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2);
 
     if (target && shouldAim) {
-        input->moveData.viewAngles = Smooth(input->moveData.viewAngles, aimAngle);
-        CLogger::Log("Mouse: {} {} {}", input->moveData.mouseDx, input->moveData.mouseDy, mouseLength);
+        lastMove.viewAngles = Smooth(lastMove.viewAngles, aimAngle);
+        CLogger::Log("Mouse: {} {} {}", lastMove.mouseDx, lastMove.mouseDy, mouseLength);
     }
     else
     {

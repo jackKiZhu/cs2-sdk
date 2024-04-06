@@ -81,8 +81,6 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     if (rcx->moveData.buttonsChanged & IN_ATTACK) rcx->moveData.buttonsChanged |= IN_JUMP;
     #endif
 
-
-
     // override the last subtick info
     if (rcx->subtickMoves.m_Size) {
         CMoveData* move = rcx->subtickMoves.AtPtr(rcx->subtickMoves.m_Size - 1);
@@ -92,43 +90,46 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
         //if (grounded) move->buttonsScroll |= IN_JUMP;
         //else if (move->prevButtonsHeld & IN_JUMP) move->prevButtonsHeld &= ~IN_JUMP;
 
+        uint32_t tickToAdd = 0;
+
         for (uint32_t j = 0; j < move->subtickCount; ++j) {
             CSubtickMove& subtickMove = move->subtickMoves[j];
             CLogger::Log("{} subtickMove {}: {} [{}, {}, {}]", rcx->sequenceNumber, j, subtickMove.when, subtickMove.lastPressedButtons, subtickMove.analog_forward_delta,
                 						 subtickMove.analog_sidemove_delta);
-            //if (grounded) subtickMove.lastPressedButtons |= IN_JUMP;
-            //else if (subtickMove.lastPressedButtons & IN_JUMP) subtickMove.lastPressedButtons &= ~IN_JUMP;
         }
 
-        if (grounded && rcx->moveData.buttonsHeld & IN_JUMP) {
-            for (uint32_t j = 0; j < move->subtickCount; ++j) {
-                CSubtickMove& subtickMove = move->subtickMoves[j];
-                subtickMove.lastPressedButtons &= ~IN_JUMP;
-            }
-
+        if (false && grounded && rcx->moveData.buttonsHeld & IN_FORWARD) {
+            //rcx->moveData.buttonsHeld &= ~IN_JUMP;
+            //rcx->moveData.buttonsChanged |= IN_JUMP;
+            //move->buttonsHeld &= ~IN_JUMP;
+            //move->buttonsChanged |= IN_JUMP;
 
             // we have enough subticks to input a jump
             if (move->subtickCount > 2) {
-                CSubtickMove& subtickMove = move->subtickMoves[move->subtickCount - 2];
-				subtickMove.lastPressedButtons |= IN_JUMP;
+                auto& subtickMove = move->subtickMoves[move->subtickCount - 2];
+                subtickMove.lastPressedButtons = IN_JUMP;
                 subtickMove.analog_forward_delta = 1;
-                subtickMove = move->subtickMoves[move->subtickCount - 1];
-                subtickMove.lastPressedButtons |= IN_JUMP;
-                subtickMove.analog_forward_delta = 0;
+
+                move->subtickMoves[move->subtickCount - 1] = subtickMove;
+                move->subtickMoves[move->subtickCount - 1].analog_forward_delta = 0;
+
+                CLogger::Log("Inputting jump at subtick {}", move->subtickCount - 2);
             } else {
                 // we don't have enough subticks to input a jump
-                const uint32_t tick = (move->subtickCount += 2) - 1;
-                move->subtickMoves[tick] = CSubtickMove{
-                    .when = 0.92f,
+                move->subtickCount += 2;
+                move->subtickMoves[0] = move->subtickMoves[1] = CSubtickMove{
+                    .when = 0.52f,
                     .lastPressedButtons = IN_JUMP,
-                    .analog_forward_delta = 1,
+                    .analog_forward_delta = 0,
                     .analog_sidemove_delta = 0,
                 };
-                move->subtickMoves[tick - 1] = move->subtickMoves[tick];
-                move->subtickMoves[tick - 1].analog_forward_delta = 0;
+                move->subtickMoves[0].analog_forward_delta = 1;
+                CLogger::Log("Inputting jump at subtick {}", 0);
             }
         }
     }
+
+    CAimbot::Get().Run();
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
 }
@@ -147,7 +148,7 @@ static void hkSetViewAngles(CCSGOInput* rcx, int subtick) {
     //CLogger::Log("SetViewAngles: {} [{}, {}, {}, {}]", rcx->sequenceNumber, rcx->moveData.buttonsChanged, rcx->moveData.buttonsHeld,
     //             rcx->moveData.buttonsScroll, rcx->moveData.prevButtonsHeld);
 
-    CAimbot::Get().Run();
+    //CAimbot::Get().Run();
 }
 
 void CGameHooks::Initialize() {

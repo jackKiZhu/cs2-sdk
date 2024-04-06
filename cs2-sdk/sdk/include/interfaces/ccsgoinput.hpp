@@ -50,10 +50,47 @@ struct CMoveData {
     CSubtickMove subtickMoves[12]; // 0x38
     Vector viewAngles;               // 0x158
     float time;                     // 0x164
+
+    void Scroll(uint64_t button) {
+        if (subtickCount <= 10) {
+            buttonsHeld |= button;
+            buttonsScroll |= button;
+            subtickCount += 2;
+            subtickMoves[subtickCount - 2] = subtickMoves[subtickCount - 1] = CSubtickMove{
+				.when = 0.95f,
+				.lastPressedButtons = button,
+				.analog_forward_delta = 1,
+				.analog_sidemove_delta = 0,
+			};
+			subtickMoves[subtickCount - 1].analog_forward_delta = 0;
+        }
+	}
+
+    /*
+       if (move->subtickCount > 2) {
+                auto& subtickMove = move->subtickMoves[move->subtickCount - 2];
+                subtickMove.lastPressedButtons = IN_JUMP;
+                subtickMove.analog_forward_delta = 1;
+
+                move->subtickMoves[move->subtickCount - 1] = subtickMove;
+                move->subtickMoves[move->subtickCount - 1].analog_forward_delta = 0;
+
+                CLogger::Log("Inputting jump at subtick {}", move->subtickCount - 2);
+            } else {
+                // we don't have enough subticks to input a jump
+                move->subtickCount += 2;
+                move->subtickMoves[0] = move->subtickMoves[1] = CSubtickMove{
+                    .when = 0.52f,
+                    .lastPressedButtons = IN_JUMP,
+                    .analog_forward_delta = 0,
+                    .analog_sidemove_delta = 0,
+                };
+                move->subtickMoves[0].analog_forward_delta = 1;
+                CLogger::Log("Inputting jump at subtick {}", 0);
+            }
+    */
 }; // Size: 0x168
 #pragma pack(pop)
-
-using CMoveDataArray = CMoveData[12];
 
 class CBasePB {
    public:
@@ -183,13 +220,7 @@ class CCSGOInput {
     CMoveData moveData; // 0x5238 (0x158)
     uint32_t lastSwitchWeaponTick; // 0x53a0
     PAD(0x84);
-    #if 0
-    uint32_t totalSubtickCount; // 0x5428
-    PAD(0x4);
-    CMoveDataArray* subtickMoves;  // 0x5430
-    #else
     CUtlVector<CMoveData> subtickMoves; // 0x5428
-    #endif
 
     CUserCmd* GetUserCmd();
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);
