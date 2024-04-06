@@ -60,181 +60,80 @@ static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, V
 }
 
 static CHook g_CreateMove;
-
 static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
-    /*if (rcx->moveData.buttonsHeld & IN_ATTACK)
-        rcx->moveData.buttonsHeld |= IN_JUMP;
-    if (rcx->moveData.buttonsScroll & IN_ATTACK)
-		rcx->moveData.buttonsScroll |= IN_JUMP;
-    if (rcx->moveData.prevButtonsHeld & IN_ATTACK)
-        rcx->moveData.prevButtonsHeld |= IN_JUMP;
-    if (rcx->moveData.buttonsChanged & IN_ATTACK) 
-        rcx->moveData.buttonsChanged |= IN_JUMP;*/
+    CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
+    if (!cachedLocal)
+        return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
+    CCSPlayerController* localController = cachedLocal->Get();
+    if (!localController)
+        return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
+    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
+    if (!localPawn)
+        return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
 
-    if (rcx->sub_tick_moves->buttonsHeld & IN_ATTACK)
-        rcx->sub_tick_moves->buttonsHeld |= IN_JUMP;
-    if (rcx->sub_tick_moves->prevButtonsHeld & IN_ATTACK)
-        rcx->sub_tick_moves->prevButtonsHeld |= IN_JUMP;
-    /*
-    if (rcx->sub_tick_moves->buttonsScroll & IN_ATTACK) rcx->sub_tick_moves->buttonsScroll |= IN_JUMP;
-    if (rcx->sub_tick_moves->buttonsChanged & IN_ATTACK) rcx->sub_tick_moves->buttonsChanged |= IN_JUMP;
-    */
+    const bool grounded = localPawn->m_hGroundEntity().Get() != nullptr;
 
-    /*for (uint32_t i = 0; i < rcx->moveData.subtickCount; ++i) {
-        CSubtickMove move = rcx->moveData.subtickMoves[i];
-        if (move.lastPressedButtons & IN_ATTACK) 
-            move.lastPressedButtons |= IN_JUMP;
-    }*/
+    #if 0
+    // override the current data
+    if (rcx->moveData.buttonsHeld & IN_ATTACK) rcx->moveData.buttonsHeld |= IN_JUMP;
+    if (rcx->moveData.buttonsScroll & IN_ATTACK) rcx->moveData.buttonsScroll |= IN_JUMP;
+    if (rcx->moveData.prevButtonsHeld & IN_ATTACK) rcx->moveData.prevButtonsHeld |= IN_JUMP;
+    if (rcx->moveData.buttonsChanged & IN_ATTACK) rcx->moveData.buttonsChanged |= IN_JUMP;
+    #endif
 
-    for (uint32_t i = 0; i < rcx->total_subtick_data; ++i) {
-        auto& subtickData = rcx->sub_tick_moves[i];
-        for (auto j = 0; j < subtickData.subtickCount; ++j) {
-            auto& move = subtickData.subtickMoves[j];
-            if (move.lastPressedButtons & IN_ATTACK)
-                move.lastPressedButtons |= IN_JUMP;
+
+
+    // override the last subtick info
+    if (rcx->subtickMoves.m_Size) {
+        CMoveData* move = rcx->subtickMoves.AtPtr(rcx->subtickMoves.m_Size - 1);
+
+        //if (grounded) move->buttonsHeld |= IN_JUMP;
+        //else if (move->prevButtonsHeld & IN_JUMP) move->prevButtonsHeld &= ~IN_JUMP;
+        //if (grounded) move->buttonsScroll |= IN_JUMP;
+        //else if (move->prevButtonsHeld & IN_JUMP) move->prevButtonsHeld &= ~IN_JUMP;
+
+        for (uint32_t j = 0; j < move->subtickCount; ++j) {
+            CSubtickMove& subtickMove = move->subtickMoves[j];
+            CLogger::Log("{} subtickMove {}: {} [{}, {}, {}]", rcx->sequenceNumber, j, subtickMove.when, subtickMove.lastPressedButtons, subtickMove.analog_forward_delta,
+                						 subtickMove.analog_sidemove_delta);
+            //if (grounded) subtickMove.lastPressedButtons |= IN_JUMP;
+            //else if (subtickMove.lastPressedButtons & IN_JUMP) subtickMove.lastPressedButtons &= ~IN_JUMP;
+        }
+
+        if (grounded && rcx->moveData.buttonsHeld & IN_JUMP) {
+            for (uint32_t j = 0; j < move->subtickCount; ++j) {
+                CSubtickMove& subtickMove = move->subtickMoves[j];
+                subtickMove.lastPressedButtons &= ~IN_JUMP;
+            }
+
+
+            // we have enough subticks to input a jump
+            if (move->subtickCount > 2) {
+                CSubtickMove& subtickMove = move->subtickMoves[move->subtickCount - 2];
+				subtickMove.lastPressedButtons |= IN_JUMP;
+                subtickMove.analog_forward_delta = 1;
+                subtickMove = move->subtickMoves[move->subtickCount - 1];
+                subtickMove.lastPressedButtons |= IN_JUMP;
+                subtickMove.analog_forward_delta = 0;
+            } else {
+                // we don't have enough subticks to input a jump
+                const uint32_t tick = (move->subtickCount += 2) - 1;
+                move->subtickMoves[tick] = CSubtickMove{
+                    .when = 0.92f,
+                    .lastPressedButtons = IN_JUMP,
+                    .analog_forward_delta = 1,
+                    .analog_sidemove_delta = 0,
+                };
+                move->subtickMoves[tick - 1] = move->subtickMoves[tick];
+                move->subtickMoves[tick - 1].analog_forward_delta = 0;
+            }
         }
     }
 
-    // setup subticks moves here
-    //if (subtick) {
-    //    // this is overriden in CClientInput::UpdateInputs
-    //    if (true || rcx->moveData.buttonsChanged & IN_ATTACK) {
-    //        rcx->moveData.buttonsHeld |= IN_JUMP;
-    //        rcx->moveData.buttonsScroll |= IN_JUMP;
-    //        for (uint32_t i = 0; i < rcx->moveData.subtickCount; ++i) {
-    //            CSubtickMove move = rcx->moveData.subtickMoves[i];
-    //            move.lastPressedButtons = rcx->moveData.buttonsHeld;
-    //            *(uint32_t*)(&move.analog_forward_delta) = 1;
-    //        }
-    //    }
-    //}
-
-    if (rcx->moveData.buttonsChanged || rcx->moveData.buttonsHeld || rcx->moveData.buttonsScroll || rcx->moveData.prevButtonsHeld) {
-        CLogger::Log("PreCreateMove5: {}:{} [{}, {}, {}, {}]", rcx->sequenceNumber, subtick, rcx->moveData.buttonsChanged,
-                     rcx->moveData.buttonsHeld, rcx->moveData.buttonsScroll, rcx->moveData.prevButtonsHeld);
-    }
-
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
-    if (rcx->sub_tick_moves->buttonsHeld & IN_ATTACK)
-        rcx->sub_tick_moves->buttonsHeld |= IN_JUMP;
-    if (rcx->moveData.buttonsChanged || rcx->moveData.buttonsHeld || rcx->moveData.buttonsScroll || rcx->moveData.prevButtonsHeld) {
-        CLogger::Log("PostCreateMove5: {}:{} [{}, {}, {}, {}]\n", rcx->sequenceNumber, subtick, rcx->moveData.buttonsChanged,
-                     rcx->moveData.buttonsHeld,
-                     rcx->moveData.buttonsScroll, rcx->moveData.prevButtonsHeld);
-    }
-
-    /*
-[cs2-sdk] CreateMove15: 13259 [0, 0, 0, 0]
-[cs2-sdk] CreateMove5: 13259 [0, 0, 0, 0]
-[cs2-sdk] SetViewAngles: 13259 [0, 0, 0, 0]
-
-[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove15: 13260 [1, 1, 0, 0]
-[cs2-sdk] CreateMove5: 13260 [1, 1, 0, 0]
-[cs2-sdk] SetViewAngles: 13260 [0, 1, 0, 1]
-
-[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13261 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13261 [0, 1, 0, 1]
-[cs2-sdk] SetViewAngles: 13261 [0, 1, 0, 1]
-
-[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13262 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13262 [0, 1, 0, 1]
-[cs2-sdk] SetViewAngles: 13262 [0, 1, 0, 1]
-
-[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13263 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13263 [0, 1, 0, 1]
-[cs2-sdk] SetViewAngles: 13263 [0, 1, 0, 1]
-
-[cs2-sdk] CreateMove15: 13264 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13264 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13264 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13264 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13264 [0, 1, 0, 1]
-[cs2-sdk] CreateMove5: 13264 [0, 1, 0, 1]
-[cs2-sdk] CreateMove15: 13264 [0, 0, 1, 1]
-[cs2-sdk] CreateMove5: 13264 [0, 0, 1, 1]
-[cs2-sdk] CreateMove15: 13264 [0, 0, 1, 1]
-[cs2-sdk] CreateMove5: 13264 [0, 0, 1, 1]
-[cs2-sdk] CreateMove15: 13264 [0, 0, 1, 1]
-[cs2-sdk] CreateMove5: 13264 [0, 0, 1, 1]
-[cs2-sdk] SetViewAngles: 13264 [0, 0, 0, 0]
-
-[cs2-sdk] CreateMove15: 13265 [0, 0, 0, 0]
-    */
-
-#if 0
-
-    static auto GetSequenceNumber = signatures::GetSequenceNumber.GetPtrAs<int (*)(void*, int)>();
-    if (!GetSequenceNumber) return;
-
-    static auto GetUserCmd = signatures::GetUserCmd.GetPtrAs<CUserCmd* (*)(void*, int, int, bool)>();
-    if (!GetUserCmd) return;
-
-    if (!CEngineClient::Get()->IsInGame()) return;
-
-    int sequenceNumber = GetSequenceNumber(nullptr, 0);
-    if (sequenceNumber < 0 || slot) return;
-
-    CUserCmd* cmd = GetUserCmd(rcx, 0, sequenceNumber, true);
-    //CUserCmd* cmd = rcx->GetUserCmd()
-    if (!cmd) return;
-
-    CBaseUserCmdPB* baseCmd = cmd->baseCmd;
-    if (!baseCmd) return;
-
-    CMsgQAngle* msgAngle = baseCmd->msgAngle;
-    if (!msgAngle) return;
-
-    CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
-    if (!cachedLocal) return;
-
-    CCSPlayerController* controller = cachedLocal->Get();
-    if (!controller) return;
-
-    C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
-    if (!pawn) return;
-#endif
 }
 
 static CHook g_CreateMove2;
-
 static bool hkCreateMove2(CCSGOInput* rcx, int subtick, void* a3) {
     bool ret = g_CreateMove2.CallOriginal<bool>(rcx, subtick, a3);
 
@@ -242,7 +141,6 @@ static bool hkCreateMove2(CCSGOInput* rcx, int subtick, void* a3) {
 }
 
 static CHook g_SetViewAngles;
-
 static void hkSetViewAngles(CCSGOInput* rcx, int subtick) {
     g_SetViewAngles.CallOriginal<void>(rcx, subtick);
 

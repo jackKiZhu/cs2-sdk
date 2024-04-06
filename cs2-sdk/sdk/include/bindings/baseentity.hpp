@@ -29,6 +29,7 @@ class C_BaseEntity : public CEntityInstance {
 
     SCHEMA(CGameSceneNode*, m_pGameSceneNode, "C_BaseEntity", "m_pGameSceneNode");
     SCHEMA(CBaseHandle, m_hOwnerEntity, "C_BaseEntity", "m_hOwnerEntity");
+    SCHEMA(CBaseHandle, m_hGroundEntity, "C_BaseEntity", "m_hGroundEntity");
     SCHEMA(CCollisionProperty*, m_pCollision, "C_BaseEntity", "m_pCollision");
     SCHEMA(uint8_t, m_iTeamNum, "C_BaseEntity", "m_iTeamNum");
     SCHEMA(int, m_iHealth, "C_BaseEntity", "m_iHealth");

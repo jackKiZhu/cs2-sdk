@@ -1,5 +1,7 @@
 #pragma once
 
+#include <types/utlvector.hpp>
+
 // this will have both CClientInput and CCSGOInput for simplicity's sake
 
 #define MAX_SPLITSCREEN_PLAYERS 150
@@ -31,8 +33,8 @@ struct CSubtickMove {
     float when; // 0x0 [0.f - 1.f]
     PAD(0x4); // 0x4
     uint64_t lastPressedButtons; // 0x8
-    float analog_forward_delta; // 0x10 acts weirdly
-    float analog_sidemove_delta; // 0x14 acts weirdly
+    uint32_t analog_forward_delta; // 0x10 acts weirdly
+    uint32_t analog_sidemove_delta;  // 0x14 acts weirdly
 }; // Size: 0x18
 
 #pragma pack(push, 1)
@@ -48,8 +50,10 @@ struct CMoveData {
     CSubtickMove subtickMoves[12]; // 0x38
     Vector viewAngles;               // 0x158
     float time;                     // 0x164
-}; // Size: 0x158
+}; // Size: 0x168
 #pragma pack(pop)
+
+using CMoveDataArray = CMoveData[12];
 
 class CBasePB {
    public:
@@ -100,7 +104,6 @@ class CBaseUserCmdPB {
     int commandNumber; // 0x48 (0x4)
     uint32_t tickcount; // 0x4C (0x4)
     Vector moves; // 0x50 (0xC)
-    // PAD(0x24); // 0x5C (0x24)
     int32_t impulse;        // 0x5C (0x4)
     int32_t weaponSelect;  // 0x60 (0x4)
     int32_t randomSeed;     // 0x64 (0x4)
@@ -171,36 +174,22 @@ class CCSGOInput {
     PAD(0x1); // 0x5200 (0x1)
     bool inThirdperson; // 0x5201 (0x1)
     PAD(0x6);
-    Vector tihrdPersonAngle;  // 0x5208
+    Vector thirdPersonAngle;  // 0x5208
     PAD(0x10);
     int sequenceNumber; // 0x5224 (0x4)
     int sequenceNumber2;   // 0x5228 (0x4)
     PAD(0x4); // 0x522C (0x4)
     double platFloatTime; // 0x5230 (0x8)
-    #if 0
-    uint64_t buttonsHeld; // 0x5238 (0x8)
-    uint64_t buttonsChanged; // 0x5240 (0x8)
-    uint64_t buttonsScroll; // 0x5248 (0x8)
-    uint64_t buttonsHeld2; // 0x5250 (0x8)
-    Vector moves; // 0x5258 (0xC)
-    int32_t mouseDx; // 0x5264 (0x4)s
-    int32_t mouseDy;  // 0x5268 (0x4)
-    uint32_t scrollAmount; // 0x526C (0x4)
-    PAD(0x120); // 0x526C (0x124)
-    #else
     CMoveData moveData; // 0x5238 (0x158)
+    uint32_t lastSwitchWeaponTick; // 0x53a0
+    PAD(0x84);
+    #if 0
+    uint32_t totalSubtickCount; // 0x5428
+    PAD(0x4);
+    CMoveDataArray* subtickMoves;  // 0x5430
+    #else
+    CUtlVector<CMoveData> subtickMoves; // 0x5428
     #endif
-    uint32_t last_switch_weapon_tick;  // 0x53a0
-   private:
-    char pad_53a4[0x84];
-
-   public:
-    uint32_t total_subtick_data;  // 0x5428
-   private:
-    char pad_542c[0x4];
-
-   public:
-    CMoveData* sub_tick_moves;  // 0x5430
 
     CUserCmd* GetUserCmd();
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);
