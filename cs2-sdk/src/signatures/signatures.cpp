@@ -188,4 +188,9 @@ namespace signatures {
                                   {
                                       {SDK_SIG("49 8B C0 48 8B CA 48 8B D0 4D 8B C1 E9 ? ? ? ? CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC 49 8B C0 48 8B CA 48 8B D0")},
                                   });
+
+        CSigScan SetMeshGroupMask("SetMeshGroupMask", CConstants::CLIENT_LIB,
+                                              {
+                                                  {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8D 99 ? ? ? ? 48 8B 71")},
+                                              });
 }  // namespace signatures

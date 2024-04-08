@@ -81,6 +81,8 @@
     <ClCompile Include="sdk\src\types\econitemschema.cpp" />
     <ClCompile Include="sdk\src\bindings\econitemview.cpp" />
     <ClCompile Include="sdk\src\types\gcclientsharedobjecttypecache.cpp" />
+    <ClCompile Include="sdk\src\bindings\gamescenenode.cpp" />
+    <ClCompile Include="sdk\src\bindings\baseflex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -184,7 +186,9 @@
     <ClInclude Include="sdk\include\types\econitemdefinition.hpp" />
     <ClInclude Include="sdk\include\types\econitemschema.hpp" />
     <ClInclude Include="sdk\include\types\utlmap.hpp" />
-    <ClInclude Include="sdk\include\types\econitemsystem.hpp" />
+    <ClInclude Include="sdk\include\interfaces\econitemsystem.hpp" />
     <ClInclude Include="sdk\include\bindings\econitemview.hpp" />
+    <ClInclude Include="sdk\include\bindings\viewmodelservices.hpp" />
+    <ClInclude Include="sdk\include\bindings\baseviewmodel.hpp" />
   </ItemGroup>
 </Project>

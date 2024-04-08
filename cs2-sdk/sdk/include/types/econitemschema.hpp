@@ -92,7 +92,7 @@ class CPaintKit {
 class CEconItemSchema {
    public:
     void* GetAttributeDefinitionInterface(int attribIndex);
-    CUtlMap<int, CEconItemDefinition*>& GetSortedItemDefinitionMap();
+    CUtlMap<uint64_t, CEconItemDefinition*>& GetSortedItemDefinitionMap();
     CUtlMap<uint64_t, AlternateIconData_t>& GetAlternateIconsMap();
     CUtlMap<int, CPaintKit*>& GetPaintKits();
 };

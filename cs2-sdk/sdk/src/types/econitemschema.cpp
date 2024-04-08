@@ -7,8 +7,8 @@ class CEconItemDefinition;
 
 void* CEconItemSchema::GetAttributeDefinitionInterface(int attribIndex) { return vt::CallMethod<void*>(this, 27, attribIndex); }
 
-CUtlMap<int, CEconItemDefinition*>& CEconItemSchema::GetSortedItemDefinitionMap() {
-    return CPointer(this).GetField<CUtlMap<int, CEconItemDefinition*>>(0x128);
+CUtlMap<uint64_t, CEconItemDefinition*>& CEconItemSchema::GetSortedItemDefinitionMap() {
+    return CPointer(this).GetField<CUtlMap<uint64_t, CEconItemDefinition*>>(0x128);
 }
 
 CUtlMap<uint64_t, AlternateIconData_t>& CEconItemSchema::GetAlternateIconsMap() {

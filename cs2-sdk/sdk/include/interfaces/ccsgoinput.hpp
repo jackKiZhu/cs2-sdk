@@ -158,7 +158,7 @@ class CCSGOUserCmdPB {
     PAD(0x4); // 0x4 (0x4)
     void* inputHistory; // 0x8 (0x8)
 
-    CCSGOInputHistoryEntryPB* GetInputHistoryEntry(int tick) {
+    CCSGOInputHistoryEntryPB* GetInputHistoryEntry(uint32_t tick) {
         if (tick < tickcount) {
             CCSGOInputHistoryEntryPB** arrTickList = std::bit_cast<CCSGOInputHistoryEntryPB**>(std::bit_cast<uintptr_t>(inputHistory) + 0x8);
             return arrTickList[tick];
@@ -193,7 +193,7 @@ class CUserCmd {
     PAD(0x20); // 0x68 (0x20)
 
     void SetSubTickAngle(const Vector& angle) {
-        for (int i = 0; i < csgoUserCmd.tickcount; i++) {
+        for (uint32_t i = 0; i < csgoUserCmd.tickcount; i++) {
             CCSGOInputHistoryEntryPB* entry = csgoUserCmd.GetInputHistoryEntry(i);
             if (!entry || !entry->pViewCmd) continue;
             entry->pViewCmd->viewAngles = angle;

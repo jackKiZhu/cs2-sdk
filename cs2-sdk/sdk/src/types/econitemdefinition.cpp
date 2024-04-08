@@ -3,7 +3,7 @@
 #include <types/econitemdefinition.hpp>
 #include <fnv/fnv1a.hpp>
 
-bool CEconItemDefinition::IsWeapon() { return GetStickersSupportedCount() >= 4; }
+bool CEconItemDefinition::IsWeapon() { return m_iStickerSlots >= 4; }
 
 bool CEconItemDefinition::IsKnife(bool excludeDefault) {
     if (FNV1A::Hash(m_pszItemTypeName) != FNV1A::HashConst("#CSGO_Type_Knife")) return false;

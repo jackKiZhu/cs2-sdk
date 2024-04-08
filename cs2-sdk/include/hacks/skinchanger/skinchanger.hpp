@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 enum LoadoutSlot {
     LOADOUT_SLOT_C4 = 1,
     LOADOUT_SLOT_CLOTHING_APPEARANCE = 46,
@@ -97,4 +99,7 @@ class CSkinChanger {
 
     void AddEconItemToList(CEconItem* pItem);
     void Shutdown();
+
+    private:
+    std::set<uint64_t> addedItemIDs;
 };

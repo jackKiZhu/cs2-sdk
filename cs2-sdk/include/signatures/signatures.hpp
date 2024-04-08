@@ -31,4 +31,5 @@ namespace signatures {
     extern CSigScan CEconItem;
     extern CSigScan AddNametagEntity;
     extern CSigScan SetDynamicAttributeValueUInt;
+    extern CSigScan SetMeshGroupMask;
 }  // namespace signatures

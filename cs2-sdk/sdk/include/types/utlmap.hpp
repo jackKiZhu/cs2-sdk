@@ -14,13 +14,13 @@ class CUtlMap {
         V m_value;
     };
 
-    auto begin() const { return m_data; }
-    auto end() const { return m_data + m_size; }
+    auto begin() const { return m_Data; }
+    auto end() const { return m_Data + m_Size; }
 
     std::optional<V> FindByKey(K key) const {
-        int current = m_root;
+        int current = m_Root;
         while (current != -1) {
-            const Node_t& element = m_data[current];
+            const Node_t& element = m_Data[current];
             if (element.m_key < key)
                 current = element.m_right;
             else if (element.m_key > key)
@@ -31,10 +31,13 @@ class CUtlMap {
         return {};
     }
 
-    char pad0[0x8];  // no idea
-    Node_t* m_data;
-    char pad1[0x8];  // no idea
-    int m_root;
-    int m_size;
-    char pad2[0x8];  // no idea
+    char pad_0[8];
+    Node_t* m_Data;
+    int m_nAllocationCount;
+    int m_nGrowSize;
+
+    int m_Root;
+    int m_NumElements;
+    int m_FirstFree;
+    int m_Size;
 };

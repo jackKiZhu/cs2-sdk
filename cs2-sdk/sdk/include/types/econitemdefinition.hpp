@@ -9,11 +9,6 @@ class CEconItemDefinition {
     bool IsKnife(bool excludeDefault);
     bool IsGlove(bool excludeDefault);
 
-    auto GetModelName() { return *reinterpret_cast<const char**>((uintptr_t)(this) + 0xD8); }
-    auto GetStickersSupportedCount() { return *reinterpret_cast<int*>((uintptr_t)(this) + 0x100); }
-    auto GetSimpleWeaponName() { return *reinterpret_cast<const char**>((uintptr_t)(this) + 0x210); }
-    auto GetLoadoutSlot() { return *reinterpret_cast<int*>((uintptr_t)(this) + 0x2E8); }
-
     void* vtable;          // 0x0
     void* m_pKVItem;       // 0x8
     uint16_t m_nDefIndex;  // 0x10

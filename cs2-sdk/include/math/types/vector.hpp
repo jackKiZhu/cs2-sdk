@@ -96,9 +96,9 @@ class Vector {
             angle.x = z > 0.f ? 270.f : 90.f;
             angle.y = 0.f;
         } else {
-        	angle.x = std::atan2(-z, std::sqrt(x * x + y * y)) * (180.f / M_PI);
+        	angle.x = std::atan2(-z, std::sqrt(x * x + y * y)) * (180.f / (float)M_PI);
             if (angle.x < 0.f) angle.x += 360.f;
-			angle.y = std::atan2(y, x) * (180.f / M_PI);
+			angle.y = std::atan2(y, x) * (180.f / (float)M_PI);
             if (angle.y < 0.f) angle.y += 360.f;
         }
 		angle.z = 0.f;
@@ -108,12 +108,12 @@ class Vector {
 
     Vector ToVector(Vector* right = nullptr, Vector* up = nullptr) const {
         const float 
-            sp = std::sin(x * (M_PI / 180.f)),
-            cp = std::cos(x * (M_PI / 180.f)),
-            sy = std::sin(y * (M_PI / 180.f)),
-            cy = std::cos(y * (M_PI / 180.f)),
-            sr = std::sin(z * (M_PI / 180.f)),
-            cr = std::cos(z * (M_PI / 180.f));
+            sp = std::sin(x * ((float)M_PI / 180.f)),
+            cp = std::cos(x * ((float)M_PI / 180.f)),
+            sy = std::sin(y * ((float)M_PI / 180.f)),
+            cy = std::cos(y * ((float)M_PI / 180.f)),
+            sr = std::sin(z * ((float)M_PI / 180.f)),
+            cr = std::cos(z * ((float)M_PI / 180.f));
 
         Vector forward { cp * cy, cp * sy, -sp };
         if (right) {

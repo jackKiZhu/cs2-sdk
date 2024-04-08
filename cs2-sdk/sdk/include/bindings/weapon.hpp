@@ -45,6 +45,10 @@ class C_CSWeaponBase : public C_BasePlayerWeapon {
     SCHEMA(bool, m_bInReload, "C_CSWeaponBase", "m_bInReload");
     SCHEMA(float, m_flPostponeFireReadyFrac, "C_CSWeaponBase", "m_flPostponeFireReadyFrac");
     SCHEMA(int, m_iBurstShotsRemaining, "C_CSWeaponBase", "m_iBurstShotsRemaining");
+    SCHEMA(bool, m_bUIWeapon, "C_CSWeaponBase", "m_bUIWeapon");
+    SCHEMA(int, m_iOriginalTeamNumber, "C_CSWeaponBase", "m_iOriginalTeamNumber");
+    PSCHEMA_EXTENDED(void, m_hStattrakAttachment, CConstants::CLIENT_LIB, "C_CSWeaponBase", "m_iNumEmptyAttacks", 4);
+    PSCHEMA_EXTENDED(void, m_hNametagAttachment, CConstants::CLIENT_LIB, "C_CSWeaponBase", "m_iNumEmptyAttacks", 20);
 };
 
 class C_CSWeaponBaseGun : public C_CSWeaponBase {
