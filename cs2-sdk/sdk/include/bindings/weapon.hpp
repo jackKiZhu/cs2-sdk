@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bindings/baseflex.hpp>
+#include <bindings/econentity.hpp>
 
 #include <signatures/signatures.hpp>
 
@@ -25,11 +25,6 @@ enum WeaponType : uint32_t {
     WEAPONTYPE_SHIELD = 17,
     WEAPONTYPE_ZONE_REPULSOR = 18,
     WEAPONTYPE_UNKNOWN = 19
-};
-
-class C_EconEntity : public C_BaseFlex {
-    public:
-    
 };
 
 class C_BasePlayerWeapon : public C_EconEntity {

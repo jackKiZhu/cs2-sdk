@@ -151,6 +151,27 @@ static void hkSetViewAngles(CCSGOInput* rcx, int subtick) {
     //CAimbot::Get().Run();
 }
 
+static CHook g_FrameStageNotify;
+static void hkFrameStageNotify(void* rcx, int stage) {
+	g_FrameStageNotify.CallOriginal<void>(rcx, stage);
+}
+
+static CHook g_FireEventClientSide;
+static bool hkFireEventClientSide(void* rcx, void* event, bool serverOnly) {
+
+    return g_FireEventClientSide.CallOriginal<bool>(rcx, event, serverOnly);
+}
+
+static CHook g_EquipItemInLoadout;
+static bool hkEquipItemInLoadout(void* rcx, int item, int slot, uint64_t itemID) {
+    return g_EquipItemInLoadout.CallOriginal<bool>(rcx, item, slot, itemID);
+}
+
+static CHook g_SetModel;
+static void* hkSetModel(void* rcx, const char* model) {
+	return g_SetModel.CallOriginal<void*>(rcx, model);
+}
+
 void CGameHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
@@ -159,7 +180,7 @@ void CGameHooks::Initialize() {
     g_MouseInputEnabled.VHook(CCSGOInput::Get(), platform::Constant(13, 14), SDK_HOOK(hkMouseInputEnabled));
     g_CreateMove.VHook(CCSGOInput::Get(), platform::Constant(5, 5), SDK_HOOK(hkCreateMove));
     g_CreateMove2.VHook(CCSGOInput::Get(), platform::Constant(15, 15), SDK_HOOK(hkCreateMove2));
-    g_SetViewAngles.VHook(CCSGOInput::Get(), platform::Constant(7, 7), SDK_HOOK(hkSetViewAngles));
+    //g_SetViewAngles.VHook(CCSGOInput::Get(), platform::Constant(7, 7), SDK_HOOK(hkSetViewAngles));
     g_OnAddEntity.VHook(CGameEntitySystem::Get(), platform::Constant(14, 15), SDK_HOOK(hkOnAddEntity));
     g_OnRemoveEntity.VHook(CGameEntitySystem::Get(), platform::Constant(15, 16), SDK_HOOK(hkOnRemoveEntity));
     g_GetMatricesForView.Hook(signatures::GetMatricesForView.GetPtrAs<void*>(), SDK_HOOK(hkGetMatricesForView));

@@ -71,6 +71,16 @@
     <ClCompile Include="sdk\src\interfaces\globalvars.cpp" />
     <ClCompile Include="sdk\src\bindings\playercontroller.cpp" />
     <ClCompile Include="sdk\src\bindings\weapon.cpp" />
+    <ClCompile Include="src\hacks\skinchanger\skinchanger.cpp" />
+    <ClCompile Include="sdk\src\interfaces\cgameevent.cpp" />
+    <ClCompile Include="sdk\src\interfaces\inventory.cpp" />
+    <ClCompile Include="sdk\src\interfaces\csgcclientsystem.cpp" />
+    <ClCompile Include="sdk\src\types\gcclientsharedobjectcache.cpp" />
+    <ClCompile Include="sdk\src\types\econitem.cpp" />
+    <ClCompile Include="sdk\src\types\econitemdefinition.cpp" />
+    <ClCompile Include="sdk\src\types\econitemschema.cpp" />
+    <ClCompile Include="sdk\src\bindings\econitemview.cpp" />
+    <ClCompile Include="sdk\src\types\gcclientsharedobjecttypecache.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -163,5 +173,18 @@
     <ClInclude Include="include\hacks\aimbot\aimbot.hpp" />
     <ClInclude Include="sdk\include\interfaces\globalvars.hpp" />
     <ClInclude Include="include\hacks\aimbot\pid.hpp" />
+    <ClInclude Include="include\hacks\skinchanger\skinchanger.hpp" />
+    <ClInclude Include="sdk\include\interfaces\cgameevent.hpp" />
+    <ClInclude Include="sdk\include\interfaces\inventory.hpp" />
+    <ClInclude Include="sdk\include\interfaces\csgcclientsystem.hpp" />
+    <ClInclude Include="sdk\include\types\gcclientsharedobjectcache.hpp" />
+    <ClInclude Include="sdk\include\types\gcclientsharedobjecttypecache.hpp" />
+    <ClInclude Include="sdk\include\bindings\econentity.hpp" />
+    <ClInclude Include="sdk\include\types\econitem.hpp" />
+    <ClInclude Include="sdk\include\types\econitemdefinition.hpp" />
+    <ClInclude Include="sdk\include\types\econitemschema.hpp" />
+    <ClInclude Include="sdk\include\types\utlmap.hpp" />
+    <ClInclude Include="sdk\include\types\econitemsystem.hpp" />
+    <ClInclude Include="sdk\include\bindings\econitemview.hpp" />
   </ItemGroup>
 </Project>

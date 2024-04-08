@@ -5,8 +5,7 @@
 #include <signatures/signatures.hpp>
 
 CEngineTrace* CEngineTrace::Get() { 
-	static CEngineTrace* engineTrace = nullptr; 
-	if (!engineTrace) engineTrace = signatures::GetEngineTrace.GetPtrAs<CEngineTrace*>();
+	static CEngineTrace* engineTrace = signatures::GetEngineTrace.GetPtrAs<CEngineTrace*>();
     return engineTrace;
 }
 

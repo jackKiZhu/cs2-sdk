@@ -137,4 +137,55 @@ namespace signatures {
                 {SDK_SIG("48 8D 05 ? ? ? ? 44 89 75 ? 48 89 45 ? 44 89 75 ? C7 45 ? ? ? ? ? 44 88 65 ? C6 45 ? ? 48 89 75"),
                  [](CPointer& ptr) { ptr.Absolute(3, 0); }},
                                });
+
+        CSigScan FireEventClientSide("FireEventClientSide", CConstants::CLIENT_LIB,
+                                {
+                                    {SDK_SIG("48 89 5C 24 ? 56 57 41 54 48 83 EC 30 48 8B F2")},
+                                });
+
+        CSigScan AddStattrakEntity("AddStattrakEntity", CConstants::CLIENT_LIB,
+                                     {
+                                         {SDK_SIG("40 55 41 55 48 8D 6C 24 ? 48 81 EC ? ? ? ? 4C 8B E9")},
+                                     });
+
+        CSigScan GetInventoryManager("InventoryManager", CConstants::CLIENT_LIB,
+                                     {
+                                         {SDK_SIG("E8 ? ? ? ? 48 63 BB ? ? ? ? 48 8D 68 28 83 FF FF"),
+                                          [](CPointer& ptr) {  ptr.Absolute(1, 0).Absolute(3, 0); }},
+                                     });
+
+        CSigScan GetCCSGCClientSystem("CCSGCClientSystem", CConstants::CLIENT_LIB,
+                                     {
+                                         {SDK_SIG("48 8D 0D ? ? ? ? FF 90 ? ? ? ? 84 C0"), [](CPointer& ptr) { ptr.Absolute(3, 0); }},
+                                     });
+
+        CSigScan SetModel("C_BaseEntityModel::SetModel", CConstants::CLIENT_LIB,
+                                   {
+                                       {SDK_SIG("48 89 5C 24 ? 48 89 7C 24 ? 55 48 8B EC 48 83 EC ? 48 8B F9 4C 8B C2")},
+                                   });
+
+        CSigScan FindSOCache("CCSGCClient::FindSOCache", CConstants::CLIENT_LIB,
+                                      {
+                                          {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 54 41 56 41 57 48 83 EC ? 48 8D B9")},
+                                      });
+
+        CSigScan CreateBaseTypeCache("CreateBaseTypeCache", CConstants::CLIENT_LIB,
+                             {
+                                 {SDK_SIG("40 53 48 83 EC ? 4C 8B 49 ? 44 8B D2")},
+                             });
+
+        CSigScan CEconItem("CEconItem::CEconItem", CConstants::CLIENT_LIB,
+                                     {
+                                         {SDK_SIG("48 83 EC ? B9 ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 48 8D 0D ? ? ? ? C7 40")},
+                                     });
+
+        CSigScan AddNametagEntity("AddNametagEntity", CConstants::CLIENT_LIB,
+                           {
+                               {SDK_SIG("40 55 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 4C 8B F9 4C 8D 05")},
+                           });
+
+        CSigScan SetDynamicAttributeValueUInt("SetDynamicAttributeValueUInt", CConstants::CLIENT_LIB,
+                                  {
+                                      {SDK_SIG("49 8B C0 48 8B CA 48 8B D0 4D 8B C1 E9 ? ? ? ? CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC 49 8B C0 48 8B CA 48 8B D0")},
+                                  });
 }  // namespace signatures

@@ -21,5 +21,14 @@ namespace signatures {
     extern CSigScan GetSurfaceData;
     extern CSigScan GameTraceCtor;
     extern CSigScan CTraceFilter;
-    extern CSigScan CTraceFilter;
+    extern CSigScan FireEventClientSide;
+    extern CSigScan AddStattrakEntity;
+    extern CSigScan GetInventoryManager;
+    extern CSigScan GetCCSGCClientSystem;
+    extern CSigScan SetModel;
+    extern CSigScan FindSOCache;
+    extern CSigScan CreateBaseTypeCache;
+    extern CSigScan CEconItem;
+    extern CSigScan AddNametagEntity;
+    extern CSigScan SetDynamicAttributeValueUInt;
 }  // namespace signatures
