@@ -13,4 +13,5 @@ class CConstants {
     static constexpr auto ANIMATIONSYSTEM_LIB = platform::Constant("animationsystem.dll", "libanimationsystem.so");
     static constexpr auto TIER_LIB = platform::Constant("tier0.dll", "libtier0.so");
     static constexpr auto RENDERSYSTEMVULKAN_LIB = platform::Constant("rendersystemvulkan.dll", "librendersystemvulkan.so");
+    static constexpr auto LOCALIZE_LIB = platform::Constant("localize.dll", "localize.so");
 };

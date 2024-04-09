@@ -18,11 +18,10 @@ static CGCClientSharedObjectTypeCache* CreateBaseTypeCache(CCSPlayerInventory* i
     CSGCClient* sgcClient = sgcClientSystem->GetSGCClient();
     if (!sgcClient) return nullptr;
 
-    CGCClientSharedObjectCache* SOCache = sgcClient->FindSOCache({});
+    CGCClientSharedObjectCache* SOCache = sgcClient->FindSOCache(&inventory->GetOwner());
     if (!SOCache) return nullptr;
 
-    //return SOCache->CreateBaseTypeCache(k_ee)
-    return nullptr;
+    return SOCache->CreateBaseTypeCache(k_EEconTypeItem);
 }
 
 CCSInventoryManager* CCSInventoryManager::Get() { 

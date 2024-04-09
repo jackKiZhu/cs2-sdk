@@ -10,7 +10,7 @@ struct SOID_t {
 
 class CSGCClient {
    public:
-    CGCClientSharedObjectCache* FindSOCache(SOID_t id, bool createIfMissing = true);
+    CGCClientSharedObjectCache* FindSOCache(SOID_t* id, bool createIfMissing = true);
 };
 
 class CSGCClientSystem {

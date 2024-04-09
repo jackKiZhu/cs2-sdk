@@ -18,16 +18,17 @@ void CEconItem::SetDynamicAttributeValue(int index, void* value) {
     void* attributeDefinitionInterface = itemSchema->GetAttributeDefinitionInterface(index);
     if (!attributeDefinitionInterface) return;
 
-    static auto SetDynamicAttributeValueUInt = signatures::SetDynamicAttributeValueUInt.GetPtrAs<void(*)(CEconItem*, void*, void*)>();
+    static auto SetDynamicAttributeValueUInt =
+        signatures::SetDynamicAttributeValueUInt.GetPtrAs<void(*)(void*, CEconItem*, void*, void*)>();
     if (!SetDynamicAttributeValueUInt) return;
 
-    SetDynamicAttributeValueUInt(this, attributeDefinitionInterface, value);
+    SetDynamicAttributeValueUInt(nullptr, this, attributeDefinitionInterface, value);
 }
 
 void CEconItem::SetDynamicAttributeValueString(int index, const char* value) { return; }
 
 CEconItem* CEconItem::CreateInstance() {
-    auto Constuctor = signatures::CEconItem.GetPtrAs<CEconItem* (*)()>();
+    auto Constuctor = signatures::CEconItem.GetPtrAs<CEconItem*(__thiscall*)()>();
     return Constuctor ? Constuctor() : nullptr;
 }
 

@@ -15,6 +15,7 @@
 #include <interfaces/source2client.hpp>
 #include <interfaces/econitemsystem.hpp>
 #include <interfaces/inventory.hpp>
+#include <interfaces/localize.hpp>
 
 #include <types/econitem.hpp>
 #include <types/econitemschema.hpp>
@@ -170,7 +171,7 @@ void CMenu::RenderInventoryWindow() {
             const uint16_t defIdx = pItem->m_nDefIndex;
 
             DumpedItem_t dumpedItem;
-            dumpedItem.m_name = itemBaseName; // interfaces::pLocalize->FindSafe(itemBaseName);
+            dumpedItem.m_name = CLocalize::Get()->FindSafe(itemBaseName); 
             dumpedItem.m_defIdx = defIdx;
             dumpedItem.m_rarity = pItem->m_nItemRarity;
 
@@ -189,7 +190,7 @@ void CMenu::RenderInventoryWindow() {
                 const uint64_t skinKey = Helper_GetAlternateIconKeyForWeaponPaintWearItem(defIdx, pPaintKit->id, 0);
                 if (vecAlternateIcons.FindByKey(skinKey).has_value()) {
                     DumpedSkin_t dumpedSkin;
-                    dumpedSkin.m_name = pPaintKit->sDescriptionTag;  // interfaces::pLocalize->FindSafe(pPaintKit->sDescriptionTag);
+                    dumpedSkin.m_name = CLocalize::Get()->FindSafe(pPaintKit->sDescriptionTag);
                     dumpedSkin.m_ID = pPaintKit->id;
                     dumpedSkin.m_rarity = pPaintKit->nRarity;
                     dumpedItem.m_dumpedSkins.emplace_back(dumpedSkin);

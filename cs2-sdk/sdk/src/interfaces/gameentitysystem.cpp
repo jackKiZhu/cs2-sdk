@@ -8,14 +8,14 @@
 CGameEntitySystem* CGameEntitySystem::Get() { return CGameResourceService::Get()->GetGameEntitySystem(); }
 
 C_BaseEntity* CGameEntitySystem::GetBaseEntityInternal(int index) {
-    return signatures::GetBaseEntity.GetPtr().Call<C_BaseEntity* (*)(void*, int)>(this, index);
+    return signatures::GetBaseEntity.GetPtr().Call<C_BaseEntity*(__thiscall*)(void*, int)>(this, index);
 }
 
 int CGameEntitySystem::GetHighestEntityIndexInternal() {
     int highestIdx = -1;
 
 #ifdef _WIN32
-    signatures::GetHighestEntityIndex.GetPtr().Call<void (*)(void*, int*)>(this, &highestIdx);
+    signatures::GetHighestEntityIndex.GetPtr().Call<void(__thiscall*)(void*, int*)>(this, &highestIdx);
 #elif __linux__
     highestIdx = signatures::GetHighestEntityIndex.GetPtr().Call<int (*)(void*)>(this);
 #endif
