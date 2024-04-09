@@ -22,8 +22,10 @@
 #include <interfaces/engineclient.hpp>
 #include <interfaces/enginetrace.hpp>
 #include <interfaces/ccsgoinput.hpp>
+#include <interfaces/inventory.hpp>
 
 #include <hacks/aimbot/aimbot.hpp>
+#include <hacks/skinchanger/skinchanger.hpp>
 
 static CHook g_MouseInputEnabled;
 
@@ -153,22 +155,25 @@ static void hkSetViewAngles(CCSGOInput* rcx, int subtick) {
 
 static CHook g_FrameStageNotify;
 static void hkFrameStageNotify(void* rcx, int stage) {
+	CSkinChanger::Get().OnFrameStageNotify(stage);
 	g_FrameStageNotify.CallOriginal<void>(rcx, stage);
 }
 
 static CHook g_FireEventClientSide;
 static bool hkFireEventClientSide(void* rcx, void* event, bool serverOnly) {
-
+    CSkinChanger::Get().OnPreFireEvent(static_cast<CGameEvent*>(event));
     return g_FireEventClientSide.CallOriginal<bool>(rcx, event, serverOnly);
 }
 
 static CHook g_EquipItemInLoadout;
 static bool hkEquipItemInLoadout(void* rcx, int item, int slot, uint64_t itemID) {
+    CSkinChanger::Get().OnEquipItemInLoadout(item, slot, itemID);
     return g_EquipItemInLoadout.CallOriginal<bool>(rcx, item, slot, itemID);
 }
 
 static CHook g_SetModel;
 static void* hkSetModel(void* rcx, const char* model) {
+    CSkinChanger::Get().OnSetModel(static_cast<C_BaseModelEntity*>(rcx), model);
 	return g_SetModel.CallOriginal<void*>(rcx, model);
 }
 
@@ -183,7 +188,9 @@ void CGameHooks::Initialize() {
     //g_SetViewAngles.VHook(CCSGOInput::Get(), platform::Constant(7, 7), SDK_HOOK(hkSetViewAngles));
     g_OnAddEntity.VHook(CGameEntitySystem::Get(), platform::Constant(14, 15), SDK_HOOK(hkOnAddEntity));
     g_OnRemoveEntity.VHook(CGameEntitySystem::Get(), platform::Constant(15, 16), SDK_HOOK(hkOnRemoveEntity));
+    g_FrameStageNotify.VHook(CSource2Client::Get(), platform::Constant(33, 34), SDK_HOOK(hkFrameStageNotify));
+    g_EquipItemInLoadout.VHook(CCSInventoryManager::Get(), platform::Constant(52, 53), SDK_HOOK(hkEquipItemInLoadout));
     g_GetMatricesForView.Hook(signatures::GetMatricesForView.GetPtrAs<void*>(), SDK_HOOK(hkGetMatricesForView));
-
-
+    g_FireEventClientSide.Hook(signatures::FireEventClientSide.GetPtrAs<void*>(), SDK_HOOK(hkFireEventClientSide));
+    g_SetModel.Hook(signatures::SetModel.GetPtrAs<void*>(), SDK_HOOK(hkSetModel));
 }

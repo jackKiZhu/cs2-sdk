@@ -32,4 +32,7 @@ namespace signatures {
     extern CSigScan AddNametagEntity;
     extern CSigScan SetDynamicAttributeValueUInt;
     extern CSigScan SetMeshGroupMask;
+    extern CSigScan GetSortedItemDefinitionMap;
+    extern CSigScan GetAlternateIconsMap;
+    extern CSigScan GetPaintKits;
 }  // namespace signatures

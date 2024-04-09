@@ -66,6 +66,19 @@ bool C_BaseEntity::IsPlayerPawn() {
     return entClass->InheritsFrom(basePlayerPawnClass);
 }
 
+bool C_BaseEntity::IsViewmodel() { 
+    static CSchemaClassInfo* baseViewmodelClass =
+        CSchemaSystem::Get()->FindTypeScopeForModule(CConstants::CLIENT_LIB)->FindDeclaredClass("C_BaseViewModel");
+    CSchemaClassInfo* entClass = Schema_DynamicBinding();
+    if (!entClass) return false;
+
+    return entClass->InheritsFrom(baseViewmodelClass);
+}
+
+bool C_BaseEntity::IsViewmodelV() { 
+    return vt::CallMethod<bool>(this, 242); 
+}
+
 bool C_BaseEntity::CalculateBBoxByCollision(BBox_t& out) {
     CGameSceneNode* node = m_pGameSceneNode();
     if (!node) return false;

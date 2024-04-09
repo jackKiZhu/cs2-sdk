@@ -7,6 +7,7 @@
 #include <interfaces/inventory.hpp>
 #include <interfaces/source2client.hpp>
 #include <interfaces/econitemsystem.hpp>
+#include <interfaces/cgameevent.hpp>
 
 #include <cache/cache.hpp>
 #include <cache/entities/player.hpp>
@@ -16,6 +17,9 @@
 #include <bindings/baseviewmodel.hpp>
 #include <bindings/viewmodelservices.hpp>
 #include <types/econitemschema.hpp>
+#include <types/econitem.hpp>
+
+#include <fnv/fnv1a.hpp>
 
 bool CSkinChanger::IsEnabled() { return true; }
 
@@ -125,4 +129,100 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
             }
         }
     }
+}
+
+void CSkinChanger::OnPreFireEvent(CGameEvent* _event) {
+    if (!_event) return;
+    CCachedPlayer* localPlayer = CMatchCache::Get().GetLocalPlayer();
+    if (!localPlayer) return;
+    CCSPlayerController* localController = localPlayer->Get();
+    if (!localController) return;
+    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
+    if (!localPawn) return;
+    C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
+    if (!weapon) return;
+    C_AttributeContainer* attributes = weapon->m_AttributeManager();
+    if (!attributes) return;
+    C_EconItemView* itemView = attributes->m_Item();
+    if (!itemView) return;
+    CEconItemDefinition* itemDefinition = itemView->GetStaticData();
+    if (!itemDefinition || !itemDefinition->IsKnife(true)) return;
+
+    const char* eventName = _event->GetName();
+    if (!eventName) return;
+    if (FNV1A::Hash(eventName) != FNV1A::HashConst("player_death")) return;
+    
+    CCSPlayerController* attackerController = _event->GetPlayerController("attacker");
+    CCSPlayerController* victimController = _event->GetPlayerController("userid");
+    if (attackerController == victimController) return;
+    if (attackerController != localController) return;
+
+    // pEvent->SetString("weapon", pWeaponDefinition->GetSimpleWeaponName());
+}
+
+void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) { 
+    if (!addedItemIDs.count(itemID)) return;
+    CCSInventoryManager* inventoryManager = CCSInventoryManager::Get();
+    if (!inventoryManager) return;
+    CCSPlayerInventory* inventory = inventoryManager->GetLocalInventory();
+    if (!inventory) return;
+    C_EconItemView* toEquipView = inventory->GetItemViewForItem(itemID);
+    if (!toEquipView) return;
+    C_EconItemView* currentView = inventory->GetItemInLoadout(team, slot);
+    if (!currentView) return;
+    CEconItemDefinition* currentDefinition = currentView->GetStaticData();
+    if (!currentDefinition) return;
+    if (currentDefinition->IsGlove(false) || currentDefinition->IsKnife(false) ||
+        currentDefinition->m_nDefIndex == toEquipView->m_iItemDefinitionIndex())
+        return;
+
+    const uint64_t defaultItemID = (std::uint64_t(0xF) << 60) | toEquipView->m_iItemDefinitionIndex();
+    inventoryManager->EquipItemInLoadout(team, slot, defaultItemID);
+
+    CEconItem* curSOCData = currentView->GetSOCData();
+    if (!curSOCData) return;
+
+    inventory->SOUpdated(inventory->GetOwner(), (CSharedObject*)curSOCData, eSOCacheEvent_Incremental);
+}
+
+void CSkinChanger::OnSetModel(C_BaseModelEntity* entity, const char*& model) { 
+    if (!entity || !entity->IsViewmodelV()) return;
+
+    C_BaseViewModel* viewModel = static_cast<C_BaseViewModel*>(entity);
+    if (!viewModel) return;
+
+    CCSPlayerInventory* inventory = CCSPlayerInventory::Get();
+    if (!inventory) return;
+
+    const uint64_t steamID = inventory->GetOwner().id;
+
+    C_CSWeaponBase* weapon = viewModel->m_hWeapon().Get();
+    if (!weapon || !weapon->IsWeapon() || weapon->GetOriginalOwnerXuid() != steamID) return;
+
+    C_AttributeContainer* attributes = weapon->m_AttributeManager();
+    if (!attributes) return;
+
+    C_EconItemView* itemView = attributes->m_Item();
+    if (!itemView) return;
+
+    CEconItemDefinition* itemDefinition = itemView->GetStaticData();
+    if (!itemDefinition) return;
+
+    C_EconItemView* loadoutItemView = inventory->GetItemInLoadout(weapon->m_iOriginalTeamNumber(), itemDefinition->m_iLoadoutSlot);
+    if (!loadoutItemView) return;
+    if (!addedItemIDs.contains(loadoutItemView->m_iItemID())) return;
+
+    CEconItemDefinition* loadoutItemDefinition = loadoutItemView->GetStaticData();
+    if (!loadoutItemDefinition || !loadoutItemDefinition->IsKnife(true)) return;
+
+    model = loadoutItemDefinition->m_pszBaseDisplayModel;
+}
+
+void CSkinChanger::AddEconItemToList(CEconItem* item) { addedItemIDs.insert(item->m_ulID); }
+
+void CSkinChanger::Shutdown() {
+    CCSPlayerInventory* inventory = CCSPlayerInventory::Get();
+    if (!inventory) return;
+    for (uint64_t itemID : addedItemIDs) 
+        inventory->RemoveEconItem(inventory->GetSOCDataForItem(itemID));
 }

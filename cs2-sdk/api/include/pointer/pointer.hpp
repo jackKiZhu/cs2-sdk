@@ -11,6 +11,8 @@ class CPointer {
 
     bool IsValid() const { return m_Value != 0; }
 
+    uintptr_t Get() const { return m_Value; }
+
     template <typename T>
     auto Get() const {
         return reinterpret_cast<T>(m_Value);

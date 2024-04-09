@@ -193,4 +193,21 @@ namespace signatures {
                                               {
                                                   {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8D 99 ? ? ? ? 48 8B 71")},
                                               });
+
+        // nuko is the greatest
+        CSigScan GetSortedItemDefinitionMap("GetSortedItemDefinitionMap", CConstants::CLIENT_LIB,
+                                  {
+                                                {SDK_SIG("49 8B 80 ? ? ? ? 48 63 CB 48 C1 E1 ? 8B 14 01 83 FA"), [](CPointer& ptr) { ptr.Offset(3).Dereference(); }},
+                                  });
+
+        // xref: "%s_large", "Alternate icon definition index '%s' (%llu) must be greater than zero"
+        CSigScan GetAlternateIconsMap("GetAlternateIconsMap", CConstants::CLIENT_LIB,
+                                  {
+                                                {SDK_SIG("48 8B 8F ? ? ? ? 48 8D 15 ? ? ? ? 48 83 C1"), [](CPointer& ptr) { ptr.Offset(3).Dereference(); }},
+                                  });
+
+        CSigScan GetPaintKits("GetPaintKits", CConstants::CLIENT_LIB,
+                                  {
+                                                {SDK_SIG("49 8B 83 ? ? ? ? 45 39 04 02 74 ? 49 8B 7C 02"), [](CPointer& ptr) { ptr.Offset(3).Dereference(); }},
+                                  });
 }  // namespace signatures

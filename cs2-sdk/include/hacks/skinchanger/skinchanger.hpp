@@ -93,7 +93,7 @@ class CSkinChanger {
     bool IsEnabled();
 
     void OnFrameStageNotify(int stage);
-    void OnPreFireEvent(CGameEvent* event);
+    void OnPreFireEvent(CGameEvent* _event);
     void OnEquipItemInLoadout(int team, int slot, uint64_t itemID);
     void OnSetModel(C_BaseModelEntity* entity, const char*& model);
 

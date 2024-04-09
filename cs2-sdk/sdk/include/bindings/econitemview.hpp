@@ -12,7 +12,7 @@ class C_EconItemView {
     CEconItem* GetSOCData();
 
     int GetCustomPaintKitIndex() { return vt::CallMethod<int>(this, 2); }
-    CEconItemDefinition* GetStaticData() { return vt::CallMethod < CEconItemDefinition*>(this, 13); }
+    CEconItemDefinition* GetStaticData() { return vt::CallMethod<CEconItemDefinition*>(this, 13); }
 
     SCHEMA(uint16_t, m_iItemDefinitionIndex, "C_EconItemView", "m_iItemDefinitionIndex");
     SCHEMA(uint64_t, m_iItemID, "C_EconItemView", "m_iItemID");

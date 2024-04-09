@@ -19,6 +19,7 @@ class CMenu {
     void RenderUI();
 
     void RenderMainMenu();
+    void RenderInventoryWindow();
 
     bool m_Open;
 };

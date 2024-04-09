@@ -19,6 +19,13 @@ class C_BaseEntity : public CEntityInstance {
     bool IsChicken();
     bool IsHostage();
     bool IsPlayerPawn();
+    bool IsViewmodel();
+
+    bool IsViewmodelV(); // 242
+
+    //bool IsPlayerControllerV(); 144
+    //bool IsPlayerPawnV(); 147
+    //bool IsWeaponV(); 150
 
     bool CalculateBBoxByCollision(BBox_t& out);
     bool CalculateBBoxByHitbox(BBox_t& out);
