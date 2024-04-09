@@ -121,7 +121,7 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
             std::optional<CPaintKit*> paintKit = CSource2Client::Get()->GetEconItemSystem()->GetEconItemSchema()->GetPaintKits().FindByKey(loadoutItemView->GetCustomPaintKitIndex());
             const bool usesOldModel = paintKit.has_value() && paintKit.value()->bUseLegacyModel;
 
-            weaponSceneNode->SetMeshGroupMask(1 + usesOldModel);
+            weaponSceneNode->SetMeshGroupMask(1 + static_cast<int>(usesOldModel));
             if (viewModel->m_hWeapon() == weaponHandle) {
                 CGameSceneNode* viewmodelSceneNode = viewModel->m_pGameSceneNode();
                 if (viewmodelSceneNode) 

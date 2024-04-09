@@ -44,7 +44,7 @@
     <ClCompile Include="sdk\src\interfaces\schemasystem.cpp" />
     <ClCompile Include="sdk\src\interfaces\gameresourceservice.cpp" />
     <ClCompile Include="sdk\src\interfaces\gameentitysystem.cpp" />
-    <ClCompile Include="sdk\src\sdl\types\handle.cpp" />
+    <ClCompile Include="sdk\src\types\handle.cpp" />
     <ClCompile Include="src\cache\cache.cpp" />
     <ClCompile Include="sdk\src\bindings\entityinstance.cpp" />
     <ClCompile Include="sdk\src\bindings\baseentity.cpp" />
@@ -75,12 +75,12 @@
     <ClCompile Include="sdk\src\interfaces\cgameevent.cpp" />
     <ClCompile Include="sdk\src\interfaces\inventory.cpp" />
     <ClCompile Include="sdk\src\interfaces\csgcclientsystem.cpp" />
-    <ClCompile Include="sdk\src\sdl\types\gcclientsharedobjectcache.cpp" />
-    <ClCompile Include="sdk\src\sdl\types\econitem.cpp" />
-    <ClCompile Include="sdk\src\sdl\types\econitemdefinition.cpp" />
-    <ClCompile Include="sdk\src\sdl\types\econitemschema.cpp" />
+    <ClCompile Include="sdk\src\types\gcclientsharedobjectcache.cpp" />
+    <ClCompile Include="sdk\src\types\econitem.cpp" />
+    <ClCompile Include="sdk\src\types\econitemdefinition.cpp" />
+    <ClCompile Include="sdk\src\types\econitemschema.cpp" />
     <ClCompile Include="sdk\src\bindings\econitemview.cpp" />
-    <ClCompile Include="sdk\src\sdl\types\gcclientsharedobjecttypecache.cpp" />
+    <ClCompile Include="sdk\src\types\gcclientsharedobjecttypecache.cpp" />
     <ClCompile Include="sdk\src\bindings\gamescenenode.cpp" />
     <ClCompile Include="sdk\src\bindings\baseflex.cpp" />
     <ClCompile Include="sdk\src\interfaces\localize.cpp" />
