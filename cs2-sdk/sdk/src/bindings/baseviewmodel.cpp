@@ -18,11 +18,15 @@ void C_CSGOViewModel::InvalidateViewmodelMaterial() {
     CViewmodelMaterialInfo* materialInfo = GetMaterialInfo();
     if (!materialInfo) return;
 
-    for (uint32_t i = 0; i < materialInfo->count; ++i) {
-        CViewmodelMaterialRecord& record = materialInfo->records[i];
-        if (record.identifier == VIEWMODEL_MATERIAL_GLOVES) {
-            record.typeIndex = -1;
-            break;
-        }
+    CViewmodelMaterialRecord* record = materialInfo->GetRecord(VIEWMODEL_MATERIAL_GLOVES);
+    if (record) record->typeIndex = -1;
+}
+
+CViewmodelMaterialRecord* CViewmodelMaterialInfo::GetRecord(ViewModelMaterial identifier) {
+    for (uint32_t i = 0; i < count; ++i) {
+        CViewmodelMaterialRecord& record = records[i];
+        if (record.identifier == identifier) 
+            return &record;
     }
+    return nullptr;
 }

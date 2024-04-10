@@ -18,6 +18,8 @@ class CViewmodelMaterialInfo {
    public:
     CViewmodelMaterialRecord* records;
     uint32_t count;
+
+    CViewmodelMaterialRecord* GetRecord(ViewModelMaterial identifier);
 };
 
 class CViewmodelMaterialRecord {

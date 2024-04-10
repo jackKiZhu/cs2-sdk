@@ -148,18 +148,19 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
     CViewmodelMaterialInfo* viewmodelMaterialInfo = viewmodel->GetMaterialInfo();
     if (!viewmodelMaterialInfo || viewmodelMaterialInfo->count == 0) return;
 
-    const uint32_t currentHandle = viewmodelMaterialInfo->records[0].handle;
-    if (currentHandle != glovesHandles[2] && glovesHandles[2] == glovesHandles[1] && glovesHandles[1] == glovesHandles[0])
-        glovesUpdateFrames = 2;
+    CViewmodelMaterialRecord* currentRecord = viewmodelMaterialInfo->GetRecord(VIEWMODEL_MATERIAL_GLOVES);
+    if (!currentRecord) return;
+
+    if (currentRecord->handle != glovesHandles[2] && glovesHandles[2] == glovesHandles[1] && glovesHandles[1] == glovesHandles[0])
+        glovesUpdateFrames = 3;
 
     // shift each handle
     for (int i = 0; i < 2; i++) 
         glovesHandles[i] = glovesHandles[i + 1];
-    glovesHandles[2] = currentHandle;
+    glovesHandles[2] = currentRecord->handle;
 
-    // or new round
     if (glovesView.m_iItemID() != loadoutGlovesView->m_iItemID()) {
-        glovesUpdateFrames = 2;
+        glovesUpdateFrames = 3;
 
         glovesView.m_iItemDefinitionIndex() = loadoutGlovesView->m_iItemDefinitionIndex();
         glovesView.m_iItemID() = loadoutGlovesView->m_iItemID();
