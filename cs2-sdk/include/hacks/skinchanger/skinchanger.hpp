@@ -102,4 +102,5 @@ class CSkinChanger {
 
     private:
     std::set<uint64_t> addedItemIDs;
+    uint32_t glovesHandles[3];
 };

@@ -111,6 +111,7 @@
     <ClCompile Include="api\src\hook\hook.cpp" />
     <ClCompile Include="api\src\module\module.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
+    <ClCompile Include="sdk\src\bindings\baseviewmodel.cpp" />
     <ClCompile Include="sdk\src\bindings\baseflex.cpp" />
     <ClCompile Include="sdk\src\bindings\gamescenenode.cpp" />
     <ClCompile Include="sdk\src\bindings\econitemview.cpp" />

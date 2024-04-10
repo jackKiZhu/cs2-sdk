@@ -160,7 +160,7 @@ void CMenu::RenderInventoryWindow() {
 
             const bool isWeapon = pItem->IsWeapon();
             const bool isKnife = pItem->IsKnife(true);
-            const bool isGloves = pItem->IsGlove(true);
+            const bool isGloves = pItem->IsGloves(true);
 
             if (!isWeapon && !isKnife && !isGloves) continue;
 

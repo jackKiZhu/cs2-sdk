@@ -6,8 +6,8 @@
 class CEconItemDefinition {
    public:
     bool IsWeapon();
-    bool IsKnife(bool excludeDefault);
-    bool IsGlove(bool excludeDefault);
+    bool IsKnife(bool excludeDefault = false);
+    bool IsGloves(bool excludeDefault = false);
 
     void* vtable;          // 0x0
     void* m_pKVItem;       // 0x8

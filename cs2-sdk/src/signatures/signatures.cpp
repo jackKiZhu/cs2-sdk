@@ -210,4 +210,9 @@ namespace signatures {
                                   {
                                                 {SDK_SIG("49 8B 83 ? ? ? ? 45 39 04 02 74 ? 49 8B 7C 02"), [](CPointer& ptr) { ptr.Offset(3).Dereference(); }},
                                   });
+
+        CSigScan FindViewmodelMaterial("FindViewmodelMaterial", CConstants::CLIENT_LIB,
+                              {
+                                  {SDK_SIG("E8 ? ? ? ? 4C 63 F0 49 C1 E6 04 4C 03 B7 ? ? ? ? 48 85 FF 74 32 48 8B 47 10 48 85 C0 74 29")},
+                              });
 }  // namespace signatures

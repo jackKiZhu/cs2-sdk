@@ -19,5 +19,6 @@ class C_EconItemView {
     SCHEMA(uint32_t, m_iItemIDLow, "C_EconItemView", "m_iItemIDLow");
     SCHEMA(uint32_t, m_iItemIDHigh, "C_EconItemView", "m_iItemIDHigh");
     SCHEMA(uint32_t, m_iAccountID, "C_EconItemView", "m_iAccountID");
+    SCHEMA(bool, m_bInitialized, "C_EconItemView", "m_bInitialized");
     SCHEMA(bool, m_bDisallowSOC, "C_EconItemView", "m_bDisallowSOC");
 };

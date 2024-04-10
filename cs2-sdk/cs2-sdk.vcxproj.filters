@@ -84,6 +84,7 @@
     <ClCompile Include="sdk\src\bindings\gamescenenode.cpp" />
     <ClCompile Include="sdk\src\bindings\baseflex.cpp" />
     <ClCompile Include="sdk\src\interfaces\localize.cpp" />
+    <ClCompile Include="sdk\src\bindings\baseviewmodel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />

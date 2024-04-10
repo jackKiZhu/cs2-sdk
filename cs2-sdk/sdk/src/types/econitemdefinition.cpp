@@ -10,7 +10,7 @@ bool CEconItemDefinition::IsKnife(bool excludeDefault) {
     return excludeDefault ? m_nDefIndex >= 500 : true;
 }
 
-bool CEconItemDefinition::IsGlove(bool excludeDefault) { 
+bool CEconItemDefinition::IsGloves(bool excludeDefault) { 
     if (FNV1A::Hash(m_pszItemTypeName) != FNV1A::HashConst("#Type_Hands")) return false;
     const bool defaultGlove = m_nDefIndex == 5028 || m_nDefIndex == 5029;
     return excludeDefault ? !defaultGlove : true;
