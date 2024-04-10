@@ -215,4 +215,9 @@ namespace signatures {
                               {
                                   {SDK_SIG("E8 ? ? ? ? 4C 63 F0 49 C1 E6 04 4C 03 B7 ? ? ? ? 48 85 FF 74 32 48 8B 47 10 48 85 C0 74 29")},
                               });
+
+       CSigScan IsLoadoutAllowed("IsLoadoutAllowed", CConstants::CLIENT_LIB,
+            {
+                {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B 0D ? ? ? ? 48 8B 01")},
+            });
 }  // namespace signatures

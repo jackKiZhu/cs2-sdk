@@ -36,4 +36,5 @@ namespace signatures {
     extern CSigScan GetAlternateIconsMap;
     extern CSigScan GetPaintKits;
     extern CSigScan FindViewmodelMaterial;
+    extern CSigScan IsLoadoutAllowed;
 }  // namespace signatures

@@ -1,5 +1,7 @@
 #include "pch.hpp"
 
+#include <intrin.h>
+
 #include <hooks/game/game_hooks.hpp>
 #include <logger/logger.hpp>
 
@@ -177,6 +179,9 @@ static void* hkSetModel(void* rcx, const char* model) {
 	return g_SetModel.CallOriginal<void*>(rcx, model);
 }
 
+static CHook g_IsLoadoutAllowed;
+static bool hkIsLoadoutAllowed() { return true; }
+
 void CGameHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
@@ -193,4 +198,5 @@ void CGameHooks::Initialize() {
     g_GetMatricesForView.Hook(signatures::GetMatricesForView.GetPtrAs<void*>(), SDK_HOOK(hkGetMatricesForView));
     g_FireEventClientSide.Hook(signatures::FireEventClientSide.GetPtrAs<void*>(), SDK_HOOK(hkFireEventClientSide));
     g_SetModel.Hook(signatures::SetModel.GetPtrAs<void*>(), SDK_HOOK(hkSetModel));
+    g_IsLoadoutAllowed.Hook(signatures::IsLoadoutAllowed.GetPtrAs<void*>(), SDK_HOOK(hkIsLoadoutAllowed));
 }
