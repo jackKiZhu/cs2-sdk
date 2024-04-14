@@ -2,6 +2,7 @@
 
 #include <math/types/vector.hpp>
 #include <hacks/aimbot/pid.hpp>
+#include <interfaces/ccsgoinput.hpp>
 
 class C_CSPlayerPawn;
 
@@ -13,7 +14,7 @@ class CAimbot {
     }
 
     bool IsEnabled();
-    void Run();
+    void Run(CMoveData* moveData);
    private:
 
     void RCS(Vector& angles, C_CSPlayerPawn* pawn);

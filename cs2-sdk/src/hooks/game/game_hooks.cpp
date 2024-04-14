@@ -25,9 +25,12 @@
 #include <interfaces/enginetrace.hpp>
 #include <interfaces/ccsgoinput.hpp>
 #include <interfaces/inventory.hpp>
+#include <interfaces/viewrender.hpp>
 
 #include <hacks/aimbot/aimbot.hpp>
 #include <hacks/skinchanger/skinchanger.hpp>
+
+#include <vars/vars.hpp>
 
 static CHook g_MouseInputEnabled;
 
@@ -51,10 +54,13 @@ static void* hkOnRemoveEntity(void* rcx, CEntityInstance* inst, CBaseHandle hand
 
 static CHook g_GetMatricesForView;
 
-static void hkGetMatricesForView(void* rcx, void* view, VMatrix* pWorldToView, VMatrix* pViewToProjection, VMatrix* pWorldToProjection,
+static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToView, VMatrix* pViewToProjection, VMatrix* pWorldToProjection,
                                  VMatrix* pWorldToPixels) {
     g_GetMatricesForView.CallOriginal<void>(rcx, view, pWorldToView, pViewToProjection, pWorldToProjection, pWorldToPixels);
 
+    //view->fov += g_Vars.m_Fov;
+    //view->viewmodelFov += g_Vars.m_ViewmodelFov;
+   
     CMath::Get().UpdateViewMatrix(pWorldToProjection);
 
     // SDKTODO: May sometimes stutter (?)
@@ -75,6 +81,8 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     if (!localPawn)
         return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
 
+    //return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
+
     const bool grounded = localPawn->m_hGroundEntity().Get() != nullptr;
 
     #if 0
@@ -85,22 +93,22 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     if (rcx->moveData.buttonsChanged & IN_ATTACK) rcx->moveData.buttonsChanged |= IN_JUMP;
     #endif
 
-    // override the last subtick info
-    if (rcx->subtickMoves.m_Size) {
-        CMoveData* move = rcx->subtickMoves.AtPtr(rcx->subtickMoves.m_Size - 1);
+    const int lastIndex = rcx->subtickMoves.m_Size - 1;
 
+    // override the last subtick info
+    if (lastIndex >= 0) {
+        CMoveData* move = rcx->subtickMoves.AtPtr(lastIndex);
+        CAimbot::Get().Run(move);
         //if (grounded) move->buttonsHeld |= IN_JUMP;
         //else if (move->prevButtonsHeld & IN_JUMP) move->prevButtonsHeld &= ~IN_JUMP;
         //if (grounded) move->buttonsScroll |= IN_JUMP;
         //else if (move->prevButtonsHeld & IN_JUMP) move->prevButtonsHeld &= ~IN_JUMP;
 
-        uint32_t tickToAdd = 0;
-
-        for (uint32_t j = 0; j < move->subtickCount; ++j) {
-            CSubtickMove& subtickMove = move->subtickMoves[j];
-            CLogger::Log("{} subtickMove {}: {} [{}, {}, {}]", rcx->sequenceNumber, j, subtickMove.when, subtickMove.lastPressedButtons, subtickMove.analog_forward_delta,
-                						 subtickMove.analog_sidemove_delta);
-        }
+        //for (uint32_t j = 0; j < move->subtickCount; ++j) {
+        //    CSubtickMove& subtickMove = move->subtickMoves[j];
+        //    CLogger::Log("{} subtickMove {}: {} [{}, {}, {}]", rcx->sequenceNumber, j, subtickMove.when, subtickMove.lastPressedButtons, subtickMove.analog_forward_delta,
+        //        						 subtickMove.analog_sidemove_delta);
+        //}
 
         if (false && grounded && rcx->moveData.buttonsHeld & IN_FORWARD) {
             //rcx->moveData.buttonsHeld &= ~IN_JUMP;
@@ -132,8 +140,6 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
             }
         }
     }
-
-    CAimbot::Get().Run();
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
 }

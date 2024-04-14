@@ -37,6 +37,7 @@ class C_BasePlayerWeapon : public C_EconEntity {
     SCHEMA(int, m_iClip2, "C_BasePlayerWeapon", "m_iClip2");
 
     bool CanFire() { return signatures::CanFire.GetPtrAs<bool (*)(C_BasePlayerWeapon*)>()(this); }
+    float GetAccuracy() { return signatures::GetAccuracy.GetPtrAs<float (*)(C_BasePlayerWeapon*)>()(this); }
 };
 
 class C_CSWeaponBase : public C_BasePlayerWeapon {

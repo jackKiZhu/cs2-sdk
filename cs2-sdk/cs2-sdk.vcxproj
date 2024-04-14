@@ -111,6 +111,7 @@
     <ClCompile Include="api\src\hook\hook.cpp" />
     <ClCompile Include="api\src\module\module.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
+    <ClCompile Include="sdk\src\interfaces\resourcesystem.cpp" />
     <ClCompile Include="sdk\src\bindings\baseviewmodel.cpp" />
     <ClCompile Include="sdk\src\bindings\baseflex.cpp" />
     <ClCompile Include="sdk\src\bindings\gamescenenode.cpp" />
@@ -145,6 +146,7 @@
     <ClCompile Include="src\cache\entities\player.cpp" />
     <ClCompile Include="src\cache\entities\gun.cpp" />
     <ClCompile Include="src\hacks\aimbot\aimbot.cpp" />
+    <ClCompile Include="src\hacks\chams\chams.cpp" />
     <ClCompile Include="src\hacks\esp\esp.cpp" />
     <ClCompile Include="src\hacks\movement\movement.cpp" />
     <ClCompile Include="src\hacks\skinchanger\skinchanger.cpp" />
@@ -266,6 +268,7 @@
     <ClInclude Include="include\constants\constants.hpp" />
     <ClInclude Include="include\fnv\fnv1a.hpp" />
     <ClInclude Include="include\hacks\aimbot\aimbot.hpp" />
+    <ClInclude Include="include\hacks\chams\chams.hpp" />
     <ClInclude Include="include\hacks\esp\esp.hpp" />
     <ClInclude Include="include\hacks\movement\movement.hpp" />
     <ClInclude Include="include\hacks\skinchanger\skinchanger.hpp" />
@@ -333,6 +336,9 @@
     <ClInclude Include="sdk\include\bindings\viewmodelservices.hpp" />
     <ClInclude Include="sdk\include\interfaces\csgcclientsystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\localize.hpp" />
+    <ClInclude Include="sdk\include\interfaces\materialsystem.hpp" />
+    <ClInclude Include="sdk\include\interfaces\resourcesystem.hpp" />
+    <ClInclude Include="sdk\include\interfaces\viewrender.hpp" />
     <ClInclude Include="sdk\include\types\econitem.hpp" />
     <ClInclude Include="sdk\include\types\econitemdefinition.hpp" />
     <ClInclude Include="sdk\include\types\econitemschema.hpp" />

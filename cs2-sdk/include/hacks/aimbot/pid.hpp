@@ -5,10 +5,10 @@
 #include <cmath>
 
 struct PIDConfig_t {
-    float m_kp;  // Proportional
-    float m_ki;  // Integral
+    float m_KP;  // Proportional
+    float m_KI;  // Integral
     float m_kd;  // Derivative
-    float m_damp;
+    float m_Damp;
 };
 
 struct PIDController_t {
@@ -22,9 +22,9 @@ struct PIDController_t {
         i += err * dt;
 
         // If integral and proportional disagree, make integral shut up
-        if (p * i <= 0.f) i *= cfg.m_damp;
+        if (p * i <= 0.f) i *= cfg.m_Damp;
 
-        return cfg.m_kp * p + cfg.m_ki * i + cfg.m_kd * d;
+        return cfg.m_KP * p + cfg.m_KI * i + cfg.m_kd * d;
     }
 
     void Reset() {

@@ -33,11 +33,10 @@ bool CAimbot::IsEnabled() {
     return true;
 }
 
-void CAimbot::Run() {
-    CCSGOInput* input = CCSGOInput::Get();
-    CMoveData& lastMove = *input->subtickMoves.end();
+void CAimbot::Run(CMoveData* moveData) {
     if (!IsEnabled()) return;
 
+    CMoveData& lastMove = *moveData;
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
     CCSPlayerController* localController = cachedLocal->Get();
     C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
@@ -45,8 +44,12 @@ void CAimbot::Run() {
     Vector localPos;
     localPawn->GetEyePos(&localPos);
 
+    RCS(lastMove.viewAngles, localPawn);
+
+    if (weapon->GetAccuracy() > 0.05f) return;
+
     if (g_Vars.m_EnableTriggerbot) {
-        const Vector end = localPos + input->moveData.viewAngles.ToVector().Normalized() * 4096.f;
+        const Vector end = localPos + lastMove.viewAngles.ToVector().Normalized() * 4096.f;
         GameTrace_t trace;
         if (CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace)) {
             if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) {
@@ -62,15 +65,12 @@ void CAimbot::Run() {
         }
     }
     
-
     const std::lock_guard<std::mutex> lock(CMatchCache::GetLock());
 
     const auto& cachedEntities = CMatchCache::GetCachedEntities();
     CCachedPlayer* target = nullptr;
 
-    // RCS(input->viewAngles, localPawn);
-
-    Vector aimAngle = input->moveData.viewAngles;
+    Vector aimAngle = lastMove.viewAngles;
 
     float currentFov = std::numeric_limits<float>::max();
     for (const auto& it : cachedEntities) {
@@ -91,7 +91,7 @@ void CAimbot::Run() {
 
         GameTrace_t trace;
         if (!CEngineTrace::Get()->TraceShape(localPos, pos, localPawn, 0x1C1003, 4, &trace)) continue;
-        if (trace.fraction < 0.97f) continue;  // visibility
+        if (trace.fraction < 0.97f) continue; // visibility
 
         const Vector angle = CMath::Get().CalculateAngle(localPos, pos);
         const float fov = CMath::Get().Fov(lastMove.viewAngles, angle);
@@ -104,12 +104,13 @@ void CAimbot::Run() {
 
     const float mouseLength = std::hypot(lastMove.mouseDx, lastMove.mouseDy);
 
-    const bool shouldAim = currentFov <= g_Vars.m_aimFov && 
+    const bool shouldAim = currentFov <= g_Vars.m_AimFov && 
         (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2);
 
     if (target && shouldAim) {
         lastMove.viewAngles = Smooth(lastMove.viewAngles, aimAngle);
-        CLogger::Log("Mouse: {} {} {}", lastMove.mouseDx, lastMove.mouseDy, mouseLength);
+        // CLogger::Log("Mouse: {} {} {}", lastMove.mouseDx, lastMove.mouseDy, mouseLength);
+        CLogger::Log("Inaccuracy: {}", weapon->GetAccuracy());
     }
     else
     {
@@ -120,10 +121,10 @@ void CAimbot::Run() {
 
 void CAimbot::RCS(Vector& angles, C_CSPlayerPawn* pawn) { 
     static Vector prevPunch = {};
-    const CUtlVector<Vector>& cache = pawn->m_aimPunchCache();
-    if (cache.m_Size <= 0) return;
-
-    const Vector& punch = cache.At(cache.m_Size - 1);
+    CUtlVector<Vector>& cache = pawn->m_aimPunchCache();
+    int cacheIndex = cache.m_Size - 1;
+    if (cacheIndex < 0) return;
+    const Vector& punch = cache.At(cacheIndex);
     const Vector delta = (punch - prevPunch).NormalizedAngle();
     prevPunch = punch;
 
@@ -138,10 +139,10 @@ void CAimbot::RCS(Vector& angles, C_CSPlayerPawn* pawn) {
 
 Vector CAimbot::Smooth(const Vector& from, const Vector& to) { 
     const PIDConfig_t pidCfg { 
-        .m_kp = g_Vars.m_kp * 0.3f, 
-        .m_ki = g_Vars.m_ki * 0.3f, 
+        .m_KP = g_Vars.m_KP * 0.3f, 
+        .m_KI = g_Vars.m_KI * 0.3f, 
         .m_kd = 0.f, 
-        .m_damp = 1.f - g_Vars.m_damp
+        .m_Damp = 1.f - g_Vars.m_Damp
     };
 
     Vector delta = (to - from).NormalizedAngle(); 

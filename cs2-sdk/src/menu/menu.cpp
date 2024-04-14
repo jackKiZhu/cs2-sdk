@@ -112,13 +112,16 @@ void CMenu::RenderMainMenu() {
 
         ImGui::Checkbox("3D boxes", &g_Vars.m_Use3DBoxes);
 
+        ImGui::SliderFloat("Field of view", &g_Vars.m_Fov, -20.f, 20.f);
+        ImGui::SliderFloat("Field of view (viewmodel)", &g_Vars.m_ViewmodelFov, -20.f, 20.f);
+
         ImGui::SeparatorText("Aimbot");
         ImGui::Checkbox("Aimbot", &g_Vars.m_EnableAimbot);
-        ImGui::SliderFloat("Aimbot FOV", &g_Vars.m_aimFov, 0.f, 180.f);
-        ImGui::SliderFloat("Aimbot smooth", &g_Vars.m_aimSmooth, 0.f, 1.f);
-        ImGui::SliderFloat("kp", &g_Vars.m_kp, 0.f, 1.f);
-        ImGui::SliderFloat("ki", &g_Vars.m_ki, 0.f, 1.f);
-        ImGui::SliderFloat("damp", &g_Vars.m_damp, 0.f, 1.f);
+        ImGui::SliderFloat("Aimbot FOV", &g_Vars.m_AimFov, 0.f, 180.f);
+        ImGui::SliderFloat("Aimbot smooth", &g_Vars.m_AimSmooth, 0.f, 1.f);
+        ImGui::SliderFloat("kp", &g_Vars.m_KP, 0.f, 1.f);
+        ImGui::SliderFloat("ki", &g_Vars.m_KI, 0.f, 1.f);
+        ImGui::SliderFloat("damp", &g_Vars.m_Damp, 0.f, 1.f);
 
         ImGui::Checkbox("Triggerbot", &g_Vars.m_EnableTriggerbot);
 

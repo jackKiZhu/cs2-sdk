@@ -85,6 +85,8 @@
     <ClCompile Include="sdk\src\bindings\baseflex.cpp" />
     <ClCompile Include="sdk\src\interfaces\localize.cpp" />
     <ClCompile Include="sdk\src\bindings\baseviewmodel.cpp" />
+    <ClCompile Include="src\hacks\chams\chams.cpp" />
+    <ClCompile Include="sdk\src\interfaces\resourcesystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -193,5 +195,9 @@
     <ClInclude Include="sdk\include\bindings\viewmodelservices.hpp" />
     <ClInclude Include="sdk\include\bindings\baseviewmodel.hpp" />
     <ClInclude Include="sdk\include\interfaces\localize.hpp" />
+    <ClInclude Include="include\hacks\chams\chams.hpp" />
+    <ClInclude Include="sdk\include\interfaces\materialsystem.hpp" />
+    <ClInclude Include="sdk\include\interfaces\resourcesystem.hpp" />
+    <ClInclude Include="sdk\include\interfaces\viewrender.hpp" />
   </ItemGroup>
 </Project>
