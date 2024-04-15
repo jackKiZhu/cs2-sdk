@@ -15,10 +15,25 @@ class CAimbot {
 
     bool IsEnabled();
     void Run(CMoveData* moveData);
+
+    bool IsVisible(int index, float for_ = 0.f);
+
    private:
 
-    void RCS(Vector& angles, C_CSPlayerPawn* pawn);
+    Vector RCS(const Vector& angles, C_CSPlayerPawn* pawn, float factor = 1.f);
     Vector Smooth(const Vector& from, const Vector& to);
 
+
     PIDController_t pid[2];
+    float lastActiveTime = 0.f;
+    Vector oldPunch;
+
+    // the angle that would hit the enemy with 100% accuracy
+    Vector perfectAngle;
+    // the angle with current view angles with perfect recoil
+    Vector rcsAngle;
+    // the angle with current view angles with settings recoil
+    Vector curAngle;
+
+    std::unordered_map<int, float> visibleSince;
 };

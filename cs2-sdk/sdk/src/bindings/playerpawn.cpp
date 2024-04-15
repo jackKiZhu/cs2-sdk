@@ -30,3 +30,10 @@ bool C_CSPlayerPawnBase::CanAttack(const float serverTime) {
             return false;
     return true;
 }
+
+Vector C_CSPlayerPawn::GetLastAimPunch() { 
+  const CUtlVector<Vector>& aimPunches = m_aimPunchCache();
+  const int index = aimPunches.m_Size - 1;
+  if (index < 0) return {};
+  return aimPunches.At(index);
+}

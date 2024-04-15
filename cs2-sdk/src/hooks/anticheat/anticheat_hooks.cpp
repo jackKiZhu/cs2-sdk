@@ -41,8 +41,6 @@ struct CDllVerification {
 
 static CHook g_GetFunctions;
 static void hkGetFunctions(CDllVerification* dll) { 
-    //SDK_LOG_PROLOGUE();
-
     dll->GetTotalFilesLoaded = nullptr;
     dll->CountFilesNeedTrustCheck = nullptr;
     dll->CountFilesCompletedTrustCheck = nullptr;
@@ -59,8 +57,6 @@ static void hkGetFunctions(CDllVerification* dll) {
 
 static CHook g_GetFunctions2;
 static void hkGetFunctions2(CDllVerification* dll) {
-    //SDK_LOG_PROLOGUE();
-    //memset(dll + 0x18, 0, 0x90);
     dll->GetTotalFilesLoaded = nullptr;
     dll->CountFilesNeedTrustCheck = nullptr;
     dll->CountFilesCompletedTrustCheck = nullptr;
@@ -78,7 +74,6 @@ static void hkGetFunctions2(CDllVerification* dll) {
 static CHook g_CSVCMsg_UserMessage_Setup;
 static bool hkCSVCMsg_UserMessage_Setup(void* rcx, void* msg) {
     SDK_LOG_PROLOGUE();
-	//return g_CSVCMsg_UserMessage_Setup.CallOriginal<bool>(rcx, msg);
     return false;
 }
 

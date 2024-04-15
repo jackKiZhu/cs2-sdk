@@ -41,4 +41,6 @@ class C_CSPlayerPawn : public C_CSPlayerPawnBase {
     SCHEMA(bool, m_bNeedToReApplyGloves, "C_CSPlayerPawn", "m_bNeedToReApplyGloves");
     SCHEMA(C_EconItemView, m_EconGloves, "C_CSPlayerPawn", "m_EconGloves");
     SCHEMA(uint8_t, m_nEconGlovesChanged, "C_CSPlayerPawn", "m_nEconGlovesChanged");
+
+    Vector GetLastAimPunch();
 };

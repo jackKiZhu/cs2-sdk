@@ -22,6 +22,9 @@ struct Vars_t {
     float m_KI = 0.175f;
     float m_Damp = 0.45f;
 
+    float m_RecoilX = 0.35f;
+    float m_RecoilY = 0.45f;
+
     bool m_EnableTriggerbot;
 
     float m_Fov = 90.f;
