@@ -54,12 +54,10 @@ void CAimbot::Run(CMoveData* moveData) {
     rcsAngle.z = 0.f;
     rcsAngle.NormalizeAngle();
 
-    curAngle = rcsAngle;
-
-    //curAngle.x -= punchDelta.x * 2.f * g_Vars.m_RecoilX;
-    //curAngle.y -= punchDelta.y * 2.f * g_Vars.m_RecoilY;
-    //curAngle.z = 0.f;
-    //curAngle.NormalizeAngle();
+    curAngle.x = lastMove.viewAngles.x - punchDelta.x * 2.f * g_Vars.m_RecoilX;
+    curAngle.y = lastMove.viewAngles.y - punchDelta.y * 2.f * g_Vars.m_RecoilY;
+    curAngle.z = 0.f;
+    curAngle.NormalizeAngle();
 
     // if (weapon->m_nNextPrimaryAttackTick() >= localController->m_nTickBase()) return;
     if (weapon->GetAccuracy() > 0.05f) return;
