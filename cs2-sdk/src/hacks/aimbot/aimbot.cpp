@@ -64,6 +64,7 @@ void CAimbot::Run(CMoveData* moveData) {
         curAngle.y -= punchDelta.y * 2.f * g_Vars.m_RecoilY;
     }
 
+    curAngle.z = 0.f;
     curAngle.NormalizeAngle();
 
     // if (weapon->m_nNextPrimaryAttackTick() >= localController->m_nTickBase()) return;
