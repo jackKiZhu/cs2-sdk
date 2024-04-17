@@ -225,4 +225,9 @@ namespace signatures {
                                  {
                                      {SDK_SIG("48 89 5C 24 ? 57 48 81 EC ? ? ? ? 0F 29 B4 24 ? ? ? ? 48 8B D9")},
                                  });
+
+       CSigScan GetWeaponData("GetWeaponData", CConstants::CLIENT_LIB,
+                            {
+                                {SDK_SIG("48 81 EC ? ? ? ? 48 85 C9 75 ? 33 C0 48 81 C4 ? ? ? ? C3 48 89 9C 24")},
+                            });
 }  // namespace signatures

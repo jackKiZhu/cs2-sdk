@@ -38,4 +38,5 @@ namespace signatures {
     extern CSigScan FindViewmodelMaterial;
     extern CSigScan IsLoadoutAllowed;
     extern CSigScan GetAccuracy;
+    extern CSigScan GetWeaponData;
 }  // namespace signatures

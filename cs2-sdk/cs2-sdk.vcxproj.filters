@@ -87,6 +87,8 @@
     <ClCompile Include="sdk\src\bindings\baseviewmodel.cpp" />
     <ClCompile Include="src\hacks\chams\chams.cpp" />
     <ClCompile Include="sdk\src\interfaces\resourcesystem.cpp" />
+    <ClCompile Include="sdk\src\bindings\econentity.cpp" />
+    <ClCompile Include="sdk\src\bindings\vdata.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -199,5 +201,6 @@
     <ClInclude Include="sdk\include\interfaces\materialsystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\resourcesystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\viewrender.hpp" />
+    <ClInclude Include="sdk\include\bindings\vdata.hpp" />
   </ItemGroup>
 </Project>

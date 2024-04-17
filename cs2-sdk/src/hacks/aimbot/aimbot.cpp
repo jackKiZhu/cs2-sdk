@@ -28,6 +28,8 @@ bool CAimbot::IsEnabled() {
     if (!localPawn) return false;
     C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
     if (!weapon) return false;
+    CCSWeaponBaseVData* weaponData = weapon->GetWeaponData();
+    if (!weaponData || !weaponData->IsGun()) return false;
     // if (!weapon || !weapon->CanPrimaryAttack(1, 0.f)) return false;
     return true;
 }
@@ -40,6 +42,7 @@ void CAimbot::Run(CMoveData* moveData) {
     CCSPlayerController* localController = cachedLocal->Get();
     C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
     C_BasePlayerWeapon* weapon = localPawn->GetActiveWeapon();
+    const bool isFiring = localPawn->m_iShotsFired() > 1;
     Vector localPos;
     localPawn->GetEyePos(&localPos);
 
@@ -54,9 +57,13 @@ void CAimbot::Run(CMoveData* moveData) {
     rcsAngle.z = 0.f;
     rcsAngle.NormalizeAngle();
 
-    curAngle.x = lastMove.viewAngles.x - punchDelta.x * 2.f * g_Vars.m_RecoilX;
-    curAngle.y = lastMove.viewAngles.y - punchDelta.y * 2.f * g_Vars.m_RecoilY;
-    curAngle.z = 0.f;
+    curAngle = lastMove.viewAngles;
+
+    if (isFiring) {
+        curAngle.x -= punchDelta.x * 2.f * g_Vars.m_RecoilX;
+        curAngle.y -= punchDelta.y * 2.f * g_Vars.m_RecoilY;
+    }
+
     curAngle.NormalizeAngle();
 
     // if (weapon->m_nNextPrimaryAttackTick() >= localController->m_nTickBase()) return;
@@ -132,7 +139,7 @@ void CAimbot::Run(CMoveData* moveData) {
 
     if (target && shouldAim) {
         lastMove.viewAngles = curAngle + Smooth(rcsAngle, targetAngle - punch * 2);
-    } else if (localPawn->m_iShotsFired() > 1) {
+    } else if (isFiring) {
         // print the different angles
         CLogger::Log("curAngle: {} {}, rcsAngle: {} {}, targetAngle: {} {}", curAngle.x, curAngle.y, rcsAngle.x, rcsAngle.y, targetAngle.x,
                      targetAngle.y);

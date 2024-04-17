@@ -2,6 +2,7 @@
 
 #include <bindings/baseflex.hpp>
 #include <bindings/econitemview.hpp>
+#include <bindings/vdata.hpp>
 
 #include <signatures/signatures.hpp>
 
@@ -16,4 +17,6 @@ class C_EconEntity : public C_BaseFlex {
     SCHEMA(uint32_t, m_OriginalOwnerXuidLow, "C_EconEntity", "m_OriginalOwnerXuidLow");
     SCHEMA(uint32_t, m_OriginalOwnerXuidHigh, "C_EconEntity", "m_OriginalOwnerXuidHigh");
     uint64_t GetOriginalOwnerXuid() { return (uint64_t(m_OriginalOwnerXuidHigh()) << 32) | m_OriginalOwnerXuidLow(); }
+
+    CCSWeaponBaseVData* GetWeaponData();
 };
