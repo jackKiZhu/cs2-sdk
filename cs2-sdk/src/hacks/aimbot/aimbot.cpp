@@ -131,12 +131,17 @@ void CAimbot::Run(CMoveData* moveData) {
         }
     }
 
-    const bool inputDown = lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2;
-    if (inputDown) lastActiveTime = CGlobalVars::Get()->currentTime;
+    if (const bool isSwitchingTargets = oldTarget && oldTarget != target; isSwitchingTargets)
+        lastTargetSwitchTime = CGlobalVars::Get()->currentTime;
 
+    oldTarget = target;
+
+    if (const bool inputDown = lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2; inputDown)
+        lastActiveTime = CGlobalVars::Get()->currentTime;
+
+    const bool isSwitching = lastTargetSwitchTime - CGlobalVars::Get()->currentTime <= 0.15f;
     const float mouseLength = std::hypot(lastMove.mouseDx, lastMove.mouseDy);
-
-    const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f;
+    const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f && !isSwitching;
 
     if (target && shouldAim) {
         lastMove.viewAngles = curAngle + Smooth(rcsAngle, targetAngle - punch * 2);
@@ -152,6 +157,8 @@ void CAimbot::Run(CMoveData* moveData) {
 
     lastMove.viewAngles.NormalizeAngle();
 }
+
+void CAimbot::Draw() {}
 
 bool CAimbot::IsVisible(int index, float for_) {
     if (!visibleSince.count(index)) return false;
