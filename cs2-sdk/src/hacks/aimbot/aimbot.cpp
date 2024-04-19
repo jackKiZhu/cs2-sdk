@@ -1,7 +1,6 @@
 #include "pch.hpp"
 #include <hacks/aimbot/aimbot.hpp>
 
-#include <cache/cache.hpp>
 #include <vars/vars.hpp>
 
 #include <interfaces/engineclient.hpp>
@@ -17,6 +16,9 @@
 #include <math/math.hpp>
 
 #include <logger/logger.hpp>
+
+#include <renderer/renderer.hpp>
+#include <imgui/imgui.h>
 
 bool CAimbot::IsEnabled() {
     if (!g_Vars.m_EnableAimbot || !CEngineClient::Get()->IsInGame()) return false;
@@ -90,7 +92,8 @@ void CAimbot::Run(CMoveData* moveData) {
     const std::lock_guard<std::mutex> lock(CMatchCache::GetLock());
 
     const auto& cachedEntities = CMatchCache::GetCachedEntities();
-    CCachedPlayer* target = nullptr;
+    target = nullptr;
+    Vector targetPos;
 
     float currentFov = std::numeric_limits<float>::max();
     for (const auto& it : cachedEntities) {
@@ -126,6 +129,7 @@ void CAimbot::Run(CMoveData* moveData) {
         const float fov = CMath::Get().Fov(rcsAngle, angle);
         if (fov < currentFov) {
             target = cachedPlayer;
+            targetPos = pos;
             targetAngle = angle;
             currentFov = fov;
         }
@@ -144,21 +148,36 @@ void CAimbot::Run(CMoveData* moveData) {
     const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f && !isSwitching;
 
     if (target && shouldAim) {
-        lastMove.viewAngles = curAngle + Smooth(rcsAngle, targetAngle - punch * 2);
-    } else if (isFiring) {
-        // print the different angles
-        CLogger::Log("curAngle: {} {}, rcsAngle: {} {}, targetAngle: {} {}", curAngle.x, curAngle.y, rcsAngle.x, rcsAngle.y, targetAngle.x,
-                     targetAngle.y);
+        lastMove.viewAngles = curAngle + Smooth(rcsAngle, (targetAngle - punch * 2).NormalizedAngle());
 
+        // setup draw data
+        CMath::Get().WorldToScreen(targetPos, targetScreen);
+    } else if (isFiring) {
         lastMove.viewAngles = curAngle;
+
         pid[0].Reset();
         pid[1].Reset();
+
+        targetScreen = ImVec2(0, 0);
     }
 
     lastMove.viewAngles.NormalizeAngle();
 }
 
-void CAimbot::Draw() {}
+void CAimbot::Update() {
+    //targetScreen = ImVec2(0, 0);
+    //if (!target) return;
+    //CMath::Get().WorldToScreen(targetPos, targetScreen);
+}
+
+void CAimbot::Render() {
+    auto drawList = CRenderer::GetBackgroundDrawList();
+    if (!drawList) return;
+
+    if (target) {
+        drawList->AddCircle(targetScreen, 5.f, IM_COL32(255, 255, 255, 255));
+    }
+}
 
 bool CAimbot::IsVisible(int index, float for_) {
     if (!visibleSince.count(index)) return false;

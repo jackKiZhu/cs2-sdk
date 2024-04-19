@@ -1,8 +1,14 @@
 #pragma once
 
 #include <math/types/vector.hpp>
+
 #include <hacks/aimbot/pid.hpp>
+
 #include <interfaces/ccsgoinput.hpp>
+
+#include <cache/cache.hpp>
+
+#include <imgui/imgui_internal.h> // vec2
 
 class C_CSPlayerPawn;
 
@@ -15,7 +21,8 @@ class CAimbot {
 
     bool IsEnabled();
     void Run(CMoveData* moveData);
-    void Draw();
+    void Update();
+    void Render();
 
     bool IsVisible(int index, float for_ = 0.f);
 
@@ -24,6 +31,8 @@ class CAimbot {
     Vector RCS(const Vector& angles, C_CSPlayerPawn* pawn, float factor = 1.f);
     Vector Smooth(const Vector& from, const Vector& to);
 
+    // the current target that is being aimed at
+    CCachedPlayer* target = nullptr;
     // the previous target that was aimed at
     CCachedPlayer* oldTarget = nullptr;
     // the initial switch time
@@ -45,4 +54,7 @@ class CAimbot {
     Vector curAngle;
 
     std::unordered_map<int, float> visibleSince;
+
+    // draw data
+    ImVec2 targetScreen;
 };
