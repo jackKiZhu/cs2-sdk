@@ -241,4 +241,9 @@ namespace signatures {
                               {
                                   {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B 71 ? 8B DA 48 8B 4E ? 48 8D 7E ? 48 0F BA E1 ? 72 ? 85 D2 7F ? 48 8B C7")},
                               });
+
+       CSigScan LineGoesThroughSmoke("LineGoesThroughSmoke", CConstants::CLIENT_LIB,
+                              {
+                                  {SDK_SIG("48 8B C4 55 56 57 41 54 41 55 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 44 0F 29 40 ? 49 8B F8 44 0F 29 48 ? 45 0F 57 C9 4C 8B FA")},
+                              });
 }  // namespace signatures

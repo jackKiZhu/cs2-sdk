@@ -41,4 +41,5 @@ namespace signatures {
     extern CSigScan GetWeaponData;
     extern CSigScan GrenadePtr;
     extern CSigScan GetBool;
+    extern CSigScan LineGoesThroughSmoke;
 }  // namespace signatures
