@@ -43,9 +43,13 @@ class CAimbot {
     PIDController_t pid[2];
 
     float lastActiveTime = 0.f;
-    
+
+    // current (sub)tick punch
+    Vector punch;
     // previous (sub)tick punch
     Vector oldPunch;
+    // current punch - previous punch
+    Vector punchDelta;
 
     // the angle that would hit the enemy with 100% accuracy
     Vector perfectAngle;

@@ -26,8 +26,14 @@ bool CAimbot::IsEnabled() {
     if (!cachedLocal || !cachedLocal->IsValid()) return false;
     CCSPlayerController* localController = cachedLocal->Get();
     if (!localController) return false;
-    C_CSPlayerPawnBase* localPawn = localController->m_hPawn().Get();
+    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
     if (!localPawn) return false;
+
+    Vector* _punch = localPawn->GetLastAimPunch();
+    punch = _punch ? *_punch : Vector{};
+    punchDelta = _punch ? (*_punch - oldPunch).NormalizedAngle() : Vector{};
+    oldPunch = _punch ? *_punch : Vector{};
+
     C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
     if (!weapon) return false;
     CCSWeaponBaseVData* weaponData = weapon->GetWeaponData();
@@ -50,10 +56,6 @@ void CAimbot::Run(CMoveData* moveData) {
 
     Vector targetAngle;
     perfectAngle = lastMove.viewAngles;
-
-    Vector punch = localPawn->GetLastAimPunch();
-    const Vector punchDelta = (punch - oldPunch).NormalizedAngle();
-    oldPunch = punch;
 
     rcsAngle = lastMove.viewAngles - punchDelta * 2.f;
     rcsAngle.z = 0.f;
@@ -146,7 +148,7 @@ void CAimbot::Run(CMoveData* moveData) {
         lastActiveTime = CGlobalVars::Get()->currentTime;
 
     const bool isSwitching = lastTargetSwitchTime - CGlobalVars::Get()->currentTime <= 0.15f;
-    const float mouseLength = std::hypot(lastMove.mouseDx, lastMove.mouseDy);
+    const float mouseLength = (float)std::hypot(lastMove.mouseDx, lastMove.mouseDy);
     const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f;
 
     if (target && shouldAim) {
@@ -181,25 +183,20 @@ void CAimbot::Render() {
     }
 }
 
-bool CAimbot::IsVisible(int index, float for_) {
+bool CAimbot::IsVisible(int index, float _for) {
     if (!visibleSince.count(index)) return false;
-    return visibleSince[index] > for_;
+    return visibleSince[index] > _for;
 }
 
 bool CAimbot::IsInSmoke(const Vector& start, const Vector& end) {
-    static auto func = signatures::LineGoesThroughSmoke.GetPtrAs<float(const Vector&, const Vector&, uintptr_t)>();
-    return func(start, end, 0) >= 1.0f;
+    static auto func = signatures::LineGoesThroughSmoke.GetPtrAs<float(*)(const Vector&, const Vector&, uintptr_t)>();
+    return func && func(start, end, 0) >= 1.0f;
 }
 
 Vector CAimbot::RCS(const Vector& angles, C_CSPlayerPawn* pawn, float factor) {
-    static Vector prevPunch = {};
-    const Vector punch = pawn->GetLastAimPunch();
-    const Vector delta = (punch - prevPunch).NormalizedAngle();
-    prevPunch = punch;
-
-    if (punch.IsZero()) return angles;
+    if (punchDelta.IsZero()) return angles;
     if (pawn->m_iShotsFired() <= 1) return angles;
-    return (angles - delta * 2.f * factor).NormalizedAngle();
+    return (angles - punchDelta * 2.f * factor).NormalizedAngle();
 }
 
 Vector CAimbot::Smooth(const Vector& from, const Vector& to) {
