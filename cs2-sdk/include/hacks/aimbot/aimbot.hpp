@@ -25,6 +25,7 @@ class CAimbot {
     void Render();
 
     bool IsVisible(int index, float for_ = 0.f);
+    bool IsInSmoke(const Vector& start, const Vector& end);
 
    private:
 

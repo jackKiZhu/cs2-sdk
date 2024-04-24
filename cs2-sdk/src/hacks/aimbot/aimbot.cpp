@@ -112,6 +112,8 @@ void CAimbot::Run(CMoveData* moveData) {
         Vector pos;
         if (!pawn->GetHitboxPosition(0, pos)) continue;
 
+        if (IsInSmoke(localPos, pos)) continue;
+
         GameTrace_t trace;
         if (!CEngineTrace::Get()->TraceShape(localPos, pos, localPawn, 0x1C1003, 4, &trace)) continue;
 
@@ -182,6 +184,11 @@ void CAimbot::Render() {
 bool CAimbot::IsVisible(int index, float for_) {
     if (!visibleSince.count(index)) return false;
     return visibleSince[index] > for_;
+}
+
+bool CAimbot::IsInSmoke(const Vector& start, const Vector& end) {
+    static auto func = signatures::LineGoesThroughSmoke.GetPtrAs<float(const Vector&, const Vector&, uintptr_t)>();
+    return func(start, end, 0) >= 1.0f;
 }
 
 Vector CAimbot::RCS(const Vector& angles, C_CSPlayerPawn* pawn, float factor) {
