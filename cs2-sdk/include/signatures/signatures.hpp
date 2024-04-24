@@ -39,4 +39,6 @@ namespace signatures {
     extern CSigScan IsLoadoutAllowed;
     extern CSigScan GetAccuracy;
     extern CSigScan GetWeaponData;
+    extern CSigScan GrenadePtr;
+    extern CSigScan GetBool;
 }  // namespace signatures

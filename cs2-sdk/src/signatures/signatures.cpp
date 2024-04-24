@@ -230,4 +230,15 @@ namespace signatures {
                             {
                                 {SDK_SIG("48 81 EC ? ? ? ? 48 85 C9 75 ? 33 C0 48 81 C4 ? ? ? ? C3 48 89 9C 24")},
                             });
+
+        CSigScan GrenadePtr("GrenadePtr", CConstants::CLIENT_LIB,
+                                    {
+                                        {SDK_SIG("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 85 C0 75 ? 48 8B 05 ? ? ? ? 48 8B 40 ? 80 38 ? 0F 84 ? ? ? ? 8B 05"),
+                                         [](CPointer& ptr) { ptr.Absolute(3, 0); }},
+                                    });
+
+       CSigScan GetBool("GetBool", CConstants::CLIENT_LIB,
+                              {
+                                  {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B 71 ? 8B DA 48 8B 4E ? 48 8D 7E ? 48 0F BA E1 ? 72 ? 85 D2 7F ? 48 8B C7")},
+                              });
 }  // namespace signatures

@@ -81,8 +81,6 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     if (!localPawn)
         return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
 
-    //return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
-
     const bool grounded = localPawn->m_hGroundEntity().Get() != nullptr;
 
     #if 0
@@ -140,6 +138,17 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
             }
         }
     }
+
+    //static auto GetBool = signatures::GetBool.GetPtrAs<bool* (*)(uintptr_t, int)>();
+    //if (GetBool) {
+    //    uintptr_t grenadeCvar = signatures::GrenadePtr.GetPtr().Get();
+    //    bool* grenadePreview = GetBool(grenadeCvar, -1);
+    //    if ( grenadePreview )
+    //    {
+    //        *grenadePreview = true;
+    //        CLogger::Log("Grenade preview enabled");
+    //    }
+    //}
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
 }

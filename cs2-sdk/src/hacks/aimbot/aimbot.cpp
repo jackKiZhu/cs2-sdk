@@ -145,7 +145,7 @@ void CAimbot::Run(CMoveData* moveData) {
 
     const bool isSwitching = lastTargetSwitchTime - CGlobalVars::Get()->currentTime <= 0.15f;
     const float mouseLength = std::hypot(lastMove.mouseDx, lastMove.mouseDy);
-    const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f && !isSwitching;
+    const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f;
 
     if (target && shouldAim) {
         lastMove.viewAngles = curAngle + Smooth(rcsAngle, (targetAngle - punch * 2).NormalizedAngle());
