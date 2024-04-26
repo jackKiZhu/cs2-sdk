@@ -71,22 +71,20 @@ void CAimbot::Run(CMoveData* moveData) {
     curAngle.z = 0.f;
     curAngle.NormalizeAngle();
 
+    const float accuracy = weapon->GetAccuracy();
+
     // if (weapon->m_nNextPrimaryAttackTick() >= localController->m_nTickBase()) return;
-    if (weapon->GetAccuracy() > 0.05f) return;
+    if (accuracy > 0.05f) return;
 
     if (g_Vars.m_EnableTriggerbot && weapon->m_nNextPrimaryAttackTick() < localController->m_nTickBase()) {
-        const Vector end = localPos + lastMove.viewAngles.ToVector().Normalized() * 4096.f;
+        const Vector end = localPos + rcsAngle.ToVector().Normalized() * 4096.f;
         GameTrace_t trace;
-        if (CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace)) {
+        if ( CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace) )
+        {
             if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) {
                 C_CSPlayerPawn* hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);
-
-                lastMove.Scroll(IN_ATTACK);
-
-                // if (hitPawn->m_iTeamNum() != hitPawn->m_iTeamNum()) {
-                //         if (!(input->moveData.buttonsHeld & IN_ATTACK)) input->buttonsChanged |= IN_ATTACK;
-                // input->buttonsHeld |= IN_ATTACK;
-                //}
+                if (hitPawn->m_iTeamNum() != localPawn->m_iTeamNum()) 
+                    lastMove.Scroll(IN_ATTACK);
             }
         }
     }

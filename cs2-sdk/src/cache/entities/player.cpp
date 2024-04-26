@@ -50,10 +50,10 @@ void CCachedPlayer::DrawESP() {
             if (IsLocalPlayer()) {
                 return IM_COL32(52, 131, 235, 255);
             } else if (IsEnemyWithTeam(cachedLocalPlayer->GetTeam())) {
-                return IM_COL32(255, 0, 0, 255);
+                return IM_COL32(0, 255, 255, 255);
             }
 
-            return IM_COL32(0, 255, 0, 255);
+            return IM_COL32(255, 0, 0, 255);
         }());
     }
 

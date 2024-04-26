@@ -21,7 +21,6 @@ class C_BasePlayerPawn : public C_BaseCombatCharacter {
 
 class C_CSPlayerPawnBase : public C_BasePlayerPawn {
    public:
-    SCHEMA(int, m_iShotsFired, "C_CSPlayerPawnBase", "m_iShotsFired");
     SCHEMA(int, m_ArmorValue, "C_CSPlayerPawnBase", "m_ArmorValue");
     SCHEMA(bool, m_bIsScoped, "C_CSPlayerPawnBase", "m_bIsScoped");
     SCHEMA(bool, m_bIsDefusing, "C_CSPlayerPawnBase", "m_bIsDefusing");
@@ -41,6 +40,7 @@ class C_CSPlayerPawn : public C_CSPlayerPawnBase {
     SCHEMA(bool, m_bNeedToReApplyGloves, "C_CSPlayerPawn", "m_bNeedToReApplyGloves");
     SCHEMA(C_EconItemView, m_EconGloves, "C_CSPlayerPawn", "m_EconGloves");
     SCHEMA(uint8_t, m_nEconGlovesChanged, "C_CSPlayerPawn", "m_nEconGlovesChanged");
+    SCHEMA(int, m_iShotsFired, "C_CSPlayerPawn", "m_iShotsFired");
 
     Vector* GetLastAimPunch();
 };

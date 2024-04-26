@@ -222,6 +222,8 @@ void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) {
         currentDefinition->m_nDefIndex == toEquipView->m_iItemDefinitionIndex())
         return;
 
+    if (slot == LOADOUT_SLOT_CLOTHING_HANDS) CLogger::Log("sex?");
+
     const uint64_t defaultItemID = (std::uint64_t(0xF) << 60) | toEquipView->m_iItemDefinitionIndex();
     inventoryManager->EquipItemInLoadout(team, slot, defaultItemID);
 

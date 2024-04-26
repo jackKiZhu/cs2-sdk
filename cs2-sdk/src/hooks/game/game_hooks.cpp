@@ -190,7 +190,7 @@ static bool hkEquipItemInLoadout(void* rcx, int item, int slot, uint64_t itemID)
 
 static CHook g_SetModel;
 static void* hkSetModel(void* rcx, const char* model) {
-    CSkinChanger::Get().OnSetModel(static_cast<C_BaseModelEntity*>(rcx), model);
+  CSkinChanger::Get().OnSetModel(static_cast<C_BaseModelEntity*>(rcx), model);
 	return g_SetModel.CallOriginal<void*>(rcx, model);
 }
 
@@ -208,7 +208,7 @@ void CGameHooks::Initialize() {
     //g_SetViewAngles.VHook(CCSGOInput::Get(), platform::Constant(7, 7), SDK_HOOK(hkSetViewAngles));
     g_OnAddEntity.VHook(CGameEntitySystem::Get(), platform::Constant(14, 15), SDK_HOOK(hkOnAddEntity));
     g_OnRemoveEntity.VHook(CGameEntitySystem::Get(), platform::Constant(15, 16), SDK_HOOK(hkOnRemoveEntity));
-    g_FrameStageNotify.VHook(CSource2Client::Get(), platform::Constant(33, 34), SDK_HOOK(hkFrameStageNotify));
+    g_FrameStageNotify.VHook(CSource2Client::Get(), platform::Constant(35, 36), SDK_HOOK(hkFrameStageNotify));
     g_EquipItemInLoadout.VHook(CCSInventoryManager::Get(), platform::Constant(52, 53), SDK_HOOK(hkEquipItemInLoadout));
     g_GetMatricesForView.Hook(signatures::GetMatricesForView.GetPtrAs<void*>(), SDK_HOOK(hkGetMatricesForView));
     g_FireEventClientSide.Hook(signatures::FireEventClientSide.GetPtrAs<void*>(), SDK_HOOK(hkFireEventClientSide));
