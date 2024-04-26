@@ -52,7 +52,6 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
     if (!weaponServices) return;
 
     const uint64_t steamID = inventory->GetOwner().id;
-
     auto weapons = weaponServices->m_hMyWeapons();
     for (const auto& weaponHandle : weapons) {
         C_CSWeaponBase* weapon = static_cast<C_CSWeaponBase*>(weaponHandle.Get());
@@ -171,9 +170,9 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
 
     if (glovesUpdateFrames > 0) {
         CLogger::Log("Forcing full update!");
-        viewmodel->InvalidateViewmodelMaterial();
         glovesView.m_bInitialized() = true;
         localPawn->m_bNeedToReApplyGloves() = true;
+        viewmodel->InvalidateViewmodelMaterial();
         glovesUpdateFrames--;
     }
 }
