@@ -13,27 +13,27 @@ const char* CGameEvent::GetName() {
 
 bool CGameEvent::GetBool(const std::string_view token) { 
 	KeyString_t str(token.data());
-	return vt::CallMethod<bool>(this, 6, &token, false);
+	return vt::CallMethod<bool>(this, 6, &str, false);
 }
 
 int CGameEvent::GetIntFromHash(const std::string_view token) {
     KeyString_t str(token.data());
-    return vt::CallMethod<int>(this, 7, &token, 0);
+    return vt::CallMethod<int>(this, 7, &str, 0);
 }
 
 float CGameEvent::GetFloat(const std::string_view token) { 
 		KeyString_t str(token.data());
-    return vt::CallMethod<float>(this, 9, &token, 0.f);
+    return vt::CallMethod<float>(this, 9, &str, 0.f);
 }
 
 const char* CGameEvent::GetString(const std::string_view token) { 
 		KeyString_t str(token.data());
-    return vt::CallMethod<const char*>(this, 10, &token, nullptr);
+    return vt::CallMethod<const char*>(this, 10, &str, nullptr);
 }
 
 CCSPlayerController* CGameEvent::GetPlayerController(const std::string_view token) { 
 		KeyString_t str(token.data());
-    return vt::CallMethod<CCSPlayerController*>(this, 16, &token);
+    return vt::CallMethod<CCSPlayerController*>(this, 16, &str);
 }
 
 // client.dll; 48 89 5C 24 08 48 89 74 24 10 48 89 7C 24 18 41 56 48 83 EC 30 48 8B 01 41 8B F0 4C 8B F1 41 B0 01 48 8D 4C 24 20 48 8B DA 48
