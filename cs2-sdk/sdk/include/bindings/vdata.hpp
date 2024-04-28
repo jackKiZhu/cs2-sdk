@@ -46,6 +46,7 @@ class CCSWeaponBaseVData : public CBasePlayerWeaponVData
    public:
     SCHEMA(int, m_WeaponType, "CCSWeaponBaseVData", "m_WeaponType");
     SCHEMA(float, m_flRange, "CCSWeaponBaseVData", "m_flRange");
+    SCHEMA(CFiringModeFloat, m_flMaxSpeed, "CCSWeaponBaseVData", "m_flMaxSpeed");
 
     bool IsGun();
 };

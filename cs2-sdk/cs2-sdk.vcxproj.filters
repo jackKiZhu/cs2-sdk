@@ -89,6 +89,7 @@
     <ClCompile Include="sdk\src\interfaces\resourcesystem.cpp" />
     <ClCompile Include="sdk\src\bindings\econentity.cpp" />
     <ClCompile Include="sdk\src\bindings\vdata.cpp" />
+    <ClCompile Include="src\input\input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -202,5 +203,7 @@
     <ClInclude Include="sdk\include\interfaces\resourcesystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\viewrender.hpp" />
     <ClInclude Include="sdk\include\bindings\vdata.hpp" />
+    <ClInclude Include="sdk\include\types\model.hpp" />
+    <ClInclude Include="include\input\input.hpp" />
   </ItemGroup>
 </Project>

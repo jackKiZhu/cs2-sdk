@@ -203,6 +203,8 @@ void CSkinChanger::OnPreFireEvent(CGameEvent* _event) {
     if (attackerController == victimController) return;
     if (attackerController != localController) return;
 
+    // _event->GetString("weapon") = itemDefinition->m_pszDefinitionName;
+
     // pEvent->SetString("weapon", pWeaponDefinition->GetSimpleWeaponName());
 }
 

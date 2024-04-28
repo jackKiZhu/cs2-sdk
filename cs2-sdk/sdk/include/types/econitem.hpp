@@ -1,6 +1,5 @@
 #pragma once
 
-
 enum EEconItemQuality {
     IQ_UNDEFINED = -1,
     IQ_NORMAL,

@@ -111,6 +111,7 @@
     <ClCompile Include="api\src\hook\hook.cpp" />
     <ClCompile Include="api\src\module\module.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
+    <ClCompile Include="src\input\input.cpp" />
     <ClCompile Include="sdk\src\bindings\vdata.cpp" />
     <ClCompile Include="sdk\src\bindings\econentity.cpp" />
     <ClCompile Include="sdk\src\interfaces\resourcesystem.cpp" />
@@ -282,6 +283,7 @@
     <ClInclude Include="include\hooks\render\directx11\directx11_hooks.hpp" />
     <ClInclude Include="include\hooks\render\render_hooks.hpp" />
     <ClInclude Include="include\hooks\render\vulkan\vulkan_hooks.hpp" />
+    <ClInclude Include="include\input\input.hpp" />
     <ClInclude Include="include\instance\instance.hpp" />
     <ClInclude Include="include\logger\logger.hpp" />
     <ClInclude Include="include\math\math.hpp" />
@@ -367,6 +369,7 @@
     <ClInclude Include="sdk\include\sdl\sdl.hpp" />
     <ClInclude Include="sdk\include\types\gcclientsharedobjecttypecache.hpp" />
     <ClInclude Include="sdk\include\types\handle.hpp" />
+    <ClInclude Include="sdk\include\types\model.hpp" />
     <ClInclude Include="sdk\include\types\utlmap.hpp" />
     <ClInclude Include="sdk\include\types\utlvector.hpp" />
   </ItemGroup>

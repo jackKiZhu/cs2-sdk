@@ -3,6 +3,7 @@
 #include <bindings/econentity.hpp>
 
 #include <signatures/signatures.hpp>
+#include <virtual/virtual.hpp>
 
 class C_BasePlayerWeapon : public C_EconEntity {
     public:
@@ -15,6 +16,9 @@ class C_BasePlayerWeapon : public C_EconEntity {
 
     bool CanFire() { return signatures::CanFire.GetPtrAs<bool (*)(C_BasePlayerWeapon*)>()(this); }
     float GetAccuracy() { return signatures::GetAccuracy.GetPtrAs<float (*)(C_BasePlayerWeapon*)>()(this); }
+
+    float GetSpread() { return vt::CallMethod<float>(this, 351); }
+    float GetInaccuracy() { return vt::CallMethod<float>(this, 397); }
 };
 
 class C_CSWeaponBase : public C_BasePlayerWeapon {

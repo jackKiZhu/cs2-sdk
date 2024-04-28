@@ -29,6 +29,8 @@ class CAimbot {
 
    private:
 
+    void Invalidate();
+
     Vector RCS(const Vector& angles, C_CSPlayerPawn* pawn, float factor = 1.f);
     Vector Smooth(const Vector& from, const Vector& to);
 

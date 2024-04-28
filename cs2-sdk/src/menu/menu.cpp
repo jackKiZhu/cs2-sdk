@@ -112,13 +112,12 @@ void CMenu::RenderMainMenu() {
 
         ImGui::Checkbox("3D boxes", &g_Vars.m_Use3DBoxes);
 
-        ImGui::SliderFloat("Field of view", &g_Vars.m_Fov, -20.f, 20.f);
-        ImGui::SliderFloat("Field of view (viewmodel)", &g_Vars.m_ViewmodelFov, -20.f, 20.f);
+        ImGui::SliderFloat("Recoil (X)", &g_Vars.m_RecoilX, 0.f, 1.f, "%.1f %%");
+        ImGui::SliderFloat("Recoil (Y)", &g_Vars.m_RecoilY, 0.f, 1.f, "%.1f %%");
 
         ImGui::SeparatorText("Aimbot");
         ImGui::Checkbox("Aimbot", &g_Vars.m_EnableAimbot);
         ImGui::SliderFloat("Aimbot FOV", &g_Vars.m_AimFov, 0.f, 180.f);
-        ImGui::SliderFloat("Aimbot smooth", &g_Vars.m_AimSmooth, 0.f, 1.f);
         ImGui::SliderFloat("kp", &g_Vars.m_KP, 0.f, 1.f);
         ImGui::SliderFloat("ki", &g_Vars.m_KI, 0.f, 1.f);
         ImGui::SliderFloat("damp", &g_Vars.m_Damp, 0.f, 1.f);
@@ -190,11 +189,11 @@ void CMenu::RenderInventoryWindow() {
                 CPaintKit* pPaintKit = it.m_value;
                 if (!pPaintKit || pPaintKit->id == 0 || pPaintKit->id == 9001) continue;
 
-                const uint64_t skinKey = Helper_GetAlternateIconKeyForWeaponPaintWearItem(defIdx, pPaintKit->id, 0);
+                const uint64_t skinKey = Helper_GetAlternateIconKeyForWeaponPaintWearItem(defIdx, (uint32_t)pPaintKit->id, 0);
                 if (vecAlternateIcons.FindByKey(skinKey).has_value()) {
                     DumpedSkin_t dumpedSkin;
                     dumpedSkin.m_name = CLocalize::Get()->FindSafe(pPaintKit->sDescriptionTag);
-                    dumpedSkin.m_ID = pPaintKit->id;
+                    dumpedSkin.m_ID = (int)pPaintKit->id;
                     dumpedSkin.m_rarity = pPaintKit->nRarity;
                     dumpedItem.m_dumpedSkins.emplace_back(dumpedSkin);
                 }

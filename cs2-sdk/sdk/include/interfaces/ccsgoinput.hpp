@@ -1,5 +1,6 @@
 #pragma once
 
+#include <math/types/vector.hpp>
 #include <types/utlvector.hpp>
 
 // this will have both CClientInput and CCSGOInput for simplicity's sake
@@ -29,67 +30,43 @@ struct ButtonState_t {
 static_assert(sizeof(ButtonState_t) == 0x20);
 
 // reading is the same as in here: "F3 41 0F 10 47 ? 83 C9"
-struct CSubtickMove {
-    float when; // 0x0 [0.f - 1.f]
-    PAD(0x4); // 0x4
-    uint64_t lastPressedButtons; // 0x8
-    uint32_t analog_forward_delta; // 0x10 acts weirdly
-    uint32_t analog_sidemove_delta;  // 0x14 acts weirdly
-}; // Size: 0x18
+struct CSubtickInput {
+    float when;                       // 0x0 [0.f - 1.f]
+    PAD(0x4);                         // 0x4
+    uint64_t button;                  // 0x8
+    uint32_t held;                    // 0x10 acts weirdly
+    uint32_t analog_sidemove_delta;   // 0x14 acts weirdly
+};                                    // Size: 0x18
 
 #pragma pack(push, 1)
 struct CMoveData {
-    uint64_t buttonsHeld; // 0x0
-    uint64_t buttonsChanged; // 0x8
-    uint64_t buttonsScroll; // 0x10
-    uint64_t prevButtonsHeld; // 0x18
-    Vector moves; // 0x20
-    int32_t mouseDx; // 0x2C
-    int32_t mouseDy; // 0x30
-    uint32_t subtickCount; // 0x34 
-    CSubtickMove subtickMoves[12]; // 0x38
+    uint64_t buttonsHeld;            // 0x0
+    uint64_t buttonsChanged;         // 0x8
+    uint64_t buttonsScroll;          // 0x10
+    uint64_t prevButtonsHeld;        // 0x18
+    Vector moves;                    // 0x20
+    int32_t mouseDx;                 // 0x2C
+    int32_t mouseDy;                 // 0x30
+    uint32_t subtickCount;           // 0x34
+    CSubtickInput subtickMoves[12];  // 0x38
     Vector viewAngles;               // 0x158
-    float time;                     // 0x164
+    float time;                      // 0x164
 
     void Scroll(uint64_t button) {
         if (subtickCount <= 10) {
             buttonsHeld |= button;
             buttonsScroll |= button;
             subtickCount += 2;
-            subtickMoves[subtickCount - 2] = subtickMoves[subtickCount - 1] = CSubtickMove{
-				.when = 0.95f,
-				.lastPressedButtons = button,
-				.analog_forward_delta = 1,
-				.analog_sidemove_delta = 0,
-			};
-			subtickMoves[subtickCount - 1].analog_forward_delta = 0;
+            subtickMoves[subtickCount - 2] = subtickMoves[subtickCount - 1] = CSubtickInput{
+                .when = 0.95f,
+                .button = button,
+                .held = 1,
+                .analog_sidemove_delta = 0,
+            };
+            subtickMoves[subtickCount - 1].held = 0;
         }
-	}
-
-    /*
-       if (move->subtickCount > 2) {
-                auto& subtickMove = move->subtickMoves[move->subtickCount - 2];
-                subtickMove.lastPressedButtons = IN_JUMP;
-                subtickMove.analog_forward_delta = 1;
-
-                move->subtickMoves[move->subtickCount - 1] = subtickMove;
-                move->subtickMoves[move->subtickCount - 1].analog_forward_delta = 0;
-
-                CLogger::Log("Inputting jump at subtick {}", move->subtickCount - 2);
-            } else {
-                // we don't have enough subticks to input a jump
-                move->subtickCount += 2;
-                move->subtickMoves[0] = move->subtickMoves[1] = CSubtickMove{
-                    .when = 0.52f,
-                    .lastPressedButtons = IN_JUMP,
-                    .analog_forward_delta = 0,
-                    .analog_sidemove_delta = 0,
-                };
-                move->subtickMoves[0].analog_forward_delta = 1;
-                CLogger::Log("Inputting jump at subtick {}", 0);
-            }
-    */
-}; // Size: 0x168
+    }
+};  // Size: 0x168
 #pragma pack(pop)
 
 class CBasePB {
@@ -99,14 +76,14 @@ class CBasePB {
 
 class CMsgQAngle : public CBasePB {
    public:
-    Vector viewAngles; // 0x18 (0xC)
-}; // Size: 0x24
+    Vector viewAngles;  // 0x18 (0xC)
+};                      // Size: 0x24
 
 class CMsgVector : public CBasePB {
    public:
     Vector xyz;
     float w;
-};                      
+};
 
 class CCSGOInterpolationInfo : public CBasePB {
    public:
@@ -136,52 +113,53 @@ class CCSGOInputHistoryEntryPB : public CBasePB {
 
 class CBaseUserCmdPB {
    public:
-    PAD(0x40);  // 0x0 (0x40)
-    CMsgQAngle* msgAngle;   // 0x40 (0x8)
-    int commandNumber; // 0x48 (0x4)
-    uint32_t tickcount; // 0x4C (0x4)
-    Vector moves; // 0x50 (0xC)
-    int32_t impulse;        // 0x5C (0x4)
-    int32_t weaponSelect;  // 0x60 (0x4)
-    int32_t randomSeed;     // 0x64 (0x4)
-    int32_t mouseDx; // 0x68 (0x4)
-    int32_t mouseDy; // 0x6C (0x4)
+    PAD(0x40);                            // 0x0 (0x40)
+    CMsgQAngle* msgAngle;                 // 0x40 (0x8)
+    int commandNumber;                    // 0x48 (0x4)
+    uint32_t tickcount;                   // 0x4C (0x4)
+    Vector moves;                         // 0x50 (0xC)
+    int32_t impulse;                      // 0x5C (0x4)
+    int32_t weaponSelect;                 // 0x60 (0x4)
+    int32_t randomSeed;                   // 0x64 (0x4)
+    int32_t mouseDx;                      // 0x68 (0x4)
+    int32_t mouseDy;                      // 0x6C (0x4)
     uint32_t consumedServerAngleChanges;  // 0x70 (0x4)
-    int32_t cmdFlags; // 0x74 (0x4)
-    uint32_t pawnEntity; // 0x78 (0x4)
-    PAD(0x4); // 0x7C (0x4)
-}; // Size: 0x80
+    int32_t cmdFlags;                     // 0x74 (0x4)
+    uint32_t pawnEntity;                  // 0x78 (0x4)
+    PAD(0x4);                             // 0x7C (0x4)
+};                                        // Size: 0x80
 
 class CCSGOUserCmdPB {
    public:
-    uint32_t tickcount; // 0x0 (0x4)
-    PAD(0x4); // 0x4 (0x4)
-    void* inputHistory; // 0x8 (0x8)
+    uint32_t tickcount;  // 0x0 (0x4)
+    PAD(0x4);            // 0x4 (0x4)
+    void* inputHistory;  // 0x8 (0x8)
 
     CCSGOInputHistoryEntryPB* GetInputHistoryEntry(uint32_t tick) {
         if (tick < tickcount) {
-            CCSGOInputHistoryEntryPB** arrTickList = std::bit_cast<CCSGOInputHistoryEntryPB**>(std::bit_cast<uintptr_t>(inputHistory) + 0x8);
+            CCSGOInputHistoryEntryPB** arrTickList =
+                std::bit_cast<CCSGOInputHistoryEntryPB**>(std::bit_cast<uintptr_t>(inputHistory) + 0x8);
             return arrTickList[tick];
         }
         return nullptr;
     }
-}; // Size: 0x10
+};  // Size: 0x10
 
 class CUserCmd {
    public:
-    void* vftable; // 0x0 (0x8)
-    uint64_t qword8; // 0x8 (0x8)
-    uint32_t flags; // 0x10 (0x4)
-    PAD(0xC); // 0x14 (0xC)
-    CCSGOUserCmdPB csgoUserCmd; // 0x20 (0x10)
-    CBaseUserCmdPB* baseCmd; // 0x30 (0x8)
+    void* vftable;               // 0x0 (0x8)
+    uint64_t qword8;             // 0x8 (0x8)
+    uint32_t flags;              // 0x10 (0x4)
+    PAD(0xC);                    // 0x14 (0xC)
+    CCSGOUserCmdPB csgoUserCmd;  // 0x20 (0x10)
+    CBaseUserCmdPB* baseCmd;     // 0x30 (0x8)
 
     // 0x70 = realtime
     /// 0x50  = button,s
 
-    PAD(0x10); // 0x38 (0x10)
-    ButtonState_t buttons; // 0x48 (0x20)
-    PAD(0x20); // 0x68 (0x20)
+    PAD(0x10);              // 0x38 (0x10)
+    ButtonState_t buttons;  // 0x48 (0x20)
+    PAD(0x20);              // 0x68 (0x20)
 
     void SetSubTickAngle(const Vector& angle) {
         for (uint32_t i = 0; i < csgoUserCmd.tickcount; i++) {
@@ -190,32 +168,31 @@ class CUserCmd {
             entry->pViewCmd->viewAngles = angle;
         }
     }
-}; // Size: 0x88 
+};  // Size: 0x88
 static_assert(sizeof(CUserCmd) == 0x88);
 
 class CCSGOInput {
    public:
     static CCSGOInput* Get();
 
-    PAD(0x250); // 0x0 (0x250)
-    CUserCmd commands[MAX_SPLITSCREEN_PLAYERS]; // 0x250 (0x4FB0)
-    PAD(0x1); // 0x5200 (0x1)
-    bool inThirdperson; // 0x5201 (0x1)
+    PAD(0x250);                                  // 0x0 (0x250)
+    CUserCmd commands[MAX_SPLITSCREEN_PLAYERS];  // 0x250 (0x4FB0)
+    PAD(0x1);                                    // 0x5200 (0x1)
+    bool inThirdperson;                          // 0x5201 (0x1)
     PAD(0x6);
     Vector thirdPersonAngle;  // 0x5208
     PAD(0x10);
-    int sequenceNumber; // 0x5224 (0x4)
-    int sequenceNumber2;   // 0x5228 (0x4)
-    PAD(0x4); // 0x522C (0x4)
-    double platFloatTime; // 0x5230 (0x8)
-    CMoveData moveData; // 0x5238 (0x158)
-    uint32_t lastSwitchWeaponTick; // 0x53a0
+    int sequenceNumber;             // 0x5224 (0x4)
+    int sequenceNumber2;            // 0x5228 (0x4)
+    PAD(0x4);                       // 0x522C (0x4)
+    double platFloatTime;           // 0x5230 (0x8)
+    CMoveData moveData;             // 0x5238 (0x158)
+    uint32_t lastSwitchWeaponTick;  // 0x53a0
     PAD(0x84);
-    CUtlVector<CMoveData> subtickMoves; // 0x5428
+    CUtlVector<CMoveData> subtickMoves;  // 0x5428
 
     CUserCmd* GetUserCmd();
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);
 };
 
 void ValidateUserCmd(const Vector& original, CUserCmd* cmd, CCSGOInputHistoryEntryPB* entry);
-

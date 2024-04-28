@@ -7,6 +7,7 @@
 #include <interfaces/enginetrace.hpp>
 #include <interfaces/ccsgoinput.hpp>
 #include <interfaces/globalvars.hpp>
+#include <interfaces/cvar.hpp>
 
 #include <cache/entities/player.hpp>
 #include <bindings/playercontroller.hpp>
@@ -30,26 +31,32 @@ bool CAimbot::IsEnabled() {
     if (!localPawn) return false;
 
     Vector* _punch = localPawn->GetLastAimPunch();
-    punch = _punch ? *_punch : Vector{};
-    punchDelta = _punch ? (*_punch - oldPunch).NormalizedAngle() : Vector{};
-    oldPunch = _punch ? *_punch : Vector{};
+    // if the aim punch is invalid, keep the last one
+    if (_punch) {
+        punch = *_punch;
+        punchDelta = (*_punch - oldPunch).NormalizedAngle();
+        oldPunch = *_punch;
+    }
 
     C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
     if (!weapon) return false;
     CCSWeaponBaseVData* weaponData = weapon->GetWeaponData();
     if (!weaponData || !weaponData->IsGun()) return false;
-    // if (!weapon || !weapon->CanPrimaryAttack(1, 0.f)) return false;
+
     return true;
 }
 
 void CAimbot::Run(CMoveData* moveData) {
-    if (!IsEnabled()) return;
+    if (!IsEnabled()) {
+        Invalidate();
+        return;
+    }
 
     CMoveData& lastMove = *moveData;
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
     CCSPlayerController* localController = cachedLocal->Get();
     C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
-    C_BasePlayerWeapon* weapon = localPawn->GetActiveWeapon();
+    C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
     const bool isFiring = localPawn->m_iShotsFired() > 1;
     Vector localPos;
     localPawn->GetEyePos(&localPos);
@@ -61,29 +68,34 @@ void CAimbot::Run(CMoveData* moveData) {
     rcsAngle.z = 0.f;
     rcsAngle.NormalizeAngle();
 
-    curAngle = lastMove.viewAngles;
-
     if (isFiring) {
-        curAngle.x -= punchDelta.x * 2.f * g_Vars.m_RecoilX;
-        curAngle.y -= punchDelta.y * 2.f * g_Vars.m_RecoilY;
+        lastMove.viewAngles.x -= punchDelta.x * 2.f * g_Vars.m_RecoilX;
+        lastMove.viewAngles.y -= punchDelta.y * 2.f * g_Vars.m_RecoilY;
+        lastMove.viewAngles.NormalizeAngle();
     }
 
+    curAngle = lastMove.viewAngles;
     curAngle.z = 0.f;
-    curAngle.NormalizeAngle();
 
     const float accuracy = weapon->GetAccuracy();
+    const float s = weapon->GetSpread();
+    const float i = weapon->GetInaccuracy();
 
-    // if (weapon->m_nNextPrimaryAttackTick() >= localController->m_nTickBase()) return;
-    if (accuracy > 0.05f) return;
+    if (accuracy > 0.05f) {
+        CLogger::Log("Accuracy: {}, Spread: {}, Inaccuracy: {}", accuracy, s, i);
+        Invalidate();
+        return;
+    }
 
-    if (g_Vars.m_EnableTriggerbot && weapon->m_nNextPrimaryAttackTick() < localController->m_nTickBase()) {
+    if (g_Vars.m_EnableTriggerbot && !isFiring && weapon->m_nNextPrimaryAttackTick() < localController->m_nTickBase()) {
         const Vector end = localPos + rcsAngle.ToVector().Normalized() * 4096.f;
         GameTrace_t trace;
         if ( CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace) )
         {
             if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) {
                 C_CSPlayerPawn* hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);
-                if (hitPawn->m_iTeamNum() != localPawn->m_iTeamNum()) 
+                static ConVar* mp_teammates_are_enemies = CCVar::Get()->GetCvarByName("mp_teammates_are_enemies");
+                if (mp_teammates_are_enemies->GetValue<bool>() ? true : hitPawn->m_iTeamNum() != localPawn->m_iTeamNum())
                     lastMove.Scroll(IN_ATTACK);
             }
         }
@@ -154,13 +166,8 @@ void CAimbot::Run(CMoveData* moveData) {
 
         // setup draw data
         CMath::Get().WorldToScreen(targetPos, targetScreen);
-    } else if (isFiring) {
-        lastMove.viewAngles = curAngle;
-
-        pid[0].Reset();
-        pid[1].Reset();
-
-        targetScreen = ImVec2(0, 0);
+    } else {
+        Invalidate();
     }
 
     lastMove.viewAngles.NormalizeAngle();
@@ -179,6 +186,13 @@ void CAimbot::Render() {
     if (target) {
         drawList->AddCircle(targetScreen, 5.f, IM_COL32(255, 255, 255, 255));
     }
+}
+
+void CAimbot::Invalidate() {
+    target = nullptr;
+    pid[0].Reset();
+    pid[1].Reset();
+    targetScreen = ImVec2(0, 0);
 }
 
 bool CAimbot::IsVisible(int index, float _for) {
