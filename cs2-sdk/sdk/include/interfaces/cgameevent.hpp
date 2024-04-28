@@ -3,7 +3,7 @@
 class CCSPlayerController;
 
 struct KeyString_t {
-    KeyString_t(const char* key) : u64(-1), key(key) {}
+    KeyString_t(const char* key) : u64(0), key(key) {}
     uint64_t u64;
     const char* key;
 };
