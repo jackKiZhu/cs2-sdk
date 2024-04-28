@@ -163,8 +163,12 @@ void CMenu::RenderInventoryWindow() {
             const bool isWeapon = pItem->IsWeapon();
             const bool isKnife = pItem->IsKnife(true);
             const bool isGloves = pItem->IsGloves(true);
+            const bool isAgent = pItem->IsAgent(true);
 
-            if (!isWeapon && !isKnife && !isGloves) continue;
+            if (!isWeapon && !isKnife && !isGloves) {
+                CLogger::Log("Skipping item {} - {}", pItem->m_pszItemBaseName, pItem->m_pszItemTypeName);
+                continue;
+            }
 
             // Some items don't have names.
             const char* itemBaseName = pItem->m_pszItemBaseName;

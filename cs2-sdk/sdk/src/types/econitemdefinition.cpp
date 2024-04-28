@@ -16,4 +16,17 @@ bool CEconItemDefinition::IsGloves(bool excludeDefault) {
     return excludeDefault ? !defaultGlove : true;
 }
 
+bool CEconItemDefinition::IsAgent(bool excludeDefault) { 
+    if (FNV1A::Hash(m_pszItemTypeName) != FNV1A::HashConst("#Type_CustomPlayer")) return false;
+    const bool defaultGlove = m_nDefIndex == 5028 || m_nDefIndex == 5029;
+    return excludeDefault ? !defaultGlove : true;
+}
+
+bool CEconItemDefinition::IsSticker() { return false; }
+
+bool CEconItemDefinition::IsCase() { 
+    if (FNV1A::Hash(m_pszItemTypeName) != FNV1A::HashConst("#CSGO_Type_WeaponCase")) return false;
+    return true;
+}
+
 

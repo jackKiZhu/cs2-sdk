@@ -8,6 +8,9 @@ class CEconItemDefinition {
     bool IsWeapon();
     bool IsKnife(bool excludeDefault = false);
     bool IsGloves(bool excludeDefault = false);
+    bool IsAgent(bool excludeDefault = false);
+    bool IsSticker();
+    bool IsCase();
 
     void* vtable;          // 0x0
     void* m_pKVItem;       // 0x8
