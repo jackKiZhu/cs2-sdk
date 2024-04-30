@@ -18,7 +18,7 @@ bool CEconItemDefinition::IsGloves(bool excludeDefault) {
 
 bool CEconItemDefinition::IsAgent(bool excludeDefault) { 
     if (FNV1A::Hash(m_pszItemTypeName) != FNV1A::HashConst("#Type_CustomPlayer")) return false;
-    const bool defaultGlove = m_nDefIndex == 5028 || m_nDefIndex == 5029;
+    const bool defaultGlove = m_nDefIndex == 5036 || m_nDefIndex == 5037;
     return excludeDefault ? !defaultGlove : true;
 }
 

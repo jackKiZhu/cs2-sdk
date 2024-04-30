@@ -20,3 +20,9 @@ class C_EconEntity : public C_BaseFlex {
 
     CCSWeaponBaseVData* GetWeaponData();
 };
+
+class C_EconWearable : public C_EconEntity
+{
+    SCHEMA(int, m_nForceSkin, "C_EconWearable", "m_nForceSkin");
+    SCHEMA(bool, m_bAlwaysAllow, "C_EconWearable", "m_bAlwaysAllow");
+};

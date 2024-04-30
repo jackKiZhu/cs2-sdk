@@ -1,7 +1,7 @@
 #pragma once
 
-#include <bindings/baseflex.hpp>
 #include <bindings/econitemview.hpp>
+#include <bindings/econentity.hpp>
 
 class CCSPlayer_ViewModelServices;
 class CCSPlayer_WeaponServices;
@@ -9,7 +9,8 @@ class C_CSWeaponBaseGun;
 
 class C_BaseCombatCharacter : public C_BaseFlex {
    public:
-    SCHEMA(CUtlVector<CHandle<C_BaseEntity>>, m_hMyWearables, "C_BaseCombatCharacter", "m_hMyWearables");
+    SCHEMA(CUtlVector<CHandle<C_EconWearable>>, m_hMyWearables, "C_BaseCombatCharacter", "m_hMyWearables");
+    SCHEMA(float, m_flFieldOfView, "C_BaseCombatCharacter", "m_flFieldOfView");
 };
 
 class C_BasePlayerPawn : public C_BaseCombatCharacter {

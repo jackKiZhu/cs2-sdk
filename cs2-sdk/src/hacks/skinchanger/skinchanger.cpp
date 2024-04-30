@@ -8,6 +8,7 @@
 #include <interfaces/source2client.hpp>
 #include <interfaces/econitemsystem.hpp>
 #include <interfaces/cgameevent.hpp>
+#include <interfaces/localize.hpp>
 
 #include <cache/cache.hpp>
 #include <cache/entities/player.hpp>
@@ -52,7 +53,7 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
     if (!weaponServices) return;
 
     const uint64_t steamID = inventory->GetOwner().id;
-    auto weapons = weaponServices->m_hMyWeapons();
+    const auto& weapons = weaponServices->m_hMyWeapons();
     for (const auto& weaponHandle : weapons) {
         C_CSWeaponBase* weapon = static_cast<C_CSWeaponBase*>(weaponHandle.Get());
         if (!weapon) continue;
@@ -132,49 +133,119 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
         }
     }
 
-    static int glovesUpdateFrames = 0;
-    C_EconItemView& glovesView = localPawn->m_EconGloves();
-    CEconItemDefinition* glovesDefinition = glovesView.GetStaticData();
-    if (!glovesDefinition) return;
+    const auto& wearables = localPawn->m_hMyWearables();
+    for (const auto& wearableHandle : wearables) {
+        C_EconWearable* wearable = wearableHandle.Get();
+        if (!wearable) continue;
 
-    C_EconItemView* loadoutGlovesView = inventory->GetItemInLoadout(localController->m_iTeamNum(), LOADOUT_SLOT_CLOTHING_HANDS);
-    if (!loadoutGlovesView) return;
-    if (!addedItemIDs.contains(loadoutGlovesView->m_iItemID())) return;
+        C_AttributeContainer* attributes = wearable->m_AttributeManager();
+        if (!attributes) continue;
 
-    CEconItemDefinition* loadoutGlovesDefinition = loadoutGlovesView->GetStaticData();
-    if (!loadoutGlovesDefinition || !loadoutGlovesDefinition->IsGloves()) return;
+        C_EconItemView* itemView = attributes->m_Item();
+        if (!itemView) continue;
 
-    CViewmodelMaterialInfo* viewmodelMaterialInfo = viewmodel->GetMaterialInfo();
-    if (!viewmodelMaterialInfo || viewmodelMaterialInfo->count == 0) return;
+        CEconItemDefinition* itemDefinition = itemView->GetStaticData();
+        if (!itemDefinition) continue;
 
-    CViewmodelMaterialRecord* currentRecord = viewmodelMaterialInfo->GetRecord(VIEWMODEL_MATERIAL_GLOVES);
-    if (!currentRecord) return;
+        const std::string_view itemBaseName = itemDefinition->m_pszItemBaseName;
+        CLogger::Log("{} - {} - {}", itemBaseName.data(), CLocalize::Get()->FindSafe(itemBaseName.data()), itemDefinition->m_nDefIndex);
 
-    if (currentRecord->handle != glovesHandles[2] && glovesHandles[2] == glovesHandles[1] && glovesHandles[1] == glovesHandles[0])
-        glovesUpdateFrames = 3;
+        uint16_t idi = itemView->m_iItemDefinitionIndex();
+        if (idi >= 43 && idi <= 49) continue;
 
-    // shift each handle
-    for (int i = 0; i < 2; i++) 
-        glovesHandles[i] = glovesHandles[i + 1];
-    glovesHandles[2] = currentRecord->handle;
+        constexpr int INVENTORY_SLOTS = 57;
 
-    if (glovesView.m_iItemID() != loadoutGlovesView->m_iItemID()) {
-        glovesUpdateFrames = 3;
+        C_EconItemView* loadoutItemView = inventory->GetItemInLoadout(localPawn->m_iTeamNum(), itemDefinition->m_iLoadoutSlot);
+        if (!loadoutItemView) continue;
 
-        glovesView.m_iItemDefinitionIndex() = loadoutGlovesView->m_iItemDefinitionIndex();
-        glovesView.m_iItemID() = loadoutGlovesView->m_iItemID();
-        glovesView.m_iItemIDHigh() = loadoutGlovesView->m_iItemIDHigh();
-        glovesView.m_iItemIDLow() = loadoutGlovesView->m_iItemIDLow();
-        glovesView.m_iAccountID() = uint32_t(steamID);
+        if (!addedItemIDs.contains(loadoutItemView->m_iItemID())) continue;
+
+        CEconItemDefinition* loadoutItemDefinition = loadoutItemView->GetStaticData();
+        if (!loadoutItemDefinition) continue;
+
+        const bool isAgent = loadoutItemDefinition->IsAgent();
+        if (!isAgent && loadoutItemDefinition->m_nDefIndex != itemDefinition->m_nDefIndex) continue;
+
+        itemView->m_bDisallowSOC() = false;
+        itemView->m_iItemID() = loadoutItemView->m_iItemID();
+        itemView->m_iItemIDHigh() = loadoutItemView->m_iItemIDHigh();
+        itemView->m_iItemIDLow() = loadoutItemView->m_iItemIDLow();
+        itemView->m_iAccountID() = uint32_t(steamID);
+
+        if (isAgent) {
+            itemView->m_iItemDefinitionIndex() = loadoutItemDefinition->m_nDefIndex;
+            const char* agentModel = loadoutItemDefinition->m_pszBaseDisplayModel;
+
+            localPawn->SetModel(agentModel);
+            //if (viewmodel->m_hWeapon() == weaponHandle) viewmodel->SetModel(knifeModel);
+            //viewmodel->animationGraphInstance->animGraphNetworkedVariables = nullptr;
+        }
     }
 
-    if (glovesUpdateFrames > 0) {
-        CLogger::Log("Forcing full update!");
-        glovesView.m_bInitialized() = true;
-        localPawn->m_bNeedToReApplyGloves() = true;
-        viewmodel->InvalidateViewmodelMaterial();
-        glovesUpdateFrames--;
-    }
+    // gloves
+    [&]() {
+        static int glovesUpdateFrames = 0;
+        C_EconItemView& glovesView = localPawn->m_EconGloves();
+        CEconItemDefinition* glovesDefinition = glovesView.GetStaticData();
+        if (!glovesDefinition) return;
+
+        C_EconItemView* loadoutGlovesView = inventory->GetItemInLoadout(localController->m_iTeamNum(), LOADOUT_SLOT_CLOTHING_HANDS);
+        if (!loadoutGlovesView) return;
+        if (!addedItemIDs.contains(loadoutGlovesView->m_iItemID())) return;
+
+        CEconItemDefinition* loadoutGlovesDefinition = loadoutGlovesView->GetStaticData();
+        if (!loadoutGlovesDefinition || !loadoutGlovesDefinition->IsGloves()) return;
+
+        CViewmodelMaterialInfo* viewmodelMaterialInfo = viewmodel->GetMaterialInfo();
+        if (!viewmodelMaterialInfo || viewmodelMaterialInfo->count == 0) return;
+
+        CViewmodelMaterialRecord* currentRecord = viewmodelMaterialInfo->GetRecord(VIEWMODEL_MATERIAL_GLOVES);
+        if (!currentRecord) return;
+
+        if (currentRecord->handle != glovesHandles[2] && glovesHandles[2] == glovesHandles[1] && glovesHandles[1] == glovesHandles[0])
+            glovesUpdateFrames = 3;
+
+        // shift each handle
+        for (int i = 0; i < 2; i++) glovesHandles[i] = glovesHandles[i + 1];
+        glovesHandles[2] = currentRecord->handle;
+
+        if (glovesView.m_iItemID() != loadoutGlovesView->m_iItemID()) {
+            glovesUpdateFrames = 3;
+            glovesView.m_iItemDefinitionIndex() = loadoutGlovesView->m_iItemDefinitionIndex();
+            glovesView.m_iItemID() = loadoutGlovesView->m_iItemID();
+            glovesView.m_iItemIDHigh() = loadoutGlovesView->m_iItemIDHigh();
+            glovesView.m_iItemIDLow() = loadoutGlovesView->m_iItemIDLow();
+            glovesView.m_iAccountID() = uint32_t(steamID);
+        }
+
+        if (glovesUpdateFrames > 0) {
+            CLogger::Log("glovesUpdateFrames: {}", glovesUpdateFrames);
+            glovesView.m_bInitialized() = true;
+            localPawn->m_bNeedToReApplyGloves() = true;
+            viewmodel->InvalidateViewmodelMaterial();
+            glovesUpdateFrames--;
+        }
+    }();
+
+    []() { []() { return []() {}(); };
+        []() {}();
+      }();
+
+    // agent
+    [&]() {
+        C_EconItemView* loadoutAgentView = inventory->GetItemInLoadout(localController->m_iTeamNum(), LOADOUT_SLOT_CLOTHING_CUSTOMPLAYER);
+        if (!loadoutAgentView) return;
+        if (!addedItemIDs.contains(loadoutAgentView->m_iItemID())) return;
+
+        CEconItemDefinition* loadoutGlovesDefinition = loadoutAgentView->GetStaticData();
+        if (!loadoutGlovesDefinition || !loadoutGlovesDefinition->IsAgent(true)) return;
+
+        if (loadoutGlovesDefinition->m_pszBaseDisplayModel)
+          localPawn->SetModel(loadoutGlovesDefinition->m_pszBaseDisplayModel);
+
+        //CLogger::Log("{} - {} - {} - {}\n", loadoutGlovesDefinition->m_pszItemBaseName, loadoutGlovesDefinition->m_pszBaseDisplayModel,
+        //             loadoutGlovesDefinition->m_pszDefinitionName, loadoutGlovesDefinition->m_pszItemClassname);
+    }();
 }
 
 void CSkinChanger::OnPreFireEvent(CGameEvent* _event) {
@@ -220,11 +291,12 @@ void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) {
     if (!currentView) return;
     CEconItemDefinition* currentDefinition = currentView->GetStaticData();
     if (!currentDefinition) return;
+
+    CLogger::Log("Equipping {}", CLocalize::Get()->FindSafe(currentDefinition->m_pszBaseDisplayModel));
+
     if (currentDefinition->IsGloves(false) || currentDefinition->IsKnife(false) ||
         currentDefinition->m_nDefIndex == toEquipView->m_iItemDefinitionIndex())
         return;
-
-    if (slot == LOADOUT_SLOT_CLOTHING_HANDS) CLogger::Log("sex?");
 
     const uint64_t defaultItemID = (std::uint64_t(0xF) << 60) | toEquipView->m_iItemDefinitionIndex();
     inventoryManager->EquipItemInLoadout(team, slot, defaultItemID);

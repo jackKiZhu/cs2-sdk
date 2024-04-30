@@ -73,6 +73,8 @@ static void hkGetFunctions2(CDllVerification* dll) {
 
 static CHook g_CSVCMsg_UserMessage_Setup;
 static bool hkCSVCMsg_UserMessage_Setup(void* rcx, void* msg) {
+    // 4C 8B BC 24 ? ? ? ? 84 C0 74 ? 48 8B 0D decals
+
     SDK_LOG_PROLOGUE();
     return false;
 }

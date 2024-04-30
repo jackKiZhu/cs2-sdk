@@ -163,13 +163,11 @@ void CMenu::RenderInventoryWindow() {
             const bool isWeapon = pItem->IsWeapon();
             const bool isKnife = pItem->IsKnife(true);
             const bool isGloves = pItem->IsGloves(true);
-            const bool isAgent = pItem->IsAgent(true);
+            const bool isAgent = pItem->IsAgent(true); 
 
-            if (!isWeapon && !isKnife && !isGloves) {
-                CLogger::Log("Skipping item {} - {}", pItem->m_pszItemBaseName, pItem->m_pszItemTypeName);
+            if (!isWeapon && !isKnife && !isGloves && !isAgent) 
                 continue;
-            }
-
+            
             // Some items don't have names.
             const char* itemBaseName = pItem->m_pszItemBaseName;
             if (!itemBaseName || itemBaseName[0] == '\0') continue;
@@ -181,25 +179,42 @@ void CMenu::RenderInventoryWindow() {
             dumpedItem.m_defIdx = defIdx;
             dumpedItem.m_rarity = pItem->m_nItemRarity;
 
-            if (isKnife || isGloves) dumpedItem.m_unusualItem = true;
+            if (isKnife || isGloves || isAgent) dumpedItem.m_unusualItem = true;
 
             // Add vanilla knives
             if (isKnife) {
                 dumpedItem.m_dumpedSkins.emplace_back("Vanilla", 0, IR_ANCIENT);
-            }
+            }                
 
-            // We filter skins by guns.
-            for (const auto& it : vecPaintKits) {
-                CPaintKit* pPaintKit = it.m_value;
-                if (!pPaintKit || pPaintKit->id == 0 || pPaintKit->id == 9001) continue;
+            if (isAgent) {
+                const std::string_view itemBaseName = pItem->m_pszItemBaseName;
 
-                const uint64_t skinKey = Helper_GetAlternateIconKeyForWeaponPaintWearItem(defIdx, (uint32_t)pPaintKit->id, 0);
-                if (vecAlternateIcons.FindByKey(skinKey).has_value()) {
-                    DumpedSkin_t dumpedSkin;
-                    dumpedSkin.m_name = CLocalize::Get()->FindSafe(pPaintKit->sDescriptionTag);
-                    dumpedSkin.m_ID = (int)pPaintKit->id;
-                    dumpedSkin.m_rarity = pPaintKit->nRarity;
+                DumpedSkin_t dumpedSkin;
+                dumpedSkin.m_name = CLocalize::Get()->FindSafe(itemBaseName.data());
+                dumpedSkin.m_ID = -1;
+                dumpedSkin.m_rarity = IR_ANCIENT;
+
+                if (itemBaseName._Starts_with("#CSGO_CustomPlayer_t")) {
                     dumpedItem.m_dumpedSkins.emplace_back(dumpedSkin);
+                } else if (itemBaseName._Starts_with("#CSGO_CustomPlayer_ct")) {
+                    dumpedItem.m_dumpedSkins.emplace_back(dumpedSkin);
+                } else {
+                    CLogger::Log("Unknown agent: {}", itemBaseName.data());
+                }
+            } else {
+                // We filter skins by guns.
+                for (const auto& it : vecPaintKits) {
+                    CPaintKit* pPaintKit = it.m_value;
+                    if (!pPaintKit || pPaintKit->id == 0 || pPaintKit->id == 9001) continue;
+
+                    const uint64_t skinKey = Helper_GetAlternateIconKeyForWeaponPaintWearItem(defIdx, (uint32_t)pPaintKit->id, 0);
+                    if (vecAlternateIcons.FindByKey(skinKey).has_value()) {
+                        DumpedSkin_t dumpedSkin;
+                        dumpedSkin.m_name = CLocalize::Get()->FindSafe(pPaintKit->sDescriptionTag);
+                        dumpedSkin.m_ID = (int)pPaintKit->id;
+                        dumpedSkin.m_rarity = pPaintKit->nRarity;
+                        dumpedItem.m_dumpedSkins.emplace_back(dumpedSkin);
+                    }
                 }
             }
 
