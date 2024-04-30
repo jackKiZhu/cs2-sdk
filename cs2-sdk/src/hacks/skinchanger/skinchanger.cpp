@@ -242,9 +242,6 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
 
         if (loadoutGlovesDefinition->m_pszBaseDisplayModel)
           localPawn->SetModel(loadoutGlovesDefinition->m_pszBaseDisplayModel);
-
-        //CLogger::Log("{} - {} - {} - {}\n", loadoutGlovesDefinition->m_pszItemBaseName, loadoutGlovesDefinition->m_pszBaseDisplayModel,
-        //             loadoutGlovesDefinition->m_pszDefinitionName, loadoutGlovesDefinition->m_pszItemClassname);
     }();
 }
 
@@ -347,4 +344,5 @@ void CSkinChanger::Shutdown() {
     if (!inventory) return;
     for (uint64_t itemID : addedItemIDs) 
         inventory->RemoveEconItem(inventory->GetSOCDataForItem(itemID));
+    addedItemIDs.clear();
 }

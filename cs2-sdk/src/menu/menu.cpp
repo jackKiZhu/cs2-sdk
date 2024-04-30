@@ -31,7 +31,7 @@ void CMenu::Render() {
     if (ImGui::IsKeyPressed(ImGuiKey_Insert, false)) {
         Toggle(!IsOpen());
     } else if (ImGui::IsKeyPressed(ImGuiKey_End, false)) {
-        return Shutdown(), CInstance::Get().FreeLibrary();
+        return Shutdown(), CSkinChanger::Get().Shutdown(), CInstance::Get().FreeLibrary();
     }
 
     RenderWatermark();
@@ -65,7 +65,7 @@ void CMenu::RenderWatermark() {
     auto drawList = CRenderer::GetBackgroundDrawList();
 
     char framerate[128];
-    snprintf(framerate, IM_ARRAYSIZE(framerate), "cs2-sdk v2 [%d]\nFPS: %d\n\n%s %s\nhttps://github.com/bruhmoment21/cs2-sdk",
+    snprintf(framerate, IM_ARRAYSIZE(framerate), "Welcome [%d]\nFPS: %d\n\n%s %s",
              CEngineClient::Get()->GetEngineBuildNumber(), static_cast<int>(ImGui::GetIO().Framerate), __DATE__, __TIME__);
 
     drawList->AddText({17, 9}, IM_COL32(0, 0, 0, 255), framerate);
@@ -124,7 +124,7 @@ void CMenu::RenderMainMenu() {
 
         ImGui::Checkbox("Triggerbot", &g_Vars.m_EnableTriggerbot);
 
-        if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CInstance::Get().FreeLibrary();
+        if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CSkinChanger::Get().Shutdown(), CInstance::Get().FreeLibrary();
     }
     ImGui::End();
 }
