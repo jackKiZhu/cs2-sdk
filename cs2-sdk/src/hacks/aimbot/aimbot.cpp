@@ -57,7 +57,9 @@ void CAimbot::Run(CMoveData* moveData) {
     CCSPlayerController* localController = cachedLocal->Get();
     C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
     C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
-    const bool isFiring = localPawn->m_iShotsFired() > 1;
+    CCSWeaponBaseVData* weaponData = weapon->GetWeaponData();
+    const int weaponType = weaponData->m_WeaponType();
+    const bool isFiring = localPawn->m_iShotsFired() > 1 && weaponType != WEAPONTYPE_SHOTGUN && weaponType != WEAPONTYPE_SNIPER_RIFLE;
     Vector localPos;
     localPawn->GetEyePos(&localPos);
 
