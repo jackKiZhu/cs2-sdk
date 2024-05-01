@@ -21,7 +21,7 @@ bool CCachedPlayer::IsValid() {
     }
 
     C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
-    if (!pawn || pawn->IsObserverPawn()) {
+    if (!pawn) {
         return false;
     }
 
@@ -41,6 +41,7 @@ void CCachedPlayer::DrawESP() {
 
     CCSPlayerController* controller = Get();
     C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
+    if (pawn->IsObserverPawn()) return;
 
     const bool isEnemy = IsEnemyWithTeam(cachedLocalPlayer->GetTeam());
     if (g_Vars.m_Team && !isEnemy) return;

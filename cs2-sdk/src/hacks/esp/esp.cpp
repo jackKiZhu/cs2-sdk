@@ -7,6 +7,8 @@
 
 #include <interfaces/engineclient.hpp>
 
+#include <renderer/renderer.hpp>
+
 bool CESP::IsEnabled() { return g_Vars.m_EnableESP && CEngineClient::Get()->IsInGame(); }
 
 void CESP::Render() {
@@ -21,6 +23,14 @@ void CESP::Render() {
         }
 
         cachedEntity->DrawESP();
+    }
+
+    ImVec2 spectatorsPos = ImVec2(ImGui::GetIO().DisplaySize.x - 200, 10);
+    if (ImDrawList* drawList = CRenderer::GetBackgroundDrawList(); drawList) {
+        for (const auto& [name, mode] : CMatchCache::GetSpectators()) {
+            drawList->AddText(spectatorsPos, ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), std::format("{} - {}", name, mode).c_str());
+            spectatorsPos.y += 8.0f;
+        }
     }
 }
 
@@ -37,4 +47,6 @@ void CESP::Update() {
 
         cachedEntity->CalculateDrawInfo();
     }
+
+    CMatchCache::Get().UpdateSpectators();
 }

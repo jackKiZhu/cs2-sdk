@@ -13,6 +13,8 @@
 #include <interfaces/engineclient.hpp>
 
 #include <bindings/baseentity.hpp>
+#include <bindings/playerpawn.hpp>
+#include <bindings/playercontroller.hpp>
 
 //#define SDK_ENABLE_CACHE_LOGGING
 
@@ -83,6 +85,34 @@ void CMatchCache::RemoveEntity(CEntityInstance* inst, CBaseHandle handle) {
     CLogger::Log("[cache] [-] {} -> {} | CHandle [Serial: {}, Index: {}]", dynamicBinding->m_Name, SDK_LOG_PTR(ent),
                  handle.GetSerialNumber(), handle.GetEntryIndex());
 #endif
+}
+
+void CMatchCache::UpdateSpectators() {
+    m_Spectators.clear();
+    if (CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer(); cachedLocal) {
+        if (CCSPlayerController* localController = cachedLocal->Get(); localController) {
+            if (C_CSPlayerPawn* localPawn = localController->m_hPawn().Get(); localPawn) {
+                for (const auto& it : GetCachedEntities()) {
+                    const auto& cachedPlayer = dynamic_cast<CCachedPlayer*>(it.second.get());
+                    if (!cachedPlayer || cachedPlayer->GetType() != CCachedBaseEntity::Type::PLAYER) continue;
+
+                    CCSPlayerController* controller = cachedPlayer->Get();
+                    if (!controller) continue;
+
+                    C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
+                    if (!pawn || !pawn->IsObserverPawn()) continue;
+
+                    const auto& observerServices = pawn->m_pObserverServices();
+                    if (!observerServices) continue;
+
+                    const auto& target = observerServices->m_hObserverTarget().Get();
+                    if (target == nullptr || target != localPawn) continue;
+
+                    m_Spectators.emplace_back(controller->m_sSanitizedPlayerName(), observerServices->m_iObserverMode());
+                }
+            }
+        }
+    }
 }
 
 CMatchCache::CachedEntityPtr& CMatchCache::GetEntityByIndex(int i) {

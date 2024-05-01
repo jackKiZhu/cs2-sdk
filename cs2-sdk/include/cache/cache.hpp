@@ -16,11 +16,13 @@ class CMatchCache {
 
     static const auto& GetCachedEntities() { return Get().m_CachedEntities; }
     static auto& GetLock() { return Get().m_EntitiesLock; }
+    static const auto& GetSpectators() { return Get().m_Spectators; }
 
     void Initialize();
 
     void AddEntity(CEntityInstance* inst, CBaseHandle handle);
     void RemoveEntity(CEntityInstance* inst, CBaseHandle handle);
+    void UpdateSpectators();
 
     CachedEntityPtr& GetEntityByIndex(int i);
     CCachedPlayer* GetLocalPlayer();
@@ -30,4 +32,5 @@ class CMatchCache {
 
     std::mutex m_EntitiesLock;
     std::unordered_map<int, CachedEntityPtr> m_CachedEntities;
+    std::vector<std::pair<const char*, uint8_t>> m_Spectators;
 };

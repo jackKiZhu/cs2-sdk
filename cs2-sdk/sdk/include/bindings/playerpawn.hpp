@@ -5,7 +5,15 @@
 
 class CCSPlayer_ViewModelServices;
 class CCSPlayer_WeaponServices;
+class CCSPlayer_ObserverServices;
 class C_CSWeaponBaseGun;
+
+class CCSPlayer_ObserverServices {
+   public:
+    SCHEMA(uint8_t, m_iObserverMode, "CPlayer_ObserverServices", "m_iObserverMode");
+    SCHEMA(CHandle<C_BaseEntity>, m_hObserverTarget, "CPlayer_ObserverServices", "m_hObserverTarget");
+    SCHEMA(bool, m_bForcedObserverMode, "CPlayer_ObserverServices", "m_bForcedObserverMode");
+};
 
 class C_BaseCombatCharacter : public C_BaseFlex {
    public:
@@ -16,6 +24,7 @@ class C_BaseCombatCharacter : public C_BaseFlex {
 class C_BasePlayerPawn : public C_BaseCombatCharacter {
    public:
     SCHEMA(CCSPlayer_WeaponServices*, m_pWeaponServices, "C_BasePlayerPawn", "m_pWeaponServices");
+    SCHEMA(CCSPlayer_ObserverServices*, m_pObserverServices, "C_BasePlayerPawn", "m_pObserverServices");
 
     C_CSWeaponBaseGun* GetActiveWeapon();
 };
