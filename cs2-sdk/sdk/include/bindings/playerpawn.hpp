@@ -37,6 +37,7 @@ class C_CSPlayerPawnBase : public C_BasePlayerPawn {
     SCHEMA(bool, m_bIsGrabbingHostage, "C_CSPlayerPawnBase", "m_bIsGrabbingHostage");
     SCHEMA(bool, m_bGunGameImmunity, "C_CSPlayerPawnBase", "m_bGunGameImmunity");
     SCHEMA(bool, m_bWaitForNoAttack, "C_CSPlayerPawnBase", "m_bWaitForNoAttack");
+    SCHEMA(Vector, m_angEyeAngles, "C_CSPlayerPawnBase", "m_angEyeAngles");
     SCHEMA(CCSPlayer_ViewModelServices*, m_pViewModelServices, "C_CSPlayerPawnBase", "m_pViewModelServices");
 
     bool IsPlayerPawn();

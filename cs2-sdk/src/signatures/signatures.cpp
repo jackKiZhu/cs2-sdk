@@ -221,7 +221,7 @@ namespace signatures {
                 {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B 0D ? ? ? ? 48 8B 01")},
             });
 
-       CSigScan GetAccuracy("GetAccuracy", CConstants::CLIENT_LIB,
+       CSigScan GetInaccuracy("GetInaccuracy", CConstants::CLIENT_LIB,
                                  {
                                      {SDK_SIG("48 89 5C 24 ? 57 48 81 EC ? ? ? ? 0F 29 B4 24 ? ? ? ? 48 8B D9")},
                                  });

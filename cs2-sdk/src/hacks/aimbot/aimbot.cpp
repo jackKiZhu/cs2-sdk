@@ -79,12 +79,12 @@ void CAimbot::Run(CMoveData* moveData) {
     curAngle = lastMove.viewAngles;
     curAngle.z = 0.f;
 
-    const float accuracy = weapon->GetAccuracy();
-    const float s = weapon->GetSpread();
-    const float i = weapon->GetInaccuracy();
+    const float accuracy = weapon->GetInaccuracy();
+    //const float s = weapon->GetSpread();
+    //const float i = weapon->GetInaccuracyV();
 
     if (accuracy > 0.05f) {
-        CLogger::Log("Accuracy: {}, Spread: {}, Inaccuracy: {}", accuracy, s, i);
+        //CLogger::Log("Accuracy: {}, Spread: {}, Inaccuracy: {}", accuracy, s, i);
         Invalidate();
         return;
     }
@@ -121,7 +121,7 @@ void CAimbot::Run(CMoveData* moveData) {
         if (!controller->m_bPawnIsAlive()) continue;
 
         C_CSPlayerPawn* pawn = controller->m_hPawn().Get();
-        if (!pawn) continue;
+        if (!pawn || pawn->m_bGunGameImmunity()) continue;
 
         Vector pos;
         if (!pawn->GetHitboxPosition(0, pos)) continue;
@@ -131,17 +131,18 @@ void CAimbot::Run(CMoveData* moveData) {
         GameTrace_t trace;
         if (!CEngineTrace::Get()->TraceShape(localPos, pos, localPawn, 0x1C1003, 4, &trace)) continue;
 
-        const int playerIndex = cachedPlayer->GetIndex();
-        if (trace.fraction < 0.97f) {
-            visibleSince[playerIndex] = 0.f;
+        if (trace.fraction < 0.85f) {
+            cachedPlayer->visibleSince = 0.f;
+            cachedPlayer->dot = 0.f;
             continue;
         }
 
-        visibleSince[playerIndex] += CGlobalVars::Get()->intervalPerTick;
-
-        if (!IsVisible(playerIndex, 0.15f)) continue;
-
         Vector angle = CMath::Get().CalculateAngle(localPos, pos);
+
+        cachedPlayer->visibleSince += CGlobalVars::Get()->intervalPerTick;
+        cachedPlayer->dot = -pawn->m_angEyeAngles().ToVector().Normalized().DotProduct(angle.ToVector().Normalized());
+
+        if (cachedPlayer->visibleSince < 0.15f) continue;
         const float fov = CMath::Get().Fov(rcsAngle, angle);
         if (fov < currentFov) {
             target = cachedPlayer;
@@ -164,10 +165,19 @@ void CAimbot::Run(CMoveData* moveData) {
     const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f;
 
     if (target && shouldAim) {
-        lastMove.viewAngles = curAngle + Smooth(rcsAngle, (targetAngle - punch * 2).NormalizedAngle());
+        perfectAngle = targetAngle - punch * 2;
+        perfectAngle.NormalizeAngle();
 
-        // setup draw data
-        CMath::Get().WorldToScreen(targetPos, targetScreen);
+        const Vector smoothedAngle = curAngle + Smooth(rcsAngle, perfectAngle);
+        const Vector curDelta = (perfectAngle - lastMove.viewAngles).NormalizedAngle();
+        const Vector smoothedDelta = (perfectAngle - smoothedAngle).NormalizedAngle();
+
+        // only apply the angle if it's beneficial
+        if ( fabsf(curDelta.x) > fabsf(smoothedDelta.x) )
+            lastMove.viewAngles.x = smoothedAngle.x;
+        
+        if ( fabsf(curDelta.y) > fabsf(smoothedDelta.y) )
+            lastMove.viewAngles.y = smoothedAngle.y;
     } else {
         Invalidate();
     }
@@ -197,24 +207,15 @@ void CAimbot::Invalidate() {
     targetScreen = ImVec2(0, 0);
 }
 
-bool CAimbot::IsVisible(int index, float _for) {
-    if (!visibleSince.count(index)) return false;
-    return visibleSince[index] > _for;
-}
-
 bool CAimbot::IsInSmoke(const Vector& start, const Vector& end) {
     static auto func = signatures::LineGoesThroughSmoke.GetPtrAs<float(*)(const Vector&, const Vector&, uintptr_t)>();
     return func && func(start, end, 0) >= 1.0f;
 }
 
-Vector CAimbot::RCS(const Vector& angles, C_CSPlayerPawn* pawn, float factor) {
-    if (punchDelta.IsZero()) return angles;
-    if (pawn->m_iShotsFired() <= 1) return angles;
-    return (angles - punchDelta * 2.f * factor).NormalizedAngle();
-}
-
 Vector CAimbot::Smooth(const Vector& from, const Vector& to) {
-    const PIDConfig_t pidCfg{.m_KP = g_Vars.m_KP * 0.3f, .m_KI = g_Vars.m_KI * 0.3f, .m_kd = 0.f, .m_Damp = 1.f - g_Vars.m_Damp};
+    const float bonus = target->dot >= g_Vars.m_ReactionTreshold ? 1.f : g_Vars.m_Bonus + 1.f;  // [1.f - 2.f]
+    const PIDConfig_t pidCfg{
+        .m_KP = g_Vars.m_KP * 0.3f * bonus, .m_KI = g_Vars.m_KI * 0.3f * bonus, .m_kd = 0.f, .m_Damp = 1.f - g_Vars.m_Damp};
 
     Vector delta = (to - from).NormalizedAngle();
     delta.x = pid[0].Step(delta.x, 0.015f, pidCfg);

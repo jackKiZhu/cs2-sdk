@@ -24,14 +24,12 @@ class CAimbot {
     void Update();
     void Render();
 
-    bool IsVisible(int index, float for_ = 0.f);
     bool IsInSmoke(const Vector& start, const Vector& end);
 
    private:
 
     void Invalidate();
 
-    Vector RCS(const Vector& angles, C_CSPlayerPawn* pawn, float factor = 1.f);
     Vector Smooth(const Vector& from, const Vector& to);
 
     // the current target that is being aimed at
@@ -59,8 +57,6 @@ class CAimbot {
     Vector rcsAngle;
     // the angle with current view angles with settings recoil
     Vector curAngle;
-
-    std::unordered_map<int, float> visibleSince;
 
     // draw data
     ImVec2 targetScreen;

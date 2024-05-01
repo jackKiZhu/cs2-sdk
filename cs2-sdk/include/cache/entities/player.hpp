@@ -19,4 +19,7 @@ class CCachedPlayer : public CCachedBaseEntity {
     Team GetTeam();
     bool IsEnemyWithTeam(Team team);
     bool IsLocalPlayer();
+
+    float visibleSince;
+    float dot;
 };

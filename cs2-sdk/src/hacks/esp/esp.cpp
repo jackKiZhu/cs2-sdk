@@ -29,7 +29,7 @@ void CESP::Render() {
     if (ImDrawList* drawList = CRenderer::GetBackgroundDrawList(); drawList) {
         for (const auto& [name, mode] : CMatchCache::GetSpectators()) {
             drawList->AddText(spectatorsPos, ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), std::format("{} - {}", name, mode).c_str());
-            spectatorsPos.y += 8.0f;
+            spectatorsPos.y += 10.f;
         }
     }
 }

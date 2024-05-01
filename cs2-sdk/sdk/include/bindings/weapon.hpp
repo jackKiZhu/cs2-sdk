@@ -15,10 +15,10 @@ class C_BasePlayerWeapon : public C_EconEntity {
     SCHEMA(int, m_iClip2, "C_BasePlayerWeapon", "m_iClip2");
 
     bool CanFire() { return signatures::CanFire.GetPtrAs<bool (*)(C_BasePlayerWeapon*)>()(this); }
-    float GetAccuracy() { return signatures::GetAccuracy.GetPtrAs<float (*)(C_BasePlayerWeapon*)>()(this); }
+    float GetInaccuracy() { return signatures::GetInaccuracy.GetPtrAs<float (*)(C_BasePlayerWeapon*)>()(this); }
 
     float GetSpread() { return vt::CallMethod<float>(this, 351); }
-    float GetInaccuracy() { return vt::CallMethod<float>(this, 397); }
+    float GetInaccuracyV() { return vt::CallMethod<float>(this, 397); }
 };
 
 class C_CSWeaponBase : public C_BasePlayerWeapon {

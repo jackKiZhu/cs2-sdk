@@ -37,7 +37,7 @@ namespace signatures {
     extern CSigScan GetPaintKits;
     extern CSigScan FindViewmodelMaterial;
     extern CSigScan IsLoadoutAllowed;
-    extern CSigScan GetAccuracy;
+    extern CSigScan GetInaccuracy;
     extern CSigScan GetWeaponData;
     extern CSigScan GrenadePtr;
     extern CSigScan GetBool;

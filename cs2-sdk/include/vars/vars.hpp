@@ -20,6 +20,8 @@ struct Vars_t {
     float m_KP = 0.06f;
     float m_KI = 0.175f;
     float m_Damp = 0.45f;
+    float m_ReactionTreshold = 0.85f;
+    float m_Bonus = 0.5f;
 
     float m_RecoilX = 0.35f;
     float m_RecoilY = 0.45f;

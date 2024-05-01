@@ -45,7 +45,6 @@ void CCachedPlayer::DrawESP() {
 
     const bool isEnemy = IsEnemyWithTeam(cachedLocalPlayer->GetTeam());
     if (g_Vars.m_Team && !isEnemy) return;
-
     if (g_Vars.m_PlayerBoxes) {
         DrawBoundingBox([this, cachedLocalPlayer]() {
             if (IsLocalPlayer()) {
@@ -64,8 +63,10 @@ void CCachedPlayer::DrawESP() {
             const ImVec2 textSize = ImGui::CalcTextSize(playerName);
             const ImVec2 textPos = ImTrunc({(min.x + max.x - textSize.x) * 0.5f, min.y - textSize.y - 2.f});
 
-            drawList->AddText(textPos + ImVec2{1, 1}, IM_COL32(0, 0, 0, 255), playerName);
+            drawList->AddText(textPos + ImVec2{1.f, 1.f}, IM_COL32(0, 0, 0, 255), playerName);
             drawList->AddText(textPos, IM_COL32(255, 255, 255, 255), playerName);
+
+            drawList->AddText(textPos + ImVec2{0.f, textSize.y}, IM_COL32(255, 255, 255, 255), std::format("dot: {:.1f}", dot).c_str());
         }
     }
 
