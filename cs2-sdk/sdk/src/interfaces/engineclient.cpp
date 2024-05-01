@@ -12,18 +12,14 @@ CEngineClient* CEngineClient::Get() {
     return inst.Get<CEngineClient*>();
 }
 
-bool CEngineClient::IsInGame() { return vt::CallMethod<bool>(this, 32); }
+bool CEngineClient::IsInGame() { return vt::CallMethod<bool>(this, 35); }
 
 int CEngineClient::GetLocalPlayer() {
     int index = -1;
 
-#if _WIN32
-    vt::CallMethod<void>(this, 44, &index, 0);
-#elif __linux__
-    index = vt::CallMethod<int>(this, 44, 0);
-#endif
+    vt::CallMethod<void>(this, 47, &index, 0);
 
     return index + 1;
 }
 
-int CEngineClient::GetEngineBuildNumber() { return vt::CallMethod<int>(this, 77); }
+int CEngineClient::GetEngineBuildNumber() { return vt::CallMethod<int>(this, 80); }
