@@ -3,13 +3,27 @@
 #include <hacks/esp/esp.hpp>
 
 #include <cache/cache.hpp>
+#include <cache/entities/player.hpp>
 #include <vars/vars.hpp>
 
 #include <interfaces/engineclient.hpp>
 
 #include <renderer/renderer.hpp>
 
-bool CESP::IsEnabled() { return g_Vars.m_EnableESP && CEngineClient::Get()->IsInGame(); }
+#include <bindings/playerpawn.hpp>
+#include <bindings/playercontroller.hpp>
+
+bool CESP::IsEnabled() { 
+  if (!CEngineClient::Get()->IsInGame()) return false;
+  CCachedPlayer* player = CMatchCache::Get().GetLocalPlayer();
+  if (!player) return false;
+  CCSPlayerController* controller = player->Get();
+  if (!controller) return false;
+  C_CSPlayerPawn* pawn = controller->m_hPawn().Get();
+  if (!pawn) return false;
+  if (g_Vars.m_EnableIfSpectating && pawn->IsObserverPawn()) return true;
+  return g_Vars.m_EnableESP; 
+}
 
 void CESP::Render() {
     const std::lock_guard<std::mutex> lock(CMatchCache::GetLock());

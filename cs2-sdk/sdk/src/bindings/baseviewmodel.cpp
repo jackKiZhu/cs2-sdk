@@ -5,11 +5,7 @@
 #include <memory/memory.hpp>
 
 CViewmodelMaterialInfo* C_CSGOViewModel::GetMaterialInfo() { 
- static auto FindViewmodelMaterial =
-        signatures::FindViewmodelMaterial.GetPtr().Absolute(1, 0).Get<uint32_t (*)(void*, void*, uint32_t, bool*)>();
-    if (!FindViewmodelMaterial) return nullptr;
-
-    static uint32_t offset = signatures::FindViewmodelMaterial.GetPtr().GetField<uint32_t>(15);  // 0xF80
+    static uint32_t offset = signatures::FindViewmodelMaterial.GetPtr().GetField<uint32_t>(0x3); // 0xF88
     CViewmodelMaterialInfo* materialInfo = CPointer(this).GetFieldPtr(offset).Get<CViewmodelMaterialInfo*>();
     return materialInfo;
 }

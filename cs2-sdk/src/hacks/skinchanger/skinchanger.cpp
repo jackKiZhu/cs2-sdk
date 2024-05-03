@@ -219,17 +219,13 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
         }
 
         if (glovesUpdateFrames > 0) {
-            CLogger::Log("glovesUpdateFrames: {}", glovesUpdateFrames);
+            CLogger::Log("i: {} | handle: {:#x} | typeidx: {} | static: {}", glovesUpdateFrames, currentRecord->handle, currentRecord->typeIndex, currentRecord->_static);
             glovesView.m_bInitialized() = true;
             localPawn->m_bNeedToReApplyGloves() = true;
             viewmodel->InvalidateViewmodelMaterial();
             glovesUpdateFrames--;
         }
     }();
-
-    []() { []() { return []() {}(); };
-        []() {}();
-      }();
 
     // agent
     [&]() {

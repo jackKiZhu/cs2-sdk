@@ -79,12 +79,9 @@ void CAimbot::Run(CMoveData* moveData) {
     curAngle = lastMove.viewAngles;
     curAngle.z = 0.f;
 
-    const float accuracy = weapon->GetInaccuracy();
-    //const float s = weapon->GetSpread();
-    //const float i = weapon->GetInaccuracyV();
+    const float inaccuracy = weapon->GetInaccuracy();
 
-    if (accuracy > 0.05f) {
-        //CLogger::Log("Accuracy: {}, Spread: {}, Inaccuracy: {}", accuracy, s, i);
+    if (inaccuracy > 0.05f) {
         Invalidate();
         return;
     }
@@ -126,12 +123,20 @@ void CAimbot::Run(CMoveData* moveData) {
         Vector pos;
         if (!pawn->GetHitboxPosition(0, pos)) continue;
 
-        if (IsInSmoke(localPos, pos)) continue;
+        if (IsInSmoke(localPos, pos)) {
+            cachedPlayer->visibleSince = 0.f;
+            cachedPlayer->dot = 0.f;
+            continue;
+        }
 
         GameTrace_t trace;
-        if (!CEngineTrace::Get()->TraceShape(localPos, pos, localPawn, 0x1C1003, 4, &trace)) continue;
+        if (!CEngineTrace::Get()->TraceShape(localPos, pos, localPawn, 0x1C1003, 4, &trace)) {
+            cachedPlayer->visibleSince = 0.f;
+            cachedPlayer->dot = 0.f;
+            continue;
+        }
 
-        if (trace.fraction < 0.85f) {
+        if (trace.fraction < 0.97f) {
             cachedPlayer->visibleSince = 0.f;
             cachedPlayer->dot = 0.f;
             continue;
@@ -157,7 +162,7 @@ void CAimbot::Run(CMoveData* moveData) {
 
     oldTarget = target;
 
-    if (const bool inputDown = lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2; inputDown)
+    if (const bool inputDown = (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2); inputDown)
         lastActiveTime = CGlobalVars::Get()->currentTime;
 
     const bool isSwitching = lastTargetSwitchTime - CGlobalVars::Get()->currentTime <= 0.15f;

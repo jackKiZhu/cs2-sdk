@@ -97,7 +97,9 @@ void CMenu::RenderMainMenu() {
     ImGui::SetNextWindowPos(IO.DisplaySize * 0.5f, ImGuiCond_Once, {0.5f, 0.5f});
     ImGui::Begin("cs2-sdk | main menu", nullptr);
     {
-        ImGui::Checkbox("Master switch", &g_Vars.m_EnableESP);
+        ImGui::Checkbox("Enable ESP", &g_Vars.m_EnableESP);
+        ImGui::Checkbox("Enable If Spectating", &g_Vars.m_EnableIfSpectating);
+
         ImGui::SeparatorText("Visuals");
 
         ImGui::Checkbox("Players box", &g_Vars.m_PlayerBoxes);

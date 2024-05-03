@@ -24,11 +24,11 @@ class CViewmodelMaterialInfo {
 
 class CViewmodelMaterialRecord {
    public:
-    uint32_t _static; 
-    uint32_t identifier; 
-    uint32_t handle; 
-    uint32_t typeIndex;
-};
+    uint32_t _static; // 0x0
+    uint32_t identifier; // 0x4
+    uint32_t handle; // 0x8
+    uint32_t typeIndex;  // 0xC
+};                       // Size: 0x10
 
 class C_BaseViewModel : public C_BaseModelEntity {
    public:

@@ -2,6 +2,7 @@
 
 struct Vars_t {
     bool m_EnableESP;
+    bool m_EnableIfSpectating;
 
     bool m_OtherBoxes;
     bool m_HostageBoxes;

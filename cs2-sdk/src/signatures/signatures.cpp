@@ -213,7 +213,7 @@ namespace signatures {
 
         CSigScan FindViewmodelMaterial("FindViewmodelMaterial", CConstants::CLIENT_LIB,
                               {
-                                  {SDK_SIG("E8 ? ? ? ? 4C 63 F0 49 C1 E6 04 4C 03 B7 ? ? ? ? 48 85 FF 74 32 48 8B 47 10 48 85 C0 74 29")},
+                                  {SDK_SIG("48 81 C1 ? ? ? ? 45 33 C9 41 B8 ? ? ? ? E8 ? ? ? ? 4C 63 F0 49 C1 E6 ? 4C 03 B7")},
                               });
 
        CSigScan IsLoadoutAllowed("IsLoadoutAllowed", CConstants::CLIENT_LIB,
