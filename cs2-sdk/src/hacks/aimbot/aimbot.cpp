@@ -53,6 +53,7 @@ void CAimbot::Run(CMoveData* moveData) {
         return;
     }
 
+    const ImVec2& screenSize = ImGui::GetIO().DisplaySize;
     CMoveData& lastMove = *moveData;
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
     CCSPlayerController* localController = cachedLocal->Get();
@@ -87,18 +88,19 @@ void CAimbot::Run(CMoveData* moveData) {
         return;
     }
 
-    if (g_Vars.m_EnableTriggerbot && !isFiring && weapon->m_nNextPrimaryAttackTick() < localController->m_nTickBase()) {
+    C_CSPlayerPawn* hitPawn = nullptr;
+    if (weapon->m_nNextPrimaryAttackTick() < localController->m_nTickBase()) {
         const Vector end = localPos + rcsAngle.ToVector().Normalized() * 4096.f;
         GameTrace_t trace;
-        if ( CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace) )
-        {
-            if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) {
-                C_CSPlayerPawn* hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);
-                static ConVar* mp_teammates_are_enemies = CCVar::Get()->GetCvarByName("mp_teammates_are_enemies");
-                if (mp_teammates_are_enemies->GetValue<bool>() ? true : hitPawn->m_iTeamNum() != localPawn->m_iTeamNum())
-                    lastMove.Scroll(IN_ATTACK);
-            }
-        }
+        if ( CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace) ) 
+            if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) 
+                hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);    
+    }
+
+    if (g_Vars.m_EnableTriggerbot && !isFiring && hitPawn) {
+        static ConVar* mp_teammates_are_enemies = CCVar::Get()->GetCvarByName("mp_teammates_are_enemies");
+        if (mp_teammates_are_enemies->GetValue<bool>() ? true : hitPawn->m_iTeamNum() != localPawn->m_iTeamNum())
+            lastMove.Scroll(IN_ATTACK);
     }
 
     const std::lock_guard<std::mutex> lock(CMatchCache::GetLock());
@@ -140,13 +142,21 @@ void CAimbot::Run(CMoveData* moveData) {
             continue;
         }
 
+        ImVec2 screenPos;
+        if (!CMath::Get().WorldToScreen(pos, screenPos)) {
+            cachedPlayer->Reset();
+            continue;
+        }
+
         Vector angle = CMath::Get().CalculateAngle(localPos, pos);
 
         cachedPlayer->visibleSince += CGlobalVars::Get()->intervalPerTick;
         cachedPlayer->dot = -pawn->m_angEyeAngles().ToVector().Normalized().DotProduct(angle.ToVector().Normalized());
         const float width = cachedPlayer->GetBBox().m_Maxs.x - cachedPlayer->GetBBox().m_Mins.x;
-        CFitts fitts(width, (pos - localPos).Length());
-        cachedPlayer->fitts = fitts.Compute(0.1f, 0.2f);
+
+        const ImVec2 screenDistance = screenPos - screenSize * 0.5f;
+        CFitts fitts(std::max(width, FLT_EPSILON), std::hypotf(screenDistance.x, screenDistance.y));
+        cachedPlayer->fitts = std::max(fitts.Compute(0.f, 0.2f), 0.f);
 
         const bool inDuel = cachedPlayer->dot >= g_Vars.m_ReactionTreshold;
 
@@ -157,6 +167,7 @@ void CAimbot::Run(CMoveData* moveData) {
             targetPos = pos;
             targetAngle = angle;
             currentFov = fov;
+            targetScreen = screenPos;
         }
     }
 
@@ -174,6 +185,11 @@ void CAimbot::Run(CMoveData* moveData) {
     const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f;
 
     if (target && shouldAim) {
+        if (hitPawn && currentFov <= g_Vars.m_DelayFov && hitPawn != target->Get()->m_hPawn().Get()) {
+            // prevent shoot
+            
+        }
+
         perfectAngle = targetAngle - punch * 2;
         perfectAngle.NormalizeAngle();
 
@@ -201,11 +217,29 @@ void CAimbot::Update() {
 }
 
 void CAimbot::Render() {
+    if (!CEngineClient::Get()->IsInGame()) return;
+
     auto drawList = CRenderer::GetBackgroundDrawList();
     if (!drawList) return;
 
+    const ImGuiIO& io = ImGui::GetIO();
+    const ImVec2 screenSize = io.DisplaySize;
+    const ImVec2 center = screenSize * 0.5f;
+
+    auto GetRadius = [&screenSize](float degrees, float fov = 90.f) {
+        float scale = std::tanf(CMath::Deg2Rad(degrees)) / std::tanf(CMath::Deg2Rad(fov * 0.5f));
+        return scale * screenSize.x * 0.5f;
+    };
+    
+    if (g_Vars.m_DrawFov) {
+        float r = GetRadius(g_Vars.m_AimFov) * 0.75f;
+        drawList->AddCircle(center, r, IM_COL32(255, 255, 255, 255));
+        r = GetRadius(g_Vars.m_DelayFov) * 0.75f;
+        drawList->AddCircle(center, r, IM_COL32(255, 255, 255, 255));
+    }
+
     if (target) {
-        drawList->AddCircle(targetScreen, 5.f, IM_COL32(255, 255, 255, 255));
+        // drawList->AddCircle(targetScreen, 5.f, IM_COL32(255, 255, 255, 255));
     }
 }
 

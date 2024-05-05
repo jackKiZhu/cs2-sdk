@@ -66,7 +66,7 @@ void CCachedPlayer::DrawESP() {
             drawList->AddText(textPos + ImVec2{1.f, 1.f}, IM_COL32(0, 0, 0, 255), playerName);
             drawList->AddText(textPos, IM_COL32(255, 255, 255, 255), playerName);
 
-            drawList->AddText(textPos + ImVec2{0.f, textSize.y}, IM_COL32(255, 255, 255, 255), std::format("dot: {:.1f}", dot).c_str());
+            drawList->AddText(textPos + ImVec2{0.f, textSize.y}, IM_COL32(255, 255, 255, 255), std::format("{:.1f}", fitts).c_str());
         }
     }
 

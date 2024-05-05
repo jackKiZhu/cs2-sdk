@@ -20,8 +20,8 @@ class CMath {
     Vector CalculateAngle(const Vector& src, const Vector& dst) const;
     float Fov(const Vector& angSrc, const Vector& angDst) const;
 
-    constexpr float Deg2Rad(float deg) const { return deg * ((float)M_PI / 180.f); }
-    constexpr float Rad2Deg(float rad) const { return rad * (180.f / (float)M_PI); }
+    constexpr static float Deg2Rad(float deg) { return deg * ((float)M_PI / 180.f); }
+    constexpr static float Rad2Deg(float rad) { return rad * (180.f / (float)M_PI); }
 
    private:
     VMatrix m_ViewMatrix;

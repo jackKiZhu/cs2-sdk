@@ -17,15 +17,17 @@ struct Vars_t {
     bool m_Use3DBoxes;
 
     bool m_EnableAimbot;
-    float m_AimFov = 30.f;
-    float m_KP = 0.06f;
-    float m_KI = 0.175f;
+    float m_AimFov = 9.5f;
+    float m_DelayFov = 2.f;
+    float m_KP = 0.03f;
+    float m_KI = 0.100f;
     float m_Damp = 0.45f;
     float m_ReactionTreshold = 0.85f;
     float m_Bonus = 0.5f;
+    bool m_DrawFov;
 
-    float m_RecoilX = 0.35f;
-    float m_RecoilY = 0.45f;
+    float m_RecoilX = 0.7f;
+    float m_RecoilY = 0.4f;
 
     bool m_EnableTriggerbot;
 

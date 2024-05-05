@@ -3,6 +3,7 @@
 #include <renderer/renderer.hpp>
 #include <logger/logger.hpp>
 
+#include <hacks/aimbot/aimbot.hpp>
 #include <hacks/esp/esp.hpp>
 
 #include <menu/menu.hpp>
@@ -16,4 +17,5 @@ void CRenderer::NewFrame() {
 
     CMenu::Get().Render();
     CESP::Get().Render();
+    CAimbot::Get().Render();
 }
