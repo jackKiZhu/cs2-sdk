@@ -22,6 +22,7 @@ class CCachedBaseEntity {
 
     auto GetHandle() const { return m_Handle; }
     auto SetHandle(CBaseHandle handle) { m_Handle = handle; }
+    auto GetBBox() const { return m_BBox; }
 
     auto GetIndex() const { return m_Handle.GetEntryIndex(); }
     auto GetSerial() const { return m_Handle.GetSerialNumber(); }

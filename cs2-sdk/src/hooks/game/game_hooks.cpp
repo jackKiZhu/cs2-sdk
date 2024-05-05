@@ -70,9 +70,7 @@ static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToV
 
 static CHook g_CreateMove;
 static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
-    CInputHandler::Get().Poll(rcx);
-
-    if (rcx->subtickMoves.m_Size == 0) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
+    if (rcx->moves.m_Size == 0) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
     if (!cachedLocal) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
     CCSPlayerController* localController = cachedLocal->Get();
@@ -80,30 +78,35 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
     if (!localPawn) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
 
-    //if (CInputHandler::Get().IsHeld(IN_JUMP)) CLogger::Log("Jump down");
-    //if (CInputHandler::Get().IsPressed(IN_JUMP)) CLogger::Log("Jump pressed");
-    //if (CInputHandler::Get().IsReleased(IN_JUMP)) CLogger::Log("Jump released");
+    CMoveData* move = rcx->moves.AtPtr(rcx->moves.m_Size - 1);
+
+    // if (CInputHandler::Get().IsHeld(IN_JUMP)) CLogger::Log("Jump down");
+    // if (CInputHandler::Get().IsPressed(IN_JUMP)) CLogger::Log("Jump pressed");
+    // if (CInputHandler::Get().IsReleased(IN_JUMP)) CLogger::Log("Jump released");
+
+    CInputHandler::Get().Poll(rcx);
 
     const bool grounded = localPawn->m_hGroundEntity().Get() != nullptr;
-    const int lastIndex = rcx->subtickMoves.m_Size - 1;
 
     // override the last subtick info
 
-    CMoveData* move = rcx->subtickMoves.AtPtr(lastIndex);
     CAimbot::Get().Run(move);
 
     #if 0
     static bool shouldInputJump = false;
     if (!grounded) {
-        shouldInputJump = CInputHandler::Get().Release(IN_JUMP) || shouldInputJump;
+        shouldInputJump = CInputHandler::Get().IsReleased(IN_JUMP) || shouldInputJump;
     } else {
-        if ((CInputHandler::Get().IsHeld(IN_JUMP) || CInputHandler::Get().IsHeld(IN_ATTACK2)) && shouldInputJump) {
+        if (CInputHandler::Get().IsHeld(IN_JUMP)) {
             CInputHandler::Get().Press(IN_JUMP, 0.9f);
             CLogger::Log("Inputting jump at subtick {}", move->subtickCount - 1);
             shouldInputJump = false;
         }
     }
     #endif
+
+    // CInputHandler::Get().Dump();
+
 
     // static auto GetBool = signatures::GetBool.GetPtrAs<bool* (*)(uintptr_t, int)>();
     // if (GetBool) {
@@ -153,6 +156,55 @@ static void* hkSetModel(void* rcx, const char* model) {
 static CHook g_IsLoadoutAllowed;
 static bool hkIsLoadoutAllowed() { return true; }
 
+static CHook g_SetButtonStates;
+static void hkSetButtonStates(ButtonState_t* state, uint64_t button, uint8_t flags) { 
+  uint64_t forceHeld = 0, forceChanged = 0, forceScroll = 0;
+  if (flags & 1) forceHeld = button;
+  if (flags & 2) forceChanged = button;
+  if (flags & 4) forceScroll = button;
+
+  if (false && button & IN_JUMP) {
+      CLogger::Log("Held: {}, Changed: {}, Scroll: {}", forceHeld, forceChanged, forceScroll);
+  }
+
+  state->value = state->value & ~button | forceHeld;
+  state->valueChanged = state->valueChanged & ~button | forceChanged;
+  state->valueScroll = state->valueScroll & ~button | forceScroll;
+
+  if (false && button & IN_JUMP) {
+      CLogger::Log("input| Held: {}, Changed: {}, Scroll: {} prev:{}", CCSGOInput::Get()->moveData.buttonsHeld,
+                   CCSGOInput::Get()->moveData.buttonsChanged, CCSGOInput::Get()->moveData.buttonsScroll,
+                   CCSGOInput::Get()->moveData.prevButtonsHeld);
+      CLogger::Log("Held: {}, Changed: {}, Scroll: {}", state->value, state->valueChanged, state->valueScroll);
+      CLogger::Log("=====================================================");
+  }
+}
+
+static CHook g_MoveData;
+static void hkMoveData(CCSGOInput* rcx, int slot) { 
+  auto c = rcx->moves.m_Size;
+  for ( int i = 0; i < c; i++ )
+  {
+    CMoveData* move = rcx->moves.AtPtr(i);
+      if (move && move->subtickCount)
+    {
+      CLogger::Log("pre subtick: {} {:#x} {:#x} {:#x}", move->subtickCount, move->buttonsHeld, move->buttonsChanged, move->buttonsScroll);
+
+    }
+  }
+
+  g_MoveData.CallOriginal<void>(rcx, slot); 
+
+  c = rcx->moves.m_Size;
+  for (int i = 0; i < c; i++) {
+      CMoveData* move = rcx->moves.AtPtr(i);
+      if (move && move->subtickCount) {
+          CLogger::Log("post subtick: {} {:#x} {:#x} {:#x}", move->subtickCount, move->buttonsHeld, move->buttonsChanged, move->buttonsScroll);
+      }
+  }  
+
+}
+
 void CGameHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
@@ -169,4 +221,6 @@ void CGameHooks::Initialize() {
     g_FireEventClientSide.Hook(signatures::FireEventClientSide.GetPtrAs<void*>(), SDK_HOOK(hkFireEventClientSide));
     g_SetModel.Hook(signatures::SetModel.GetPtrAs<void*>(), SDK_HOOK(hkSetModel));
     g_IsLoadoutAllowed.Hook(signatures::IsLoadoutAllowed.GetPtrAs<void*>(), SDK_HOOK(hkIsLoadoutAllowed));
+    //g_SetButtonStates.Hook(signatures::SetButtonStates.GetPtrAs<void*>(), SDK_HOOK(hkSetButtonStates));
+    //g_MoveData.Hook(signatures::MoveData.GetPtrAs<void*>(), SDK_HOOK(hkMoveData));
 }

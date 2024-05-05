@@ -54,7 +54,7 @@ void CESP::Update() {
     const auto& cachedEntities = CMatchCache::GetCachedEntities();
     for (const auto& it : cachedEntities) {
         const auto& cachedEntity = it.second;
-        if (!IsEnabled() || !cachedEntity->IsValid()) {
+        if (!cachedEntity->IsValid()) {
             cachedEntity->InvalidateDrawInfo();
             continue;
         }

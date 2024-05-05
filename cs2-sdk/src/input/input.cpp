@@ -4,29 +4,56 @@
 #include <logger/logger.hpp>
 
 void CInputHandler::Poll(CCSGOInput* input) {
-    [[unlikely]]
-    if (input->subtickMoves.m_Size == 0) return;
-
-    move = input->subtickMoves.AtPtr(input->subtickMoves.m_Size - 1);
-    [[unlikely]]
-    if (!move) return;
-
     buttonsScroll = 0;
     prevButtonsHeld = buttonsHeld;
 
-    uint64_t lastButtonPressed = 0;
-    for (uint32_t i = 0; i < move->subtickCount; ++i) {
-        CSubtickInput& subInput = move->subtickMoves[i];
-        if (subInput.held) {
-            buttonsHeld |= subInput.button;
-            lastButtonPressed = subInput.button;
-        } else {         
-            buttonsHeld &= ~subInput.button;
-            if ( lastButtonPressed == subInput.button )
-            {
-                lastButtonPressed = 0;
-                buttonsScroll |= subInput.button;
+    return;
+
+    [[unlikely]] if (input->moves.m_Size == 0)
+        return;
+
+    for (int i = 0; i < input->moves.m_Size; ++i) {
+        move = input->moves.AtPtr(i);
+        [[unlikely]] if (!move)
+            continue;
+
+        uint64_t pressed = 0;
+
+        uint64_t lastButton = 0;
+        for (uint32_t j = 0; j < move->subtickCount; ++j) {
+            CSubtickInput& subInput = move->subtickMoves[j];
+            if (subInput.when >= 1.f) break;
+
+            if (subInput.held) {
+                lastButton = subInput.button;
+                pressed |= subInput.button;
+            } else {
+                pressed &= ~subInput.button;
+                if (lastButton == subInput.button) buttonsScroll |= subInput.button;
+
+                // erase the subinput
+                if (move->subtickCount - j > 0)
+                    memmove(&subInput, &move->subtickMoves[j + 1], sizeof(CSubtickInput) * (move->subtickCount - j));
+                move->subtickCount--;
             }
+        }
+
+        buttonsHeld |= pressed;
+
+        for (uint32_t j = 0; j < move->subtickCount; ++j) {
+            CSubtickInput& subInput = move->subtickMoves[j];
+            if (subInput.when >= 1.f) break;
+            if (move->subtickCount > 11) break;
+
+            if (subInput.held && pressed & subInput.button) {
+                CSubtickInput& releaseInput = move->subtickMoves[move->subtickCount++];
+                releaseInput.button = subInput.button;
+                releaseInput.held = false;
+                releaseInput.when = subInput.when;
+                move->buttonsHeld &= ~subInput.button;
+                move->buttonsChanged |= subInput.button;
+                move->buttonsScroll |= subInput.button;
+            } 
         }
     }
 }
@@ -35,30 +62,26 @@ void CInputHandler::Press(uint64_t button, float when) {
     if (!move) return;
 
     // we always need to input 2 subtick inputs
-    [[unlikely]]
-    if ( move->subtickCount > 10 )
-    {
+    [[unlikely]] if (move->subtickCount > 10) {
         CLogger::Log("Too many subticks already queued, input ignored");
         return;
     }
 
-    if (move->subtickCount > 0) 
-        when = move->subtickMoves[move->subtickCount - 1].when;
-    
+    if (move->subtickCount > 0) when = move->subtickMoves[move->subtickCount - 1].when;
+
     CSubtickInput& pressInput = move->subtickMoves[move->subtickCount++];
     CSubtickInput& releaseInput = move->subtickMoves[move->subtickCount++];
 
     pressInput.button = releaseInput.button = button;
 
-    if (IsHeld(button)) {
+    if (false && IsHeld(button)) {
         // interupt hold
         pressInput.held = false;
         pressInput.when = when + 0.05f;
         // press it back down
         releaseInput.held = true;
         releaseInput.when = when + 0.1f;
-    } 
-    else {
+    } else {
         // press it
         pressInput.held = true;
         pressInput.when = when;
@@ -77,7 +100,7 @@ bool CInputHandler::Release(uint64_t button) {
         if (subInput.button != button) continue;
         if (subInput.held) {
             if (move->subtickCount - i > 0)
-              memmove(&subInput, &move->subtickMoves[i + 1], sizeof(CSubtickInput) * (move->subtickCount - i));
+                memmove(&subInput, &move->subtickMoves[i + 1], sizeof(CSubtickInput) * (move->subtickCount - i));
             move->subtickCount--;
             i--;
             removed = true;
@@ -88,7 +111,7 @@ bool CInputHandler::Release(uint64_t button) {
 
     if (!IsReleased(button)) {
         if (move->subtickCount >= 12) {
-            CLogger::Log("Too many subticks already queued, input ignored");  
+            CLogger::Log("Too many subticks already queued, input ignored");
             return false;
         }
 
@@ -99,4 +122,15 @@ bool CInputHandler::Release(uint64_t button) {
     }
 
     return removed;
+}
+
+void CInputHandler::Dump() {
+    if (!move) return;
+    if (move->subtickCount < 1) return;
+    CLogger::Log("================================================");
+    CLogger::Log("Subtick count: {}", move->subtickCount);
+    for (uint32_t i = 0; i < move->subtickCount; ++i) {
+        CSubtickInput& subInput = move->subtickMoves[i];
+        CLogger::Log("Subtick {}: button 0x{:X}, held {}, when {:.2f}", i, subInput.button, subInput.held, subInput.when);
+    }
 }

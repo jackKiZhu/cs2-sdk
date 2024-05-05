@@ -15,6 +15,7 @@
 #include <bindings/weapon.hpp>
 
 #include <math/math.hpp>
+#include <math/fitts.hpp>
 
 #include <logger/logger.hpp>
 
@@ -124,21 +125,18 @@ void CAimbot::Run(CMoveData* moveData) {
         if (!pawn->GetHitboxPosition(0, pos)) continue;
 
         if (IsInSmoke(localPos, pos)) {
-            cachedPlayer->visibleSince = 0.f;
-            cachedPlayer->dot = 0.f;
+            cachedPlayer->Reset();
             continue;
         }
 
         GameTrace_t trace;
         if (!CEngineTrace::Get()->TraceShape(localPos, pos, localPawn, 0x1C1003, 4, &trace)) {
-            cachedPlayer->visibleSince = 0.f;
-            cachedPlayer->dot = 0.f;
+            cachedPlayer->Reset();
             continue;
         }
 
         if (trace.fraction < 0.97f) {
-            cachedPlayer->visibleSince = 0.f;
-            cachedPlayer->dot = 0.f;
+            cachedPlayer->Reset();
             continue;
         }
 
@@ -146,8 +144,13 @@ void CAimbot::Run(CMoveData* moveData) {
 
         cachedPlayer->visibleSince += CGlobalVars::Get()->intervalPerTick;
         cachedPlayer->dot = -pawn->m_angEyeAngles().ToVector().Normalized().DotProduct(angle.ToVector().Normalized());
+        const float width = cachedPlayer->GetBBox().m_Maxs.x - cachedPlayer->GetBBox().m_Mins.x;
+        CFitts fitts(width, (pos - localPos).Length());
+        cachedPlayer->fitts = fitts.Compute(0.1f, 0.2f);
 
-        if (cachedPlayer->visibleSince < 0.15f) continue;
+        const bool inDuel = cachedPlayer->dot >= g_Vars.m_ReactionTreshold;
+
+        if (cachedPlayer->visibleSince < 0.15f && !inDuel) continue;
         const float fov = CMath::Get().Fov(rcsAngle, angle);
         if (fov < currentFov) {
             target = cachedPlayer;
@@ -161,8 +164,9 @@ void CAimbot::Run(CMoveData* moveData) {
         lastTargetSwitchTime = CGlobalVars::Get()->currentTime;
 
     oldTarget = target;
+    const bool inDuel = target ? target->dot >= g_Vars.m_ReactionTreshold : false;
 
-    if (const bool inputDown = (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2); inputDown)
+    if (const bool inputDown = (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2); inputDown || inDuel)
         lastActiveTime = CGlobalVars::Get()->currentTime;
 
     const bool isSwitching = lastTargetSwitchTime - CGlobalVars::Get()->currentTime <= 0.15f;

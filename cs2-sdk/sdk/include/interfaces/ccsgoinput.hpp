@@ -22,10 +22,10 @@ enum Buttons {
 };
 
 struct ButtonState_t {
-    PAD(0x8);
-    uint64_t value;
-    uint64_t valueChanged;
-    uint64_t valueScroll;
+    PAD(0x8); // 0x0
+    uint64_t value; // 0x8
+    uint64_t valueChanged; // 0x10
+    uint64_t valueScroll; // 0x18
 };
 static_assert(sizeof(ButtonState_t) == 0x20);
 
@@ -34,8 +34,11 @@ struct CSubtickInput {
     float when;                       // 0x0 [0.f - 1.f]
     PAD(0x4);                         // 0x4
     uint64_t button;                  // 0x8
-    uint32_t held;                    // 0x10 acts weirdly
-    uint32_t analog_sidemove_delta;   // 0x14 acts weirdly
+    union {
+        bool held;                 // 0x10
+        float forwardDelta;  // 0x10 if button is 0
+    };
+    uint32_t sidemoveDelta;  // 0x14
 };                                    // Size: 0x18
 
 #pragma pack(push, 1)
@@ -50,7 +53,7 @@ struct CMoveData {
     uint32_t subtickCount;           // 0x34
     CSubtickInput subtickMoves[12];  // 0x38
     Vector viewAngles;               // 0x158
-    float time;                      // 0x164
+    float fraction;                  // 0x164
 
     void Scroll(uint64_t button) {
         if (subtickCount <= 10) {
@@ -60,8 +63,7 @@ struct CMoveData {
             subtickMoves[subtickCount - 2] = subtickMoves[subtickCount - 1] = CSubtickInput{
                 .when = 0.95f,
                 .button = button,
-                .held = 1,
-                .analog_sidemove_delta = 0,
+                .held = true
             };
             subtickMoves[subtickCount - 1].held = 0;
         }
@@ -183,13 +185,13 @@ class CCSGOInput {
     Vector thirdPersonAngle;  // 0x5208
     PAD(0x10);
     int sequenceNumber;             // 0x5224 (0x4)
-    int sequenceNumber2;            // 0x5228 (0x4)
+    int moveDataCount;              // 0x5228 (0x4)
     PAD(0x4);                       // 0x522C (0x4)
     double platFloatTime;           // 0x5230 (0x8)
     CMoveData moveData;             // 0x5238 (0x158)
     uint32_t lastSwitchWeaponTick;  // 0x53a0
     PAD(0x84);
-    CUtlVector<CMoveData> subtickMoves;  // 0x5428
+    CUtlVector<CMoveData> moves;  // 0x5428
 
     CUserCmd* GetUserCmd();
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);

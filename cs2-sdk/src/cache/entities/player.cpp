@@ -98,6 +98,12 @@ void CCachedPlayer::CalculateDrawInfo() {
     }
 }
 
+void CCachedPlayer::Reset() {
+    visibleSince = 0.f;
+    dot = 0.f;
+    fitts = 0.f;
+}
+
 CCachedPlayer::Team CCachedPlayer::GetTeam() {
     CCSPlayerController* controller = Get();
     if (!controller) return Team::UNKNOWN;

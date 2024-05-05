@@ -286,6 +286,7 @@
     <ClInclude Include="include\input\input.hpp" />
     <ClInclude Include="include\instance\instance.hpp" />
     <ClInclude Include="include\logger\logger.hpp" />
+    <ClInclude Include="include\math\fitts.hpp" />
     <ClInclude Include="include\math\math.hpp" />
     <ClInclude Include="include\hacks\aimbot\pid.hpp" />
     <ClInclude Include="include\math\types\bbox.hpp" />

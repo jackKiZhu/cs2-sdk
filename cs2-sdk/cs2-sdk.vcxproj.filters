@@ -205,5 +205,6 @@
     <ClInclude Include="sdk\include\bindings\vdata.hpp" />
     <ClInclude Include="sdk\include\types\model.hpp" />
     <ClInclude Include="include\input\input.hpp" />
+    <ClInclude Include="include\math\fitts.hpp" />
   </ItemGroup>
 </Project>

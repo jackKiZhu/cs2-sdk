@@ -15,6 +15,7 @@ class CCachedPlayer : public CCachedBaseEntity {
     bool IsValid() override;
     void DrawESP() override;
     void CalculateDrawInfo() override;
+    void Reset();
 
     Team GetTeam();
     bool IsEnemyWithTeam(Team team);
@@ -22,4 +23,5 @@ class CCachedPlayer : public CCachedBaseEntity {
 
     float visibleSince;
     float dot;
+    float fitts;
 };

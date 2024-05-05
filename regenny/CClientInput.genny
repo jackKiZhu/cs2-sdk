@@ -1,11 +1,11 @@
 import "types.genny"
 import "CUserCmd.genny"
 
-struct CSubTickMove 0x18
+struct CSubInput 0x18
 {
     float when;
-    uint64_t lastPressedButtons @ 0x8
-    float analog_forward_delta @ 0x10
+    uint64_t button @ 0x8
+    uint32_t held @ 0x10
     float analog_sidemove_delta @ 0x14
 }
 
@@ -17,22 +17,17 @@ struct CSubTickMoveData 0x168
     uint32_t unk_0x160 @ 0x160
 }
 
-struct ButtonState
+struct CMoveData 0x168
 {
-    uint64_t held
+	uint64_t held
     uint64_t changed
     uint64_t scroll
     uint64_t prevHeld
-}
-
-struct CMoveData 0x168
-{
-    ButtonState buttonState
     Vector3D moves
     int32_t mouseDx
     int32_t mouseDy
     uint32_t subtickCount
-    CSubTickMove subtickMove[12]
+    CSubInput subtickMove[12]
     Angle viewangles
     float time
 }
@@ -49,13 +44,13 @@ struct CClientInput 0x6000
     bool inThirdPerson @ 0x5201
     Angle tihrdPersonAngle @ 0x5208
 
-    uint32_t sequenceNumber @ 0x5224
-    uint32_t sequenceNumber2 @ 0x5228
+    int sequenceNumber @ 0x5224
+    int sequenceNumber2 @ 0x5228
 
     double platFloatTime @ 0x5230
     CMoveData moveData @ 0x5238
     uint32_t last_switch_weapon_tick @ 0x53a0
 
     uint32_t total_subtick_data @ 0x5428
-    CMoveDataArray* sub_tick_moves @ 0x5430
+    CMoveData* sub_tick_moves @ 0x5430
 }
