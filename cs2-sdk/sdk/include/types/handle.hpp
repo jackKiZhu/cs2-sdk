@@ -33,3 +33,19 @@ class CHandle : public CBaseHandle {
    public:
     auto Get() const { return reinterpret_cast<T*>(CBaseHandle::Get()); }
 };
+
+struct ResourceBinding_t {
+    void* data;
+};
+
+template <typename T>
+class CStrongHandle
+{
+   public:
+    CStrongHandle() : m_Binding(nullptr) {}
+    CStrongHandle(const ResourceBinding_t* binding) : m_Binding(binding) {}
+
+    T* Get() const { return reinterpret_cast<T*>(m_Binding->data); }
+   private:
+    const ResourceBinding_t* m_Binding;
+};

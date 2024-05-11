@@ -175,7 +175,7 @@ void CAimbot::Run(CMoveData* moveData) {
         lastTargetSwitchTime = CGlobalVars::Get()->currentTime;
 
     oldTarget = target;
-    const bool inDuel = target ? target->dot >= g_Vars.m_ReactionTreshold : false;
+    const bool inDuel = g_Vars.m_EnableInDuel && (target ? target->dot >= g_Vars.m_ReactionTreshold : false);
 
     if (const bool inputDown = (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2); inputDown || inDuel)
         lastActiveTime = CGlobalVars::Get()->currentTime;

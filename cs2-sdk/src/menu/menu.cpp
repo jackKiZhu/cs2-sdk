@@ -119,6 +119,7 @@ void CMenu::RenderMainMenu() {
 
         ImGui::SeparatorText("Aimbot");
         ImGui::Checkbox("Aimbot", &g_Vars.m_EnableAimbot);
+        ImGui::Checkbox("Enable In Duel", &g_Vars.m_EnableInDuel);
         ImGui::SliderFloat("Aimbot FOV", &g_Vars.m_AimFov, 0.f, 180.f);
         ImGui::SliderFloat("Delay FOV", &g_Vars.m_DelayFov, 0.f, 180.f);
         ImGui::SliderFloat("KP", &g_Vars.m_KP, 0.f, 1.f);

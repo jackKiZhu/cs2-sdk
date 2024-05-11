@@ -256,4 +256,26 @@ namespace signatures {
                                 {
                                     {SDK_SIG("40 53 56 41 56 48 83 EC ? 48 8B F1 48 63 CA")},
                                 });
+
+       CSigScan MemAlloc("g_pMemAlloc", CConstants::CLIENT_LIB,
+                         {
+                             {SDK_SIG("48 8B 05 ? ? ? ? 48 8B 08 48 8B 01 FF 50 ? 45 33 E4"), [](CPointer& ptr) { ptr.Absolute(3, 0); }},
+                         });
+
+       CSigScan FindKeyVar("FindKeyVar", CConstants::PARTICLES_LIB,
+                         {
+                             {SDK_SIG("48 89 5C 24 ? 57 48 81 EC ? ? ? ? 33 C0 8B DA")},
+                         });
+
+       CSigScan SetMaterialShaderType("SetMaterialShaderType", CConstants::PARTICLES_LIB,
+                         {
+                             {SDK_SIG("E8 ? ? ? ? 48 8D 05 ? ? ? ? C7 44 24 ? ? ? ? ? 41 B1 ? 48 89 44 24 ? 4C 8B C7 48 8D 54 24 ? 48 8B CE"), [](CPointer& ptr) { ptr.Absolute(1, 0); }},
+                         });
+
+       CSigScan SetMaterialFunction(
+           "SetMaterialFunction", CConstants::PARTICLES_LIB,
+           {
+               {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 54 41 56 41 57 48 83 EC ? 0F B6 01 45 0F B6 F9 8B 2A 48 8B F9")},
+           });
+
 }  // namespace signatures

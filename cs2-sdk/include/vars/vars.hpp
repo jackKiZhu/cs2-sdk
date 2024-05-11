@@ -17,6 +17,7 @@ struct Vars_t {
     bool m_Use3DBoxes;
 
     bool m_EnableAimbot;
+    bool m_EnableInDuel;
     float m_AimFov = 9.5f;
     float m_DelayFov = 2.f;
     float m_KP = 0.03f;

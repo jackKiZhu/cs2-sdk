@@ -111,6 +111,8 @@
     <ClCompile Include="api\src\hook\hook.cpp" />
     <ClCompile Include="api\src\module\module.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
+    <ClCompile Include="sdk\src\interfaces\memalloc.cpp" />
+    <ClCompile Include="sdk\src\interfaces\materialsystem.cpp" />
     <ClCompile Include="src\input\input.cpp" />
     <ClCompile Include="sdk\src\bindings\vdata.cpp" />
     <ClCompile Include="sdk\src\bindings\econentity.cpp" />
@@ -343,8 +345,10 @@
     <ClInclude Include="sdk\include\interfaces\csgcclientsystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\localize.hpp" />
     <ClInclude Include="sdk\include\interfaces\materialsystem.hpp" />
+    <ClInclude Include="sdk\include\interfaces\memalloc.hpp" />
     <ClInclude Include="sdk\include\interfaces\resourcesystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\viewrender.hpp" />
+    <ClInclude Include="sdk\include\types\color.hpp" />
     <ClInclude Include="sdk\include\types\econitem.hpp" />
     <ClInclude Include="sdk\include\types\econitemdefinition.hpp" />
     <ClInclude Include="sdk\include\types\econitemschema.hpp" />

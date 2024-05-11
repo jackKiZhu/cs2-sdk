@@ -44,4 +44,8 @@ namespace signatures {
     extern CSigScan LineGoesThroughSmoke;
     extern CSigScan SetButtonStates;
     extern CSigScan MoveData;
+    extern CSigScan MemAlloc;
+    extern CSigScan FindKeyVar;
+    extern CSigScan SetMaterialShaderType;
+    extern CSigScan SetMaterialFunction;
 }  // namespace signatures
