@@ -26,6 +26,7 @@ class C_BasePlayerPawn : public C_BaseCombatCharacter {
    public:
     SCHEMA(CCSPlayer_WeaponServices*, m_pWeaponServices, "C_BasePlayerPawn", "m_pWeaponServices");
     SCHEMA(CCSPlayer_ObserverServices*, m_pObserverServices, "C_BasePlayerPawn", "m_pObserverServices");
+    SCHEMA(CPlayer_CameraServices*, m_pCameraServices, "C_BasePlayerPawn", "m_pCameraServices");
 
     C_CSWeaponBaseGun* GetActiveWeapon();
 };
@@ -41,7 +42,6 @@ class C_CSPlayerPawnBase : public C_BasePlayerPawn {
     SCHEMA(Vector, m_angEyeAngles, "C_CSPlayerPawnBase", "m_angEyeAngles");
 
     SCHEMA(CCSPlayer_ViewModelServices*, m_pViewModelServices, "C_CSPlayerPawnBase", "m_pViewModelServices");
-    SCHEMA(CPlayer_CameraServices*, m_pCameraServices, "C_CSPlayerPawnBase", "m_pCameraServices");
 
     bool IsPlayerPawn();
     bool IsObserverPawn();

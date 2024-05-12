@@ -259,7 +259,8 @@ namespace signatures {
 
        CSigScan MemAlloc("g_pMemAlloc", CConstants::CLIENT_LIB,
                          {
-                             {SDK_SIG("48 8B 05 ? ? ? ? 48 8B 08 48 8B 01 FF 50 ? 45 33 E4"), [](CPointer& ptr) { ptr.Absolute(3, 0); }},
+                             {SDK_SIG("48 8B 05 ? ? ? ? 48 8B 08 48 8B 01 FF 50 ? 45 33 E4"),
+                              [](CPointer& ptr) { ptr.Absolute(3, 0).Dereference(); }},
                          });
 
        CSigScan FindKeyVar("FindKeyVar", CConstants::PARTICLES_LIB,
@@ -276,6 +277,12 @@ namespace signatures {
            "SetMaterialFunction", CConstants::PARTICLES_LIB,
            {
                {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 54 41 56 41 57 48 83 EC ? 0F B6 01 45 0F B6 F9 8B 2A 48 8B F9")},
+           });
+
+       CSigScan DrawObject(
+           "DrawObject", CConstants::SCENESYSTEM_LIB,
+           {
+               {SDK_SIG("48 8B C4 48 89 50 ? 55 41 56")},
            });
 
 }  // namespace signatures

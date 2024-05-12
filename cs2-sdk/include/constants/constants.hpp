@@ -16,4 +16,5 @@ class CConstants {
     static constexpr auto LOCALIZE_LIB = platform::Constant("localize.dll", "localize.so");
     static constexpr auto MATERIALSYSTEM_LIB = platform::Constant("materialsystem2.dll", "materialsystem2.so");
     static constexpr auto PARTICLES_LIB = platform::Constant("particles.dll", "particles.so");
+    static constexpr auto SCENESYSTEM_LIB = platform::Constant("scenesystem.dll", "scenesystem.so");
 };

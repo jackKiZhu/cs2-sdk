@@ -48,4 +48,5 @@ namespace signatures {
     extern CSigScan FindKeyVar;
     extern CSigScan SetMaterialShaderType;
     extern CSigScan SetMaterialFunction;
+    extern CSigScan DrawObject;
 }  // namespace signatures

@@ -3,6 +3,7 @@
 #include <array>
 
 #include <types/handle.hpp>
+#include <types/keyvalues.hpp>
 
 class CMeshData;
 class CMaterial2;
@@ -28,6 +29,8 @@ class CChams {
    
     bool OnDrawObject(void* animatableSceneObjectDesc, void* dx11, CMeshData* meshDraw, int dataCount, void* sceneView, void* sceneLayer,
                       void* unk, void* unk2);
+
+    CStrongHandle<CMaterial2> CreateMaterial(const char* name);
 
    private:
     CMaterial2* CreateMaterial(const char* name, const char* materialVMAT, const char* shaderType, bool blendMode, bool translucent, bool disableZ);

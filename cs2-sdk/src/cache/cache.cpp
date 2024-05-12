@@ -137,12 +137,8 @@ CCachedPlayer* CMatchCache::GetLocalPlayer() {
 
 C_CSPlayerPawn* CMatchCache::GetLocalPawn() {
     CCachedPlayer* localPlayer = GetLocalPlayer();
-    if (!localPlayer) return nullptr;
-
-    CCSPlayerController* controller = localPlayer->Get();
-    if (!controller) return nullptr;
-
-    return controller->m_hPawn().Get();
+    if (!localPlayer || !localPlayer->IsValid()) return nullptr;
+    return localPlayer->Get()->m_hPawn().Get();
 }
 
 CMatchCache::CachedEntityPtr CMatchCache::CreateCachedEntityPointer(C_BaseEntity* ent) {

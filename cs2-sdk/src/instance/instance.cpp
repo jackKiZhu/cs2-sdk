@@ -6,6 +6,8 @@
 #include <memory/memory.hpp>
 #include <hooks/hooks.hpp>
 
+#include <hacks/chams/chams.hpp>
+
 #include <constants/constants.hpp>
 
 #ifdef _WIN32
@@ -21,6 +23,7 @@ void CInstance::Initialize() {
 
     auto start = std::chrono::high_resolution_clock::now();
     CMemory::Get().Initialize();
+    CChams::Get().Initialize();
     CHooks::Get().Initialize();
     auto end = std::chrono::high_resolution_clock::now();
 

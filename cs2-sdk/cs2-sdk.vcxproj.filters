@@ -93,6 +93,7 @@
     <ClCompile Include="sdk\src\interfaces\materialsystem.cpp" />
     <ClCompile Include="sdk\src\interfaces\memalloc.cpp" />
     <ClCompile Include="src\hacks\visuals\visuals.cpp" />
+    <ClCompile Include="sdk\src\types\keyvalues.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -213,5 +214,6 @@
     <ClInclude Include="sdk\include\types\color.hpp" />
     <ClInclude Include="sdk\include\bindings\cameraservices.hpp" />
     <ClInclude Include="include\hacks\visuals\visuals.hpp" />
+    <ClInclude Include="sdk\include\types\keyvalues.hpp" />
   </ItemGroup>
 </Project>

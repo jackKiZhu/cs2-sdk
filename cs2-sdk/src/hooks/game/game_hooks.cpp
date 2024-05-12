@@ -9,6 +9,7 @@
 #include <constants/constants.hpp>
 
 #include <hacks/esp/esp.hpp>
+#include <hacks/chams/chams.hpp>
 #include <cache/cache.hpp>
 #include <menu/menu.hpp>
 #include <math/math.hpp>
@@ -27,6 +28,7 @@
 #include <interfaces/ccsgoinput.hpp>
 #include <interfaces/inventory.hpp>
 #include <interfaces/viewrender.hpp>
+#include <interfaces/materialsystem.hpp>
 
 #include <hacks/aimbot/aimbot.hpp>
 #include <hacks/visuals/visuals.hpp>
@@ -207,6 +209,17 @@ static void hkMoveData(CCSGOInput* rcx, int slot) {
 
 }
 
+static CHook g_DrawObject;
+static void hkDrawObject(void* animatableSceneObjectDesc, void* dx11, CMeshData* meshDraw, int dataCount, void* sceneView, void* sceneLayer, void* unk, void* unk2) {
+    if (!CEngineClient::Get()->IsInGame())
+      return g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
+
+    if (!CChams::Get().OnDrawObject(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2)) 
+      return g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
+
+    g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
+}
+
 void CGameHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
@@ -225,4 +238,5 @@ void CGameHooks::Initialize() {
     g_IsLoadoutAllowed.Hook(signatures::IsLoadoutAllowed.GetPtrAs<void*>(), SDK_HOOK(hkIsLoadoutAllowed));
     //g_SetButtonStates.Hook(signatures::SetButtonStates.GetPtrAs<void*>(), SDK_HOOK(hkSetButtonStates));
     //g_MoveData.Hook(signatures::MoveData.GetPtrAs<void*>(), SDK_HOOK(hkMoveData));
+    g_DrawObject.Hook(signatures::DrawObject.GetPtrAs<void*>(), SDK_HOOK(hkDrawObject));
 }

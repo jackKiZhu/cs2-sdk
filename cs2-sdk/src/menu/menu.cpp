@@ -133,9 +133,7 @@ void CMenu::RenderMainMenu() {
         ImGui::Checkbox("Triggerbot", &g_Vars.m_EnableTriggerbot);
         ImGui::Spacing();
 
-        ImGui::SliderFloat("Min exposure", &g_Vars.m_MinExposure, 0.f, g_Vars.m_MaxExposure);
-        ImGui::SliderFloat("Max exposure", &g_Vars.m_MaxExposure, g_Vars.m_MinExposure, 10.f);
-
+        ImGui::SliderFloat("World brightness", &g_Vars.m_NightMode, 0.f, 1.f);
 
         if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CSkinChanger::Get().Shutdown(), CInstance::Get().FreeLibrary();
     }

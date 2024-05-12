@@ -51,6 +51,6 @@ class CMaterialSystem {
     static CMaterialSystem* Get();
 
     CMaterial2*** FindOrCreateFromResource(CMaterial2*** out, const char* materialName);
-    CMaterial2** CreateMaterial(CMaterial2*** out, const char* materialName, CMeshData* data);
+    CMaterial2** CreateMaterial(void* out, const char* materialName, void* data, unsigned int unk, uint8_t unk2);
     void SetCreateDataByMaterial(CMaterial2*** const in, const void* data);
 };

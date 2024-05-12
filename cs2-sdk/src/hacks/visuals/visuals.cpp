@@ -8,25 +8,22 @@
 #include <vars/vars.hpp>
 
 void CVisuals::OnFrameStageNotify(int stage) {
-    if (stage != 6) return;
-
     C_CSPlayerPawn* pawn = CMatchCache::Get().GetLocalPawn();
     if (!pawn) return;
 
     CPlayer_CameraServices* cameraSvc = pawn->m_pCameraServices();
     if (!cameraSvc) return;
 
-    if (g_Vars.m_MinExposure == 0.f || g_Vars.m_MaxExposure == 0.f) return;
-
-    auto& ppVolumes = cameraSvc->m_PostProcessingVolumes();
+    const bool enabled = g_Vars.m_NightMode > 0.f;
+    const auto& ppVolumes = cameraSvc->m_PostProcessingVolumes();
     for (int i = 0; i < ppVolumes.m_Size; i++) {
         C_PostProcessingVolume* volume = ppVolumes.AtPtr(i)->Get();
         if (!volume) continue;
 
         if (minExposureBackup == 0.f) minExposureBackup = volume->m_flMinExposure();
         if (maxExposureBackup == 0.f) maxExposureBackup = volume->m_flMaxExposure();
-
-        volume->m_flMinExposure() = g_Vars.m_MinExposure;
-        volume->m_flMaxExposure() = g_Vars.m_MaxExposure;
+        
+        volume->m_flMinExposure() = enabled ? g_Vars.m_NightMode : minExposureBackup;
+        volume->m_flMaxExposure() = enabled ? g_Vars.m_NightMode : maxExposureBackup;
     }
 }

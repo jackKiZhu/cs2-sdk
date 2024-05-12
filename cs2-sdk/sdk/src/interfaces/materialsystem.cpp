@@ -8,7 +8,7 @@
 #include <virtual/virtual.hpp>
 
 CMaterialSystem* CMaterialSystem::Get() {
-    static const auto inst = CMemory::GetInterface(CConstants::MATERIALSYSTEM_LIB, "VMaterialSystem2_00");
+    static const auto inst = CMemory::GetInterface(CConstants::MATERIALSYSTEM_LIB, "VMaterialSystem2_001");
     return inst.Get<CMaterialSystem*>();
 }
 
@@ -36,8 +36,8 @@ CMaterial2*** CMaterialSystem::FindOrCreateFromResource(CMaterial2*** out, const
     return vt::CallMethod<CMaterial2***>(this, 14, out, materialName);
 }
 
-CMaterial2** CMaterialSystem::CreateMaterial(CMaterial2*** out, const char* materialName, CMeshData* data) {
-    return vt::CallMethod<CMaterial2**>(this, 29, out, materialName, data, 0, 0, 0, 0, 0, 1);
+CMaterial2** CMaterialSystem::CreateMaterial(void* out, const char* materialName, void* data, unsigned int unk, uint8_t unk2) {
+    return vt::CallMethod<CMaterial2**>(this, 29, out, materialName, data, unk, unk2);
 }
 
 void CMaterialSystem::SetCreateDataByMaterial(CMaterial2*** const in, const void* data) {

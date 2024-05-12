@@ -2,10 +2,13 @@
 
 class CMemAlloc
 {
-   public:
-  static CMemAlloc* Get();
+  public:
+    static CMemAlloc& Get() {
+       static CMemAlloc instance;
+       return instance;
+    }
 
-  virtual void* Alloc(size_t size) = 0;
-  virtual void* Realloc(void* ptr, size_t size) = 0;
-  virtual void Free(void* ptr) = 0;
+    void* Alloc(size_t size);
+    void Free(void* ptr);
+  
 };
