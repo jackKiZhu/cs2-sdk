@@ -4,6 +4,7 @@
 #include <bindings/econentity.hpp>
 
 class CCSPlayer_ViewModelServices;
+class CPlayer_CameraServices;
 class CCSPlayer_WeaponServices;
 class CCSPlayer_ObserverServices;
 class C_CSWeaponBaseGun;
@@ -38,7 +39,9 @@ class C_CSPlayerPawnBase : public C_BasePlayerPawn {
     SCHEMA(bool, m_bGunGameImmunity, "C_CSPlayerPawnBase", "m_bGunGameImmunity");
     SCHEMA(bool, m_bWaitForNoAttack, "C_CSPlayerPawnBase", "m_bWaitForNoAttack");
     SCHEMA(Vector, m_angEyeAngles, "C_CSPlayerPawnBase", "m_angEyeAngles");
+
     SCHEMA(CCSPlayer_ViewModelServices*, m_pViewModelServices, "C_CSPlayerPawnBase", "m_pViewModelServices");
+    SCHEMA(CPlayer_CameraServices*, m_pCameraServices, "C_CSPlayerPawnBase", "m_pCameraServices");
 
     bool IsPlayerPawn();
     bool IsObserverPawn();

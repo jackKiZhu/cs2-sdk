@@ -4,6 +4,7 @@
 
 class CEntityInstance;
 class CCachedPlayer;
+class C_CSPlayerPawn;
 
 class CMatchCache {
    public:
@@ -26,6 +27,7 @@ class CMatchCache {
 
     CachedEntityPtr& GetEntityByIndex(int i);
     CCachedPlayer* GetLocalPlayer();
+    C_CSPlayerPawn* GetLocalPawn();
 
    private:
     CachedEntityPtr CreateCachedEntityPointer(C_BaseEntity* ent);

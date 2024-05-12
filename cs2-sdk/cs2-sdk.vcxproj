@@ -113,6 +113,7 @@
     <ClCompile Include="api\src\pointer\pointer.cpp" />
     <ClCompile Include="sdk\src\interfaces\memalloc.cpp" />
     <ClCompile Include="sdk\src\interfaces\materialsystem.cpp" />
+    <ClCompile Include="src\hacks\visuals\visuals.cpp" />
     <ClCompile Include="src\input\input.cpp" />
     <ClCompile Include="sdk\src\bindings\vdata.cpp" />
     <ClCompile Include="sdk\src\bindings\econentity.cpp" />
@@ -277,6 +278,7 @@
     <ClInclude Include="include\hacks\esp\esp.hpp" />
     <ClInclude Include="include\hacks\movement\movement.hpp" />
     <ClInclude Include="include\hacks\skinchanger\skinchanger.hpp" />
+    <ClInclude Include="include\hacks\visuals\visuals.hpp" />
     <ClInclude Include="include\hooks\anticheat\anticheat_hooks.hpp" />
     <ClInclude Include="include\hooks\game\game_hooks.hpp" />
     <ClInclude Include="include\hooks\hooks.hpp" />
@@ -334,6 +336,7 @@
     <ClInclude Include="sdk\include\bindings\baseentity.hpp" />
     <ClInclude Include="sdk\include\bindings\baseflex.hpp" />
     <ClInclude Include="sdk\include\bindings\baseviewmodel.hpp" />
+    <ClInclude Include="sdk\include\bindings\cameraservices.hpp" />
     <ClInclude Include="sdk\include\bindings\collisionproperty.hpp" />
     <ClInclude Include="sdk\include\bindings\econentity.hpp" />
     <ClInclude Include="sdk\include\bindings\econitemview.hpp" />

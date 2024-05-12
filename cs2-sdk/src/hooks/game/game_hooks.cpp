@@ -29,6 +29,7 @@
 #include <interfaces/viewrender.hpp>
 
 #include <hacks/aimbot/aimbot.hpp>
+#include <hacks/visuals/visuals.hpp>
 #include <hacks/skinchanger/skinchanger.hpp>
 
 #include <vars/vars.hpp>
@@ -132,6 +133,7 @@ static bool hkCreateMove2(CCSGOInput* rcx, int subtick, void* a3) {
 static CHook g_FrameStageNotify;
 static void hkFrameStageNotify(void* rcx, int stage) {
     CSkinChanger::Get().OnFrameStageNotify(stage);
+    CVisuals::Get().OnFrameStageNotify(stage);
     g_FrameStageNotify.CallOriginal<void>(rcx, stage);
 }
 

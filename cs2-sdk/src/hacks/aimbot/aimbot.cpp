@@ -24,11 +24,7 @@
 
 bool CAimbot::IsEnabled() {
     if (!g_Vars.m_EnableAimbot || !CEngineClient::Get()->IsInGame()) return false;
-    CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
-    if (!cachedLocal || !cachedLocal->IsValid()) return false;
-    CCSPlayerController* localController = cachedLocal->Get();
-    if (!localController) return false;
-    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
+    C_CSPlayerPawn* localPawn = CMatchCache::Get().GetLocalPawn();
     if (!localPawn) return false;
 
     Vector* _punch = localPawn->GetLastAimPunch();
@@ -61,7 +57,7 @@ void CAimbot::Run(CMoveData* moveData) {
     C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
     CCSWeaponBaseVData* weaponData = weapon->GetWeaponData();
     const int weaponType = weaponData->m_WeaponType();
-    const bool isFiring = localPawn->m_iShotsFired() > 1 && weaponType != WEAPONTYPE_SHOTGUN && weaponType != WEAPONTYPE_SNIPER_RIFLE;
+    const bool wantsRecoil = localPawn->m_iShotsFired() > 1 && weaponType != WEAPONTYPE_SHOTGUN && weaponType != WEAPONTYPE_SNIPER_RIFLE;
     Vector localPos;
     localPawn->GetEyePos(&localPos);
 
@@ -72,7 +68,7 @@ void CAimbot::Run(CMoveData* moveData) {
     rcsAngle.z = 0.f;
     rcsAngle.NormalizeAngle();
 
-    if (isFiring) {
+    if (wantsRecoil) {
         lastMove.viewAngles.x -= punchDelta.x * 2.f * g_Vars.m_RecoilX;
         lastMove.viewAngles.y -= punchDelta.y * 2.f * g_Vars.m_RecoilY;
         lastMove.viewAngles.NormalizeAngle();
@@ -97,7 +93,7 @@ void CAimbot::Run(CMoveData* moveData) {
                 hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);    
     }
 
-    if (g_Vars.m_EnableTriggerbot && !isFiring && hitPawn) {
+    if (g_Vars.m_EnableTriggerbot && !wantsRecoil && hitPawn) {
         static ConVar* mp_teammates_are_enemies = CCVar::Get()->GetCvarByName("mp_teammates_are_enemies");
         if (mp_teammates_are_enemies->GetValue<bool>() ? true : hitPawn->m_iTeamNum() != localPawn->m_iTeamNum())
             lastMove.Scroll(IN_ATTACK);
@@ -193,7 +189,7 @@ void CAimbot::Run(CMoveData* moveData) {
         perfectAngle = targetAngle - punch * 2;
         perfectAngle.NormalizeAngle();
 
-        const Vector smoothedAngle = curAngle + Smooth(rcsAngle, perfectAngle);
+        const Vector smoothedAngle = curAngle + Smooth(rcsAngle, wantsRecoil ? perfectAngle : targetAngle);
         const Vector curDelta = (perfectAngle - lastMove.viewAngles).NormalizedAngle();
         const Vector smoothedDelta = (perfectAngle - smoothedAngle).NormalizedAngle();
 

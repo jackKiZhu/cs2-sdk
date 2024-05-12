@@ -34,6 +34,9 @@ struct Vars_t {
 
     float m_Fov = 90.f;
     float m_ViewmodelFov = 90.f;
+
+    float m_MinExposure = 0.f;
+    float m_MaxExposure = 0.f;
 };
 
 extern Vars_t g_Vars;

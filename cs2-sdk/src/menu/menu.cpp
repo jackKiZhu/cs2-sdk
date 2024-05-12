@@ -119,7 +119,7 @@ void CMenu::RenderMainMenu() {
 
         ImGui::SeparatorText("Aimbot");
         ImGui::Checkbox("Aimbot", &g_Vars.m_EnableAimbot);
-        ImGui::Checkbox("Enable In Duel", &g_Vars.m_EnableInDuel);
+        ImGui::Checkbox("Enable duel", &g_Vars.m_EnableInDuel);
         ImGui::SliderFloat("Aimbot FOV", &g_Vars.m_AimFov, 0.f, 180.f);
         ImGui::SliderFloat("Delay FOV", &g_Vars.m_DelayFov, 0.f, 180.f);
         ImGui::SliderFloat("KP", &g_Vars.m_KP, 0.f, 1.f);
@@ -131,6 +131,11 @@ void CMenu::RenderMainMenu() {
         ImGui::Checkbox("Draw FOV", &g_Vars.m_DrawFov);
 
         ImGui::Checkbox("Triggerbot", &g_Vars.m_EnableTriggerbot);
+        ImGui::Spacing();
+
+        ImGui::SliderFloat("Min exposure", &g_Vars.m_MinExposure, 0.f, g_Vars.m_MaxExposure);
+        ImGui::SliderFloat("Max exposure", &g_Vars.m_MaxExposure, g_Vars.m_MinExposure, 10.f);
+
 
         if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CSkinChanger::Get().Shutdown(), CInstance::Get().FreeLibrary();
     }
