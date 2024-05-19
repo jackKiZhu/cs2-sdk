@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cache/entities/base.hpp>
+#include <hacks/aimbot/lagcomp.hpp>
 
 class CCSPlayerController;
 
@@ -24,4 +25,6 @@ class CCachedPlayer : public CCachedBaseEntity {
     float visibleSince;
     float dot;
     float fitts;
+
+    std::vector<CRecord> records;
 };

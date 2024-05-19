@@ -21,4 +21,6 @@ class CSkeletonInstance
 {
    public:
     SCHEMA(CModelState, m_modelState, "CSkeletonInstance", "m_modelState");
+
+    void GetBone(BoneData_t& bone, int index);
 };

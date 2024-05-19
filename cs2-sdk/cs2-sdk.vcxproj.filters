@@ -95,6 +95,8 @@
     <ClCompile Include="src\hacks\visuals\visuals.cpp" />
     <ClCompile Include="sdk\src\types\keyvalues.cpp" />
     <ClCompile Include="sdk\src\types\utlbuffer.cpp" />
+    <ClCompile Include="src\hacks\aimbot\lagcomp.cpp" />
+    <ClCompile Include="sdk\src\types\model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -218,5 +220,7 @@
     <ClInclude Include="sdk\include\types\keyvalues.hpp" />
     <ClInclude Include="sdk\include\types\utlbuffer.hpp" />
     <ClInclude Include="sdk\include\types\utlmemory.hpp" />
+    <ClInclude Include="sdk\include\types\utlstringtoken.hpp" />
+    <ClInclude Include="include\hacks\aimbot\lagcomp.hpp" />
   </ItemGroup>
 </Project>

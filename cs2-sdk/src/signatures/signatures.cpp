@@ -308,4 +308,24 @@ namespace signatures {
                           {
                               {SDK_SIG("48 89 5C 24 ? 55 56 57 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 ? ? ? ? 49 63 F0")},
                           });
+
+    CSigScan BoneFlags("BoneFlags", CConstants::CLIENT_LIB,
+        {
+            {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 8B 04 90")},
+        });
+
+    CSigScan BoneName("BoneName", CConstants::CLIENT_LIB,
+                       {
+                           {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 48 8B 0C D0")},
+                       });
+
+    CSigScan BoneParent("BoneParent", CConstants::CLIENT_LIB,
+                      {
+                          {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 0F B7 04 50")},
+                      });
+
+    CSigScan GetBone("GetBone", CConstants::CLIENT_LIB,
+                        {
+                            {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B FA 49 63 F0 BA ? ? ? ? 48 8B D9 E8 ? ? ? ? 48 8B 8B")},
+                        });
 }  // namespace signatures

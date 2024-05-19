@@ -122,7 +122,7 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     //     }
     // }
 
-    CLogger::Log("Pre checksum: {}", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
+    //CLogger::Log("Pre checksum: {}", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
 

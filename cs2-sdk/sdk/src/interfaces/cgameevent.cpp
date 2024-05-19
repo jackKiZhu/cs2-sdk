@@ -40,3 +40,8 @@ CCSPlayerController* CGameEvent::GetPlayerController(const std::string_view toke
 // 8B 78
 int64_t CGameEvent::GetInt(const std::string_view eventName) { return 0; }
 
+void CGameEvent::SetString(const std::string_view token, const char* value) {
+    KeyString_t str(token.data());
+    vt::CallMethod<void>(this, 24, &str, value);
+}
+

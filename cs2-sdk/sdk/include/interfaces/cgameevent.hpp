@@ -23,4 +23,7 @@ class CGameEvent {
     CCSPlayerController* GetPlayerController(const std::string_view token);
 
     int64_t GetInt(const std::string_view eventName);
+
+    //   @ida: server.dll -> ["48 8D 4D A7 48 8B B8 ? ? ? ? 33" + 0x7] / sizeof(std::uintptr_t)   @XREF: "weapon"
+    void SetString(const std::string_view token, const char* value);
 };

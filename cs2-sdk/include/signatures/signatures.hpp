@@ -52,4 +52,9 @@ namespace signatures {
     extern CSigScan CalculateCRC;
     extern CSigScan SetCRC;
     extern CSigScan SerializePartialToArray;
+    extern CSigScan BoneCount;
+    extern CSigScan BoneFlags;
+    extern CSigScan BoneName;
+    extern CSigScan BoneParent;
+    extern CSigScan GetBone;
 }  // namespace signatures
