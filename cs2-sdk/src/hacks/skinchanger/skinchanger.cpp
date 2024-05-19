@@ -110,10 +110,15 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
 
         if (isKnife) {
             itemView->m_iItemDefinitionIndex() = loadoutItemDefinition->m_nDefIndex;
+            //*itemDefinition = *loadoutItemDefinition;
             const char* knifeModel = loadoutItemDefinition->m_pszBaseDisplayModel;
+            //itemDefinition->m_iSubType = loadoutItemDefinition->m_iSubType;
             
             weapon->SetModel(knifeModel);
-            if (viewmodel->m_hWeapon() == weaponHandle) viewmodel->SetModel(knifeModel);
+            if (viewmodel->m_hWeapon() == weaponHandle) {
+                viewmodel->SetModel(knifeModel);
+                //viewmodel->m_nSubclassID() = loadoutItemDefinition->m_iSubType;
+            }
             viewmodel->animationGraphInstance->animGraphNetworkedVariables = nullptr;
         } 
         else {

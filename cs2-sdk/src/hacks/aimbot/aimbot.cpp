@@ -57,7 +57,7 @@ void CAimbot::Run(CMoveData* moveData) {
     C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
     CCSWeaponBaseVData* weaponData = weapon->GetWeaponData();
     const int weaponType = weaponData->m_WeaponType();
-    const bool wantsRecoil = localPawn->m_iShotsFired() > 1 && weaponType != WEAPONTYPE_SHOTGUN && weaponType != WEAPONTYPE_SNIPER_RIFLE;
+    const bool wantsRecoil = localPawn->m_iShotsFired() > 1 && weaponType != WEAPONTYPE_SHOTGUN && weaponType != WEAPONTYPE_SNIPER_RIFLE && !weapon->m_bBurstMode();
     Vector localPos;
     localPawn->GetEyePos(&localPos);
 
@@ -173,7 +173,7 @@ void CAimbot::Run(CMoveData* moveData) {
     oldTarget = target;
     const bool inDuel = g_Vars.m_EnableInDuel && (target ? target->dot >= g_Vars.m_ReactionTreshold : false);
 
-    if (const bool inputDown = (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_ATTACK2); inputDown || inDuel)
+    if (const bool inputDown = (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_SECOND_ATTACK); inputDown || inDuel)
         lastActiveTime = CGlobalVars::Get()->currentTime;
 
     const bool isSwitching = lastTargetSwitchTime - CGlobalVars::Get()->currentTime <= 0.15f;

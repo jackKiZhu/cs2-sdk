@@ -1,5 +1,7 @@
 #include "pch.hpp"
 
+#include <intrin.h>
+
 #include <hooks/anticheat/anticheat_hooks.hpp>
 #include <logger/logger.hpp>
 
@@ -37,10 +39,10 @@ struct CDllVerification {
     uint64_t N00000170;                    // 0x00C8
     uint64_t N00000171;                    // 0x00D0
     char pad_00D8[1848];                   // 0x00D8
-};  // Size: 0x0810
+};                                         // Size: 0x0810
 
 static CHook g_GetFunctions;
-static void hkGetFunctions(CDllVerification* dll) { 
+static void hkGetFunctions(CDllVerification *dll) {
     dll->GetTotalFilesLoaded = nullptr;
     dll->CountFilesNeedTrustCheck = nullptr;
     dll->CountFilesCompletedTrustCheck = nullptr;
@@ -56,7 +58,7 @@ static void hkGetFunctions(CDllVerification* dll) {
 }
 
 static CHook g_GetFunctions2;
-static void hkGetFunctions2(CDllVerification* dll) {
+static void hkGetFunctions2(CDllVerification *dll) {
     dll->GetTotalFilesLoaded = nullptr;
     dll->CountFilesNeedTrustCheck = nullptr;
     dll->CountFilesCompletedTrustCheck = nullptr;
@@ -72,19 +74,20 @@ static void hkGetFunctions2(CDllVerification* dll) {
 }
 
 static CHook g_CSVCMsg_UserMessage_Setup;
-static bool hkCSVCMsg_UserMessage_Setup(void* rcx, void* msg) {
-    // 4C 8B BC 24 ? ? ? ? 84 C0 74 ? 48 8B 0D decals
+static bool hkCSVCMsg_UserMessage_Setup(void *CSVCMsg_UserMessage, int type, void *CUserMessage) {
+    CLogger::Log("CSVCCMsg_UserMessage of type {} has been blasted!", type);
 
-    SDK_LOG_PROLOGUE();
+    if (type == 368) return g_CSVCMsg_UserMessage_Setup.CallOriginal<bool>(CSVCMsg_UserMessage, type, CUserMessage);
+
     return false;
 }
 
 void CAntiCheatHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
-    g_GetFunctions.Hook(signatures::GetFunctions.GetPtrAs<void*>(), SDK_HOOK(hkGetFunctions));
-    g_GetFunctions2.Hook(signatures::GetFunctions2.GetPtrAs<void*>(), SDK_HOOK(hkGetFunctions2));
-    g_CSVCMsg_UserMessage_Setup.Hook(signatures::CSVCMsg_UserMessage_Setup.GetPtrAs<void*>(), SDK_HOOK(hkCSVCMsg_UserMessage_Setup));
+    g_GetFunctions.Hook(signatures::GetFunctions.GetPtrAs<void *>(), SDK_HOOK(hkGetFunctions));
+    g_GetFunctions2.Hook(signatures::GetFunctions2.GetPtrAs<void *>(), SDK_HOOK(hkGetFunctions2));
+    g_CSVCMsg_UserMessage_Setup.Hook(signatures::CSVCMsg_UserMessage_Setup.GetPtrAs<void *>(), SDK_HOOK(hkCSVCMsg_UserMessage_Setup));
 }
 
 // 48 89 4C 24 ? 48 81 EC ? ? ? ? 48 C7 44 24 - DllVerification

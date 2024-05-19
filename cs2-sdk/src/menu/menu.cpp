@@ -134,6 +134,14 @@ void CMenu::RenderMainMenu() {
         ImGui::Spacing();
 
         ImGui::SliderFloat("World brightness", &g_Vars.m_NightMode, 0.f, 1.f);
+        ImGui::SliderFloat("FOV", &g_Vars.m_Fov, 0.f, 20.f);
+        ImGui::SliderFloat("Viewmodel FOV", &g_Vars.m_ViewmodelFov, 0.f, 20.f);
+        ImGui::Checkbox("Chams", &g_Vars.m_Chams);
+        ImGui::SameLine();
+        static float clr[4];
+        if (ImGui::ColorEdit4("##Chams color", clr, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+            g_Vars.m_ChamsColor = Color_t(clr[0], clr[1], clr[2], clr[3]);
+        }
 
         if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CSkinChanger::Get().Shutdown(), CInstance::Get().FreeLibrary();
     }

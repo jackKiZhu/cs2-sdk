@@ -10,22 +10,67 @@
 #include <bindings/baseentity.hpp>
 #include <bindings/playercontroller.hpp>
 #include <bindings/playerpawn.hpp>
+#include <vars/vars.hpp>
+
+#include <cache/cache.hpp>
 
 void CChams::Initialize() {
-    materials[MAT_TYPE_TEST] = CreateMaterial("primary_white", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true, false);
+    static constexpr char glowVisible[] = R"#(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}
+			format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+			{
+                shader = "solidcolor.vfx"
+                F_SELF_ILLUM = 1
+                F_PAINT_VERTEX_COLORS = 1
+                F_TRANSLUCENT = 1 
+                F_IGNOREZ = 0
+                F_DISABLE_Z_WRITE = 0
+                F_DISABLE_Z_BUFFERING = 0
+               
+                g_tColor = resource:"materials/default/default_mask_tga_fde710a5.vtex"
+                g_tNormal = resource:"materials/default/default_mask_tga_fde710a5.vtex"
+                g_tRoughness = resource:"materials/default/default_normal_tga_b3f4ec4c.vtex"
+				g_tMetalness = resource:"materials/default/default_normal_tga_b3f4ec4c.vtex"
+                g_tSelfIllumMask = resource:"materials/default/default_mask_tga_fde710a5.vtex"
+                TextureAmbientOcclusion = resource:"materials/debug/particleerror.vtex"
+                g_tAmbientOcclusion = resource:"materials/debug/particleerror.vtex"
+                
+                g_vColorTint = [ 20.000000, 20.000000, 20.000000, 20.000000 ]
+                g_flSelfIllumScale = [ 5.000000, 5.000000, 5.000000, 5.000000 ]
+                g_flSelfIllumBrightness = [ 5.000000, 5.000000, 5.000000, 5.000000 ]
+                g_vSelfIllumTint = [ 10.000000, 10.000000, 10.000000, 10.000000 ]
+			} )#";
+
+    void* buffer = CMemAlloc::Get().Alloc(0x100 + sizeof(CKeyValues));
+    memset(buffer, 0, 0x100 + sizeof(CKeyValues));
+    CKeyValues* kv = std::bit_cast<CKeyValues*>(uintptr_t(buffer) + 0x100);
+    KVID_t id;
+    id.name = "generic";
+    id.pad[0] = 0x469806E97412167C;
+    id.pad[1] = 0xE73790B53EE6F2AF;
+
+    if (!kv->Load(glowVisible, &id, nullptr)) return;
+
+    CStrongHandle<CMaterial2> mat;
+    CMaterialSystem::Get()->CreateMaterial(&mat, "glow_vis", kv, 0, 1);
+    materials[MAT_FLAT] = mat.Get();
+    // CreateMaterial("primary_white", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true, false);
+    //materials[MAT_FLAT_Z] = CreateMaterial("primary_white_z", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true, true);
+    //materials[MAT_REGULAR] = mat.Get(); // CreateMaterial("regular_white", "materials/dev/primary_white.vmat", "csgo_litgeneric.vfx", true, true, false);
+    //materials[MAT_REGULAR_Z] = CreateMaterial("regular_white_z", "materials/dev/primary_white.vmat", "csgo_litgeneric.vfx", true, true, true);
 }
 
 void CChams::Shutdown() {}
 
-bool CChams::IsEnabled() { return true; }
+bool CChams::IsEnabled() { return g_Vars.m_Chams; }
 
 bool CChams::OnDrawObject(void* animatableSceneObjectDesc, void* dx11, CMeshData* meshDraw, int dataCount, void* sceneView,
                           void* sceneLayer, void* unk, void* unk2) {
     if (!IsEnabled() || !meshDraw || !meshDraw->sceneAnimatableObject) return false;
     CBaseHandle hOwner = meshDraw->sceneAnimatableObject->owner;
     if (!hOwner.IsValid()) return false;
+    C_CSPlayerPawn* local = CMatchCache::Get().GetLocalPawn();
     C_CSPlayerPawn* entity = CGameResourceService::Get()->GetGameEntitySystem()->GetBaseEntity<C_CSPlayerPawn>(hOwner.GetEntryIndex());
-    if (!entity || !entity->IsPlayerPawn()) return false;
+    if (!local || !entity || !entity->IsPlayerPawn() || entity->m_iTeamNum() == local->m_iTeamNum()) return false;
     return OverrideMaterial(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
 }
 
@@ -61,9 +106,6 @@ CStrongHandle<CMaterial2> CChams::CreateMaterial(const char* name) {
 
 CMaterial2* CChams::CreateMaterial(const char* name, const char* materialVMAT, const char* shaderType, bool blendMode, bool translucent,
                                    bool disableZ) {
-  void* a = CMemAlloc::Get().Alloc(0x200);
-
-
   CMeshData* data = (CMeshData*)(std::bit_cast<byte*>(CMemAlloc::Get().Alloc(0x200)) + 0x50);
   CMaterial2** prototype;
 
@@ -83,16 +125,12 @@ CMaterial2* CChams::CreateMaterial(const char* name, const char* materialVMAT, c
   CMaterialSystem::Get()->CreateMaterial(&mat, name, data, 0, 1);
   CMemAlloc::Get().Free(data);
   return *mat;
-
-  CMemAlloc::Get().Free(data);
-  return *prototype;
 }
 
 bool CChams::OverrideMaterial(void* animatableSceneObjectDesc, void* dx11, CMeshData* meshDraw, int dataCount, void* sceneView,
                               void* sceneLayer, void* unk, void* unk2) {
-    CMaterial2* mat = materials[MAT_TYPE_TEST];
+    CMaterial2* mat = materials[MAT_FLAT];
     meshDraw->material = mat;
-    meshDraw->color = Color_t(0, 122, 220);
-
+    meshDraw->color = g_Vars.m_ChamsColor;
     return true;
 }

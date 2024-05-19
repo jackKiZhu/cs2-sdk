@@ -60,8 +60,14 @@ static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToV
                                  VMatrix* pWorldToProjection, VMatrix* pWorldToPixels) {
     g_GetMatricesForView.CallOriginal<void>(rcx, view, pWorldToView, pViewToProjection, pWorldToProjection, pWorldToPixels);
 
-    // view->fov += g_Vars.m_Fov;
-    // view->viewmodelFov += g_Vars.m_ViewmodelFov;
+    if (!CEngineClient::Get()->IsInGame()) return;
+
+    if (auto local = CMatchCache::Get().GetLocalPlayer(); local && local->IsValid()) {
+        if (auto pawn = local->Get()->m_hPawn().Get(); !pawn->m_bIsScoped()) {
+             view->fov += g_Vars.m_Fov;
+             view->viewmodelFov += g_Vars.m_ViewmodelFov;
+        }
+    }
 
     CMath::Get().UpdateViewMatrix(pWorldToProjection);
 
@@ -73,6 +79,7 @@ static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToV
 
 static CHook g_CreateMove;
 static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
+    if (!CEngineClient::Get()->IsInGame()) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
     if (rcx->moves.m_Size == 0) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
     if (!cachedLocal) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
@@ -92,6 +99,15 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     const bool grounded = localPawn->m_hGroundEntity().Get() != nullptr;
 
     // override the last subtick info
+
+    if (CUserCmd* cmd = rcx->GetUserCmd(); cmd && cmd->vftable) {
+        if (CBaseUserCmdPB* baseCmd = cmd->csgoUserCmd.baseCmd; baseCmd && baseCmd->subticksMoveSteps.currentSize > 0) {
+            for (int i = 0; i < baseCmd->subticksMoveSteps.currentSize; ++i) {
+                if (CSubtickMoveStep* step = baseCmd->subticksMoveSteps.rep->elements[i]; step)
+                    CLogger::Log("subtick: {} {:#x} {} {}", i, step->button, step->when, step->pressed);
+            }
+        }
+    }
 
     CAimbot::Get().Run(move);
 
@@ -160,29 +176,29 @@ static void* hkSetModel(void* rcx, const char* model) {
 static CHook g_IsLoadoutAllowed;
 static bool hkIsLoadoutAllowed() { return true; }
 
-static CHook g_SetButtonStates;
-static void hkSetButtonStates(ButtonState_t* state, uint64_t button, uint8_t flags) { 
-  uint64_t forceHeld = 0, forceChanged = 0, forceScroll = 0;
-  if (flags & 1) forceHeld = button;
-  if (flags & 2) forceChanged = button;
-  if (flags & 4) forceScroll = button;
-
-  if (false && button & IN_JUMP) {
-      CLogger::Log("Held: {}, Changed: {}, Scroll: {}", forceHeld, forceChanged, forceScroll);
-  }
-
-  state->value = state->value & ~button | forceHeld;
-  state->valueChanged = state->valueChanged & ~button | forceChanged;
-  state->valueScroll = state->valueScroll & ~button | forceScroll;
-
-  if (false && button & IN_JUMP) {
-      CLogger::Log("input| Held: {}, Changed: {}, Scroll: {} prev:{}", CCSGOInput::Get()->moveData.buttonsHeld,
-                   CCSGOInput::Get()->moveData.buttonsChanged, CCSGOInput::Get()->moveData.buttonsScroll,
-                   CCSGOInput::Get()->moveData.prevButtonsHeld);
-      CLogger::Log("Held: {}, Changed: {}, Scroll: {}", state->value, state->valueChanged, state->valueScroll);
-      CLogger::Log("=====================================================");
-  }
-}
+//static CHook g_SetButtonStates;
+//static void hkSetButtonStates(ButtonState_t* state, uint64_t button, uint8_t flags) { 
+//  uint64_t forceHeld = 0, forceChanged = 0, forceScroll = 0;
+//  if (flags & 1) forceHeld = button;
+//  if (flags & 2) forceChanged = button;
+//  if (flags & 4) forceScroll = button;
+//
+//  if (false && button & IN_JUMP) {
+//      CLogger::Log("Held: {}, Changed: {}, Scroll: {}", forceHeld, forceChanged, forceScroll);
+//  }
+//
+//  state->value = state->value & ~button | forceHeld;
+//  state->valueChanged = state->valueChanged & ~button | forceChanged;
+//  state->valueScroll = state->valueScroll & ~button | forceScroll;
+//
+//  if (false && button & IN_JUMP) {
+//      CLogger::Log("input| Held: {}, Changed: {}, Scroll: {} prev:{}", CCSGOInput::Get()->moveData.buttonsHeld,
+//                   CCSGOInput::Get()->moveData.buttonsChanged, CCSGOInput::Get()->moveData.buttonsScroll,
+//                   CCSGOInput::Get()->moveData.prevButtonsHeld);
+//      CLogger::Log("Held: {}, Changed: {}, Scroll: {}", state->value, state->valueChanged, state->valueScroll);
+//      CLogger::Log("=====================================================");
+//  }
+//}
 
 static CHook g_MoveData;
 static void hkMoveData(CCSGOInput* rcx, int slot) { 

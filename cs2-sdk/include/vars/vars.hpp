@@ -1,5 +1,7 @@
 #pragma once
 
+#include <types/color.hpp>
+
 struct Vars_t {
     bool m_EnableESP;
     bool m_EnableIfSpectating;
@@ -36,6 +38,11 @@ struct Vars_t {
     float m_ViewmodelFov = 90.f;
 
     float m_NightMode = 0.f;
+
+    bool m_Chams = true;
+    bool m_ChamsXQZ = true;
+    Color_t m_ChamsColor = Color_t(0, 255, 125);
+
 };
 
 extern Vars_t g_Vars;

@@ -8,26 +8,47 @@
 #define MAX_SPLITSCREEN_PLAYERS 150
 
 enum Buttons {
-    IN_ATTACK = 1 << 0,
-    IN_JUMP = 1 << 1,
-    IN_DUCK = 1 << 2,
-    IN_FORWARD = 1 << 3,
-    IN_BACK = 1 << 4,
-    IN_USE = 1 << 5,
-    IN_MOVELEFT = 1 << 9,
-    IN_MOVERIGHT = 1 << 10,
-    IN_ATTACK2 = 1 << 11,
-    IN_SCORE = 1 << 16,
-    IN_BULLRUSH = 1 << 22
+    IN_ATTACK = (1 << 0),
+    IN_JUMP = (1 << 1),
+    IN_DUCK = (1 << 2),
+    IN_FORWARD = (1 << 3),
+    IN_BACK = (1 << 4),
+    IN_USE = (1 << 5),
+    IN_CANCEL = (1 << 6),
+    IN_LEFT = (1 << 7),
+    IN_RIGHT = (1 << 8),
+    IN_MOVELEFT = (1 << 9),
+    IN_MOVERIGHT = (1 << 10),
+    IN_SECOND_ATTACK = (1 << 11),
+    IN_RUN = (1 << 12),
+    IN_RELOAD = (1 << 13),
+    IN_LEFT_ALT = (1 << 14),
+    IN_RIGHT_ALT = (1 << 15),
+    IN_SCORE = (1 << 16),
+    IN_SPEED = (1 << 17),
+    IN_WALK = (1 << 18),
+    IN_ZOOM = (1 << 19),
+    IN_FIRST_WEAPON = (1 << 20),
+    IN_SECOND_WEAPON = (1 << 21),
+    IN_BULLRUSH = (1 << 22),
+    IN_FIRST_GRENADE = (1 << 23),
+    IN_SECOND_GRENADE = (1 << 24),
+    IN_MIDDLE_ATTACK = (1 << 25),
+    IN_USE_OR_RELOAD = (1 << 26)
 };
 
-struct ButtonState_t {
-    PAD(0x8); // 0x0
-    uint64_t value; // 0x8
-    uint64_t valueChanged; // 0x10
-    uint64_t valueScroll; // 0x18
+template <typename T>
+struct RepeatedPtrField_t {
+    struct Rep_t {
+        int allocatedSize;
+        T* elements[(std::numeric_limits<int>::max() - 2 * sizeof(int)) / sizeof(void*)];
+    };
+
+    void* arena;
+    int currentSize;
+    int totalSize;
+    Rep_t* rep;
 };
-static_assert(sizeof(ButtonState_t) == 0x20);
 
 // reading is the same as in here: "F3 41 0F 10 47 ? 83 C9"
 struct CSubtickInput {
@@ -35,10 +56,10 @@ struct CSubtickInput {
     PAD(0x4);                         // 0x4
     uint64_t button;                  // 0x8
     union {
-        bool held;                 // 0x10
-        float forwardDelta;  // 0x10 if button is 0
+        bool held;            // 0x10
+        float forwardDelta;   // 0x10 
     };
-    uint32_t sidemoveDelta;  // 0x14
+    float sidemoveDelta;      // 0x14
 };                                    // Size: 0x18
 
 #pragma pack(push, 1)
@@ -72,9 +93,11 @@ struct CMoveData {
 #pragma pack(pop)
 
 class CBasePB {
-   public:
-    PAD(0x18);  // 0x0 (0x18)
+    void* vftable;
+    uint32_t hasBits;
+    uint64_t cachedBits;
 };
+static_assert(sizeof(CBasePB) == 0x18);
 
 class CMsgQAngle : public CBasePB {
    public:
@@ -113,10 +136,46 @@ class CCSGOInputHistoryEntryPB : public CBasePB {
     int nTargetEntIndex;                    // 0x74
 };
 
-class CBaseUserCmdPB {
+class CInButtonState {
    public:
-    PAD(0x40);                            // 0x0 (0x40)
-    CMsgQAngle* msgAngle;                 // 0x40 (0x8)
+    PAD(0x8);
+    uint64_t held;
+    uint64_t changed;
+    uint64_t scroll;
+};
+static_assert(sizeof(CInButtonState) == 0x20);
+
+class CInButtonStatePB : public CBasePB {
+    uint64_t held;
+    uint64_t changed;
+    uint64_t scroll;
+};
+static_assert(sizeof(CInButtonStatePB) == 0x30);
+
+class CSubtickMoveStep : public CBasePB {
+    public:
+    uint64_t button;  // 0x18
+    bool pressed;     // 0x20
+    PAD(0x3);         // 0x21
+    float when;       // 0x24
+    float forward;    // 0x28
+    float sidemove;   // 0x2C
+};
+static_assert(sizeof(CSubtickMoveStep) == 0x30);
+
+struct CSubtickMoveStepContainer
+{
+    int a;
+    PAD(0x4);
+    CSubtickMoveStep* moves[12];
+};
+
+class CBaseUserCmdPB : public CBasePB {
+   public:
+    RepeatedPtrField_t<CSubtickMoveStep> subticksMoveSteps; // 0x18 (0x18)      
+    const char* moveCRC;                                    // 0x30 (0x8)
+    CInButtonStatePB* buttons;                              // 0x38 (0x8)
+    CMsgQAngle* angles;                                     // 0x40 (0x8)
     int commandNumber;                    // 0x48 (0x4)
     uint32_t tickcount;                   // 0x4C (0x4)
     Vector moves;                         // 0x50 (0xC)
@@ -133,41 +192,36 @@ class CBaseUserCmdPB {
 
 class CCSGOUserCmdPB {
    public:
-    uint32_t tickcount;  // 0x0 (0x4)
-    PAD(0x4);            // 0x4 (0x4)
-    void* inputHistory;  // 0x8 (0x8)
-
-    CCSGOInputHistoryEntryPB* GetInputHistoryEntry(uint32_t tick) {
-        if (tick < tickcount) {
-            CCSGOInputHistoryEntryPB** arrTickList =
-                std::bit_cast<CCSGOInputHistoryEntryPB**>(std::bit_cast<uintptr_t>(inputHistory) + 0x8);
-            return arrTickList[tick];
-        }
-        return nullptr;
-    }
-};  // Size: 0x10
+    std::uint32_t hasBits;
+    std::uint64_t cachedBits;
+    RepeatedPtrField_t<CCSGOInputHistoryEntryPB> inputHistoryField;
+    CBaseUserCmdPB* baseCmd;
+    bool wantsLeftHand;
+    std::int32_t nAttack3StartHistoryIndex;
+    std::int32_t nAttack1StartHistoryIndex;
+    std::int32_t nAttack2StartHistoryIndex;
+}; 
+static_assert(sizeof(CCSGOUserCmdPB) == 0x40);
 
 class CUserCmd {
    public:
     void* vftable;               // 0x0 (0x8)
-    uint64_t qword8;             // 0x8 (0x8)
-    uint32_t flags;              // 0x10 (0x4)
-    PAD(0xC);                    // 0x14 (0xC)
-    CCSGOUserCmdPB csgoUserCmd;  // 0x20 (0x10)
-    CBaseUserCmdPB* baseCmd;     // 0x30 (0x8)
+    CCSGOUserCmdPB csgoUserCmd;  // 0x8
+    CInButtonState buttons;      // 0x28
+    PAD(0x20);                   // 0x50
 
-    // 0x70 = realtime
-    /// 0x50  = button,s
+    CCSGOInputHistoryEntryPB* GetInputHistoryEntry(int nIndex) {
+        if (nIndex >= csgoUserCmd.inputHistoryField.rep->allocatedSize || nIndex >= csgoUserCmd.inputHistoryField.currentSize)
+            return nullptr;
 
-    PAD(0x10);              // 0x38 (0x10)
-    ButtonState_t buttons;  // 0x48 (0x20)
-    PAD(0x20);              // 0x68 (0x20)
+        return csgoUserCmd.inputHistoryField.rep->elements[nIndex];
+    }
 
-    void SetSubTickAngle(const Vector& angle) {
-        for (uint32_t i = 0; i < csgoUserCmd.tickcount; i++) {
-            CCSGOInputHistoryEntryPB* entry = csgoUserCmd.GetInputHistoryEntry(i);
-            if (!entry || !entry->pViewCmd) continue;
-            entry->pViewCmd->viewAngles = angle;
+    void SetSubTickAngle(const Vector& angView) {
+        for (int i = 0; i < this->csgoUserCmd.inputHistoryField.rep->allocatedSize; i++) {
+            CCSGOInputHistoryEntryPB* pInputEntry = this->GetInputHistoryEntry(i);
+            if (!pInputEntry || !pInputEntry->pViewCmd) continue;
+            pInputEntry->pViewCmd->viewAngles = angView;
         }
     }
 };  // Size: 0x88

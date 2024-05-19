@@ -17,7 +17,11 @@ class CChams {
 
     enum MaterialType_t
     {
-      MAT_TYPE_TEST,
+      MAT_FLAT,
+      MAT_FLAT_Z, 
+
+      MAT_REGULAR,
+      MAT_REGULAR_Z,
 
       MAT_TYPE_COUNT
     };
