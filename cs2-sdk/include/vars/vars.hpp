@@ -34,8 +34,8 @@ struct Vars_t {
 
     bool m_EnableTriggerbot;
 
-    float m_Fov = 90.f;
-    float m_ViewmodelFov = 90.f;
+    float m_Fov = 0.f;
+    float m_ViewmodelFov = 0.f;
 
     float m_NightMode = 0.f;
 

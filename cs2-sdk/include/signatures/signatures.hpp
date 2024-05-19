@@ -49,4 +49,7 @@ namespace signatures {
     extern CSigScan SetMaterialShaderType;
     extern CSigScan SetMaterialFunction;
     extern CSigScan DrawObject;
+    extern CSigScan CalculateCRC;
+    extern CSigScan SetCRC;
+    extern CSigScan SerializePartialToArray;
 }  // namespace signatures

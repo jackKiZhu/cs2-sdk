@@ -293,4 +293,19 @@ namespace signatures {
                         {
                             {SDK_SIG("48 8B C4 48 89 50 ? 55 41 56")},
                         });
+
+    CSigScan CalculateCRC("CalculateCRC", CConstants::CLIENT_LIB,
+                        {
+                            {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 BF")},
+                        });
+
+    CSigScan SetCRC("SetCRC", CConstants::CLIENT_LIB,
+                          {
+                              {SDK_SIG("48 89 5C 24 ? 55 56 57 48 83 EC ? 49 8B C0")},
+                          });
+
+    CSigScan SerializePartialToArray("SerializePartialToArray", CConstants::CLIENT_LIB,
+                          {
+                              {SDK_SIG("48 89 5C 24 ? 55 56 57 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 ? ? ? ? 49 63 F0")},
+                          });
 }  // namespace signatures

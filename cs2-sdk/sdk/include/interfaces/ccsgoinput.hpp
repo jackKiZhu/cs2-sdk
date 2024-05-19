@@ -93,9 +93,12 @@ struct CMoveData {
 #pragma pack(pop)
 
 class CBasePB {
+   public:
     void* vftable;
     uint32_t hasBits;
     uint64_t cachedBits;
+
+    size_t Checksum();
 };
 static_assert(sizeof(CBasePB) == 0x18);
 
@@ -146,6 +149,7 @@ class CInButtonState {
 static_assert(sizeof(CInButtonState) == 0x20);
 
 class CInButtonStatePB : public CBasePB {
+   public:
     uint64_t held;
     uint64_t changed;
     uint64_t scroll;
@@ -162,13 +166,6 @@ class CSubtickMoveStep : public CBasePB {
     float sidemove;   // 0x2C
 };
 static_assert(sizeof(CSubtickMoveStep) == 0x30);
-
-struct CSubtickMoveStepContainer
-{
-    int a;
-    PAD(0x4);
-    CSubtickMoveStep* moves[12];
-};
 
 class CBaseUserCmdPB : public CBasePB {
    public:
@@ -192,14 +189,18 @@ class CBaseUserCmdPB : public CBasePB {
 
 class CCSGOUserCmdPB {
    public:
-    std::uint32_t hasBits;
-    std::uint64_t cachedBits;
-    RepeatedPtrField_t<CCSGOInputHistoryEntryPB> inputHistoryField;
-    CBaseUserCmdPB* baseCmd;
-    bool wantsLeftHand;
-    std::int32_t nAttack3StartHistoryIndex;
-    std::int32_t nAttack1StartHistoryIndex;
-    std::int32_t nAttack2StartHistoryIndex;
+    std::uint32_t hasBits;  // 0x0 (0x4)
+    std::uint64_t cachedBits;  // 0x4 (0x8)
+    RepeatedPtrField_t<CCSGOInputHistoryEntryPB> inputHistoryField;  // 0xC (0x18)
+    CBaseUserCmdPB* baseCmd;                                         // 0x24 (0x8)
+    bool wantsLeftHand;                                              // 0x2C (0x4)
+    PAD(0x3);
+    std::int32_t nAttack3StartHistoryIndex;                          // 0x30 (0x4)
+    std::int32_t nAttack1StartHistoryIndex;                          // 0x34 (0x4)
+    std::int32_t nAttack2StartHistoryIndex;                          // 0x38 (0x4)
+
+    size_t Checksum();
+    char* Checksum(char* a2, char* a3);
 }; 
 static_assert(sizeof(CCSGOUserCmdPB) == 0x40);
 
@@ -235,6 +236,9 @@ class CUserCmd {
             entry->pViewCmd->viewAngles = angView;
         }
     }
+
+    void SetBaseCmdButtons();
+    void GetBaseCmdButtons();
 };  // Size: 0x88
 static_assert(sizeof(CUserCmd) == 0x88);
 

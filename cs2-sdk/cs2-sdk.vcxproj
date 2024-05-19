@@ -114,6 +114,7 @@
     <ClCompile Include="sdk\src\types\keyvalues.cpp" />
     <ClCompile Include="sdk\src\interfaces\memalloc.cpp" />
     <ClCompile Include="sdk\src\interfaces\materialsystem.cpp" />
+    <ClCompile Include="sdk\src\types\utlbuffer.cpp" />
     <ClCompile Include="src\hacks\visuals\visuals.cpp" />
     <ClCompile Include="src\input\input.cpp" />
     <ClCompile Include="sdk\src\bindings\vdata.cpp" />
@@ -380,7 +381,9 @@
     <ClInclude Include="sdk\include\types\handle.hpp" />
     <ClInclude Include="sdk\include\types\keyvalues.hpp" />
     <ClInclude Include="sdk\include\types\model.hpp" />
+    <ClInclude Include="sdk\include\types\utlbuffer.hpp" />
     <ClInclude Include="sdk\include\types\utlmap.hpp" />
+    <ClInclude Include="sdk\include\types\utlmemory.hpp" />
     <ClInclude Include="sdk\include\types\utlvector.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

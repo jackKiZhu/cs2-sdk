@@ -94,6 +94,7 @@
     <ClCompile Include="sdk\src\interfaces\memalloc.cpp" />
     <ClCompile Include="src\hacks\visuals\visuals.cpp" />
     <ClCompile Include="sdk\src\types\keyvalues.cpp" />
+    <ClCompile Include="sdk\src\types\utlbuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -215,5 +216,7 @@
     <ClInclude Include="sdk\include\bindings\cameraservices.hpp" />
     <ClInclude Include="include\hacks\visuals\visuals.hpp" />
     <ClInclude Include="sdk\include\types\keyvalues.hpp" />
+    <ClInclude Include="sdk\include\types\utlbuffer.hpp" />
+    <ClInclude Include="sdk\include\types\utlmemory.hpp" />
   </ItemGroup>
 </Project>

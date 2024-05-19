@@ -34,6 +34,8 @@
 #include <hacks/visuals/visuals.hpp>
 #include <hacks/skinchanger/skinchanger.hpp>
 
+#include <types/utlbuffer.hpp>
+
 #include <vars/vars.hpp>
 
 static CHook g_MouseInputEnabled;
@@ -120,12 +122,45 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     //     }
     // }
 
+    CLogger::Log("Pre checksum: {}", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
+
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
+
+    cmd->csgoUserCmd.baseCmd->buttons->scroll |= IN_JUMP;  
+    cmd->GetBaseCmdButtons();
+
+    #if 0
+    static auto SerializePartialToArray = signatures::SerializePartialToArray.GetPtrAs<bool (*)(void*, CUtlBuffer*, int)>();
+    static auto CalculateCRC = signatures::CalculateCRC.GetPtrAs<void(*)(void*, const void*, size_t)>();
+    static auto SetCRC = signatures::SetCRC.GetPtrAs<void (*)(void*, void*, void*)>();
+
+    auto buffer = CUtlBuffer();
+    const int CRCSize = cmd->csgoUserCmd.baseCmd->Checksum();
+    buffer.EnsureCapacity(CRCSize + 1);
+    if (!SerializePartialToArray(cmd->csgoUserCmd.baseCmd, &buffer, CRCSize)) {
+        CLogger::Log("Failed to serialize partial to array");
+        return;
+    }
+
+    uint64_t crc[4];
+    memset(crc, 0, sizeof(crc));
+    CalculateCRC(crc, buffer.Base(), CRCSize);
+
+    uint64_t* v95 = (uint64_t*)(*(uint64_t*)&cmd->csgoUserCmd.hasBits & 0xFFFFFFFFFFFFFFFC);
+    if ( cmd->csgoUserCmd.hasBits & 1)
+      v95 = (uint64_t*)*v95;
+    SetCRC(cmd->csgoUserCmd.baseCmd, crc, v95);
+
+    CLogger::Log("Post checksum: {}\n", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
+    #endif
 
     const CInButtonState originalButtons = cmd->buttons;
 
     // after this, all the subticks have been processed into the protobufs messages
     // it is better to change the message _before_ calling original but for that you need to meddle with CMoveData and i can't bother.
+
+    // cmd->buttons.changed |= IN_JUMP;
+
 
     #if 0
     if (CBaseUserCmdPB* baseCmd = cmd->csgoUserCmd.baseCmd; baseCmd && baseCmd->subticksMoveSteps.currentSize > 0) {
