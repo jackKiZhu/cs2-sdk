@@ -207,21 +207,32 @@ class CUserCmd {
    public:
     void* vftable;               // 0x0 (0x8)
     CCSGOUserCmdPB csgoUserCmd;  // 0x8
-    CInButtonState buttons;      // 0x28
-    PAD(0x20);                   // 0x50
+    CInButtonState buttons;      // 0x48
+    PAD(0x20);                   // 0x68
 
-    CCSGOInputHistoryEntryPB* GetInputHistoryEntry(int nIndex) {
-        if (nIndex >= csgoUserCmd.inputHistoryField.rep->allocatedSize || nIndex >= csgoUserCmd.inputHistoryField.currentSize)
+    CCSGOInputHistoryEntryPB* GetInputHistoryEntry(int i) {
+        if (i >= csgoUserCmd.inputHistoryField.rep->allocatedSize || i >= csgoUserCmd.inputHistoryField.currentSize)
             return nullptr;
 
-        return csgoUserCmd.inputHistoryField.rep->elements[nIndex];
+        return csgoUserCmd.inputHistoryField.rep->elements[i];
+    }
+
+    CSubtickMoveStep* GetSubtickMoveEntry(int i) {
+        CBaseUserCmdPB* baseCmd = csgoUserCmd.baseCmd;
+        if (!baseCmd) return nullptr;
+        auto& steps = baseCmd->subticksMoveSteps;
+
+        if (i >= steps.rep->allocatedSize || i >= steps.currentSize)
+            return nullptr;
+
+        return steps.rep->elements[i];
     }
 
     void SetSubTickAngle(const Vector& angView) {
         for (int i = 0; i < this->csgoUserCmd.inputHistoryField.rep->allocatedSize; i++) {
-            CCSGOInputHistoryEntryPB* pInputEntry = this->GetInputHistoryEntry(i);
-            if (!pInputEntry || !pInputEntry->pViewCmd) continue;
-            pInputEntry->pViewCmd->viewAngles = angView;
+            CCSGOInputHistoryEntryPB* entry = GetInputHistoryEntry(i);
+            if (!entry || !entry->pViewCmd) continue;
+            entry->pViewCmd->viewAngles = angView;
         }
     }
 };  // Size: 0x88
@@ -251,4 +262,3 @@ class CCSGOInput {
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);
 };
 
-void ValidateUserCmd(const Vector& original, CUserCmd* cmd, CCSGOInputHistoryEntryPB* entry);

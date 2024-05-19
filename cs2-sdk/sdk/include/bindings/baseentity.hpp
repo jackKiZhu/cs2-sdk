@@ -45,4 +45,6 @@ class C_BaseEntity : public CEntityInstance {
 
     VIRTUAL_METHOD(void, GetEyePos, 160, (Vector* angles), angles);
     VIRTUAL_METHOD(void, GetEyeAngles, 161, (Vector* angles), angles);
+
+    bool IsEnemy(C_BaseEntity* other);
 };

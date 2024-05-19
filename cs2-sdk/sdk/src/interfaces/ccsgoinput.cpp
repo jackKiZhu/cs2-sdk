@@ -14,4 +14,4 @@ CCSGOInput* CCSGOInput::Get() {
 
 CUserCmd* CCSGOInput::GetUserCmd() { return sequenceNumber < 0 ? nullptr : GetUserCmd(sequenceNumber); }
 
-CUserCmd* CCSGOInput::GetUserCmd(uint32_t sequenceNumber) { return &commands[sequenceNumber]; }
+CUserCmd* CCSGOInput::GetUserCmd(uint32_t sequenceNumber) { return &commands[sequenceNumber % 150]; }

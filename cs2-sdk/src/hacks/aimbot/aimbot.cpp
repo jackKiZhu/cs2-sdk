@@ -43,14 +43,14 @@ bool CAimbot::IsEnabled() {
     return true;
 }
 
-void CAimbot::Run(CMoveData* moveData) {
+void CAimbot::Run(CUserCmd* cmd) {
     if (!IsEnabled()) {
         Invalidate();
         return;
     }
 
     const ImVec2& screenSize = ImGui::GetIO().DisplaySize;
-    CMoveData& lastMove = *moveData;
+    CMoveData& lastMove = *CCSGOInput::Get()->moves.AtPtr(CCSGOInput::Get()->moves.m_Size - 1);
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
     CCSPlayerController* localController = cachedLocal->Get();
     C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
@@ -93,10 +93,8 @@ void CAimbot::Run(CMoveData* moveData) {
                 hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);    
     }
 
-    if (g_Vars.m_EnableTriggerbot && !wantsRecoil && hitPawn) {
-        static ConVar* mp_teammates_are_enemies = CCVar::Get()->GetCvarByName("mp_teammates_are_enemies");
-        if (mp_teammates_are_enemies->GetValue<bool>() ? true : hitPawn->m_iTeamNum() != localPawn->m_iTeamNum())
-            lastMove.Scroll(IN_ATTACK);
+    if (g_Vars.m_EnableTriggerbot && !wantsRecoil && hitPawn && hitPawn->IsEnemy(localPawn)) {
+        lastMove.Scroll(IN_ATTACK);
     }
 
     const std::lock_guard<std::mutex> lock(CMatchCache::GetLock());

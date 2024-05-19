@@ -10,6 +10,7 @@
 #include <virtual/virtual.hpp>
 
 #include <interfaces/schemasystem.hpp>
+#include <interfaces/cvar.hpp>
 
 #include <imgui/imgui_internal.h>
 
@@ -170,4 +171,9 @@ bool C_BaseEntity::GetHitboxPosition(int i, Vector& out) {
 
     out = (worldMins + worldMaxs) * 0.5f;
     return true; 
+}
+
+bool C_BaseEntity::IsEnemy(C_BaseEntity* other) { 
+    static ConVar* mp_teammates_are_enemies = CCVar::Get()->GetCvarByName("mp_teammates_are_enemies");
+    return mp_teammates_are_enemies->GetValue<bool>() ? true : m_iTeamNum() != other->m_iTeamNum();
 }

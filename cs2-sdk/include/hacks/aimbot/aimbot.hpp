@@ -20,7 +20,7 @@ class CAimbot {
     }
 
     bool IsEnabled();
-    void Run(CMoveData* moveData);
+    void Run(CUserCmd* cmd);
     void Update();
     void Render();
 
