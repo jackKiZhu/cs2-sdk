@@ -27,7 +27,4 @@ class CCachedPlayer : public CCachedBaseEntity {
     float fitts;
 
     std::deque<CRecord> records;
-
-    CRecordInterp FindRecordInterp(const Vector& start, const Vector& end, float simTime);
-    void InvalidateRecords();
 };

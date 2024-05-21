@@ -18,6 +18,10 @@
 #include <cache/entities/player.hpp>
 #include <math/math.hpp>
 
+#include <logger/logger.hpp>
+
+#include <algorithm>
+
 void CRecord::Store(C_CSPlayerPawn* pawn) {
     valid = false;
 
@@ -85,10 +89,10 @@ void CRecord::Apply(C_CSPlayerPawn* pawn, bool clean) {
 }
 
 TargetData_t CLagComp::Find() {
-    const Vector end = CGlobal::Get().eyePos + CGlobal::Get().rcsAngles.ToVector().Normalized() * CGlobal::Get().vdata->m_flRange();
+    const Vector end = CGlobal::Get().eyePos + CGlobal::Get().rcsAngles.ToVector().Normalized() * 4096.f;
 
     float bestRecordDistance = std::numeric_limits<float>::max();
-    TargetData_t data;
+    data = {};
 
     const std::lock_guard<std::mutex> lock(CMatchCache::GetLock());
     for (const auto& it : CMatchCache::GetCachedEntities()) {
@@ -107,7 +111,7 @@ TargetData_t CLagComp::Find() {
         Vector eyePos;
         pawn->GetEyePos(&eyePos);
         const float distance = eyePos.DistTo(CGlobal::Get().eyePos);
-        if (distance > CGlobal::Get().vdata->m_flRange()) continue;
+        if (CGlobal::Get().vdata && distance > CGlobal::Get().vdata->m_flRange()) continue;
 
         GameTrace_t trace;
         if (!CEngineTrace::Get()->TraceShape(CGlobal::Get().eyePos, eyePos, CGlobal::Get().pawn, 0x1C1003, 4, &trace) ||
@@ -144,7 +148,7 @@ TargetData_t CLagComp::Find() {
         }
     }
 
-    if (!data.player) return {};
+    if (!data.player) return data;
 
     data.bestBone = BONE_HEAD_0;
 
@@ -169,19 +173,18 @@ void CLagComp::Update() {
 
         CCachedPlayer* cachedPlayer = dynamic_cast<CCachedPlayer*>(cachedEntity.get());
         if (!cachedPlayer || !cachedPlayer->IsEnemyWithTeam(CGlobal::Get().player->GetTeam())) {
-            cachedPlayer->InvalidateRecords();
             continue;
         }
 
         CCSPlayerController* controller = cachedPlayer->Get();
         if (!controller->m_bPawnIsAlive()) {
-            cachedPlayer->InvalidateRecords();
+            cachedPlayer->records.clear();
             continue;
         }
 
         C_CSPlayerPawn* pawn = controller->m_hPawn().Get();
         if (!pawn || pawn->m_bGunGameImmunity()) {
-            cachedPlayer->InvalidateRecords();
+            cachedPlayer->records.clear();
             continue;
         }
 
@@ -193,6 +196,18 @@ void CLagComp::Update() {
 
         // remove every record that are invalid
         std::erase_if(cachedPlayer->records, [](const CRecord& record) { return !record.valid; });
+
+        const size_t size = cachedPlayer->records.size();
+
+        #if 0
+        cachedPlayer->records.erase(std::unique(cachedPlayer->records.begin(), cachedPlayer->records.end(),
+                                                [](const CRecord& a, const CRecord& b) { return a.simulationTime == b.simulationTime && a.origin == b.origin; }),
+                                    cachedPlayer->records.end());
+        #endif
+
+        if (size != cachedPlayer->records.size()) {
+            CLogger::Log("Removed {} duplicate records", size - cachedPlayer->records.size());
+        }
     }
 }
 
@@ -202,7 +217,7 @@ float CLagComp::LastValidSimtime() {
     return CGlobalVars::Get()->currentTime - sv_maxunlag->GetValue<float>();
 }
 
-CRecordInterp CLagComp::GetRecordInterp(const TargetData_t& data) {
+CRecordInterp CLagComp::GetRecordInterp() {
     CRecordInterp result{nullptr, nullptr, 0.f};
     if (!data.player || !data.pawn || !data.bestRecord || !data.records || data.records->empty()) return result;
 
@@ -224,7 +239,7 @@ CRecordInterp CLagComp::GetRecordInterp(const TargetData_t& data) {
     CRecord* next = &data.records->at(nextIndex);
     CRecord* prev = &data.records->at(prevIndex);
 
-    const Vector end = CGlobal::Get().eyePos + CGlobal::Get().rcsAngles.ToVector().Normalized() * CGlobal::Get().vdata->m_flRange();
+    const Vector end = CGlobal::Get().eyePos + CGlobal::Get().rcsAngles.ToVector().Normalized() * 4096.f;
 
     const float bestDist = CMath::Get().DistanceBetweenLines(
         CGlobal::Get().eyePos, end, data.bestRecord->boneMatrix[data.bestBone].position, data.bestRecord->boneMatrix[parent].position);

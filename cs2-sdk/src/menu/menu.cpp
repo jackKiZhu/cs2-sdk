@@ -128,7 +128,6 @@ void CMenu::RenderMainMenu() {
         ImGui::SliderFloat("Damp", &g_Vars.m_Damp, 0.f, 1.f);
         ImGui::SliderFloat("Reaction", &g_Vars.m_ReactionTreshold, 0.f, 1.f);
         ImGui::SliderFloat("Bonus", &g_Vars.m_Bonus, 0.f, 1.f);
-        ImGui::SliderInt("ticks", &g_Vars.m_tick, 0, 20);
 
         ImGui::Checkbox("Draw FOV", &g_Vars.m_DrawFov);
 

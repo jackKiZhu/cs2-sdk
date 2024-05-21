@@ -29,7 +29,7 @@
 
 bool CAimbot::IsEnabled() {
     if (!g_Vars.m_EnableAimbot || !CEngineClient::Get()->IsInGame()) return false;
-    if (!CGlobal::Get().vdata->IsGun()) return false;
+    if (!CGlobal::Get().vdata || !CGlobal::Get().vdata->IsGun()) return false;
     return true;
 }
 
@@ -169,16 +169,14 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     if (!target || target->records.empty()) return;
 
     CCSGOInputHistoryEntryPB* subtick = historyEntry;
-    if (!subtick || !subtick->pViewCmd || !subtick->sv_interp0 || !subtick->sv_interp1) return;
+    if (!subtick || !subtick->pViewCmd || !subtick->cl_interp || !subtick->sv_interp0 || !subtick->sv_interp1) return;
+
+    recordInterp = CLagComp::Get().GetRecordInterp();
+    if (recordInterp.first == nullptr || recordInterp.second == nullptr) return;
+
+    if (CGlobal::Get().cmd->csgoUserCmd.nAttack1StartHistoryIndex == -1) return;
 
     constexpr float interval = 1.f / 64.f;
-
-    int og = subtick->nPlayerTickCount;
-    // subtick->nPlayerTickCount = recordInterp.first->simulationTime / interval;
-    // subtick->flPlayerTickFraction = recordInterp.fraction;
-    //  subtick->nRenderTickCount -= og - subtick->nPlayerTickCount;
-
-    // subtick->nPlayerTickCount -= g_Vars.m_tick;
 
     INetworkGameClient* client = INetworkGameClient::Get();
     if (!client) return;
@@ -186,110 +184,41 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     CNetworkGameClient* network = client->GetNetworkClient();
     if (!network) return;
 
-    float simTime = target->records.front().simulationTime + network->GetClientInterp();
+    //float simTime = target->records.front().simulationTime/* + network->GetClientInterp()*/;
+
+    float simTime = recordInterp.first->simulationTime /*+ network->GetClientInterp()*/;
     int tick = static_cast<int>((simTime / interval) + 0.5f);
 
     Tickfrac_t tf{tick, 1.f};
     InterpInfo_t cl, sv0, sv1;
     if (!target->Get()->m_hPawn().Get()->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return;
 
-    CLogger::Log("Attempted to backtrack {} to tick {} + {:.1f}", og, tick, 1.f);
-    subtick->nRenderTickCount = tick + 1;
-    
-    #if 0
-    subtick->cl_interp->srcTick = tick;
-    subtick->cl_interp->dstTick = tick + 1;
-    subtick->cl_interp->fraction = 1.f;
+    CLogger::Log("Attempted to backtrack {} to tick {} + {:.1f}", subtick->nPlayerTickCount, tick, 1.f);
+    subtick->nRenderTickCount = cl.dstTick;
 
-    subtick->sv_interp0->srcTick = tick;
-    subtick->sv_interp0->dstTick = tick + 1;
-    subtick->sv_interp0->fraction = sv0.fraction;  // sv0.fraction;
+    subtick->cl_interp->srcTick = cl.srcTick;
+    subtick->cl_interp->dstTick = cl.dstTick;
+    subtick->cl_interp->fraction = cl.fraction;
 
-    subtick->sv_interp1->srcTick = tick + 1;
-    subtick->sv_interp1->dstTick = tick + 2;
-    subtick->sv_interp1->fraction = sv1.fraction;  // sv1.fraction;
-    #else
-    #endif
-}
+    subtick->sv_interp0->srcTick = sv0.srcTick;
+    subtick->sv_interp0->dstTick = sv0.dstTick;
+    subtick->sv_interp0->fraction = sv0.fraction;
 
-bool CAimbot::Backtrack(const TargetData_t& data) {
-    return false;
-    // const float inaccuracy = CGlobal::Get().weapon->GetInaccuracy();
-    // if (inaccuracy > 0.05f) return false;
-    if (!target || target->records.empty()) return false;
+    subtick->sv_interp1->srcTick = sv1.srcTick;
+    subtick->sv_interp1->dstTick = sv1.dstTick;
+    subtick->sv_interp1->fraction = sv1.fraction;
 
-    recordInterp = CLagComp::Get().GetRecordInterp(data);
-    if (recordInterp.first == nullptr || recordInterp.second == nullptr) return false;
+    //subtick->cl_interp->srcTick = tick;
+    //subtick->cl_interp->dstTick = tick + 1;
+    //subtick->cl_interp->fraction = 1.f;
 
-    recordInterp = {&target->records.front(), &target->records.front(), 0.f};
+    //subtick->sv_interp0->srcTick = tick;
+    //subtick->sv_interp0->dstTick = tick+1;
+    //subtick->sv_interp0->fraction = 0.f;
 
-    if (CGlobal::Get().cmd->csgoUserCmd.nAttack1StartHistoryIndex == -1) return false;
-
-    CCSGOInputHistoryEntryPB* subtick = CGlobal::Get().cmd->GetInputHistoryEntry(CGlobal::Get().cmd->csgoUserCmd.nAttack1StartHistoryIndex);
-    if (!subtick || !subtick->pViewCmd || !subtick->sv_interp0 || !subtick->sv_interp1) return false;
-
-    constexpr float interval = 1.f / 64.f;
-
-    int og = subtick->nPlayerTickCount;
-    // subtick->nPlayerTickCount = recordInterp.first->simulationTime / interval;
-    // subtick->flPlayerTickFraction = recordInterp.fraction;
-    //  subtick->nRenderTickCount -= og - subtick->nPlayerTickCount;
-
-    // subtick->nPlayerTickCount -= g_Vars.m_tick;
-
-    float simTime = target->records.front().simulationTime;
-    int tick = static_cast<int>(std::floorf(simTime / interval));
-
-    Tickfrac_t tf{tick - g_Vars.m_tick, 1.f};
-    InterpInfo_t cl, sv0, sv1;
-    if (!data.pawn->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return false;
-
-    if (shouldAim) {
-        CLogger::Log("Attempted to backtrack {} to tick {} + {:.1f}", og, subtick->nPlayerTickCount, recordInterp.fraction);
-        subtick->cl_interp->srcTick = tick;
-        subtick->cl_interp->dstTick = tick + 1;
-        subtick->cl_interp->fraction = 1.f;
-
-        subtick->sv_interp0->srcTick = tick;
-        subtick->sv_interp0->dstTick = tick + 1;
-        subtick->sv_interp0->fraction = sv0.fraction;
-
-        subtick->sv_interp1->srcTick = tick + 1;
-        subtick->sv_interp1->dstTick = tick + 2;
-        subtick->sv_interp1->fraction = sv1.fraction;
-
-        // CGlobal::Get().cmd->csgoUserCmd.nAttack1StartHistoryIndex = 0;
-        // CGlobal::Get().cmd->csgoUserCmd.nAttack2StartHistoryIndex = 0;
-        // CGlobal::Get().cmd->csgoUserCmd.nAttack3StartHistoryIndex = 0;
-    }
-
-    return true;
-
-    const float bestTime = std::lerp(recordInterp.first->simulationTime, recordInterp.second->simulationTime, recordInterp.fraction);
-    const float bestTickTime = bestTime / interval;
-    int bestTick = static_cast<int>(std::floorf(bestTickTime));
-    const float remainder = bestTickTime - static_cast<float>(bestTick);
-
-    if (shouldAim) {
-        CLogger::Log("Attempted to backtrack to tick {} with fraction {}", bestTick, remainder);
-
-        bestTick--;  // ?
-
-        // bestTick += 3;
-
-        subtick->cl_interp->srcTick = bestTick;
-        subtick->cl_interp->dstTick = bestTick + 1;
-        subtick->cl_interp->fraction = remainder;
-
-        subtick->sv_interp0->srcTick = bestTick;
-        subtick->sv_interp0->dstTick = bestTick + 1;
-        subtick->sv_interp0->fraction = 0.f;
-
-        subtick->sv_interp1->srcTick = bestTick + 1;
-        subtick->sv_interp1->dstTick = bestTick + 2;
-        subtick->sv_interp1->fraction = 0.f;
-    }
-    return true;
+    //subtick->sv_interp1->srcTick = tick+1;
+    //subtick->sv_interp1->dstTick = tick+2;
+    //subtick->sv_interp1->fraction = 0.f;
 }
 
 void CAimbot::Invalidate() {

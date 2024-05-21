@@ -24,7 +24,7 @@ class CAimbot {
 
     bool IsEnabled();
     void Run(const TargetData_t& data);
-    bool Backtrack(const TargetData_t& data);
+
     void Update();
     void Render();
     void Test(CCSGOInputHistoryEntryPB* historyEntry);

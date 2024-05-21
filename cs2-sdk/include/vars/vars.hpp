@@ -43,8 +43,6 @@ struct Vars_t {
     bool m_Chams = true;
     bool m_ChamsXQZ = true;
     Color_t m_ChamsColor = Color_t(0, 255, 125);
-
-    int m_tick = 3;
 };
 
 extern Vars_t g_Vars;

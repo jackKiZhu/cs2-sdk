@@ -70,5 +70,7 @@ class CLagComp {
     void Update();
 
     float LastValidSimtime();
-    CRecordInterp GetRecordInterp(const TargetData_t& data);
+    CRecordInterp GetRecordInterp();
+
+    TargetData_t data;
 };

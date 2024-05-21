@@ -122,8 +122,6 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
 
-    CAimbot::Get().Backtrack(targetData);
-
     //cmd->csgoUserCmd.baseCmd->buttons->scroll |= IN_JUMP;  
     //cmd->GetBaseCmdButtons();
 
