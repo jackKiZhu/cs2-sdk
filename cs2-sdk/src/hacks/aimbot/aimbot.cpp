@@ -174,7 +174,7 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     recordInterp = CLagComp::Get().GetRecordInterp();
     if (recordInterp.first == nullptr || recordInterp.second == nullptr) return;
 
-    if (CGlobal::Get().cmd->csgoUserCmd.nAttack1StartHistoryIndex == -1) return;
+    // if (!(CGlobal::Get().cmd->csgoUserCmd.baseCmd->buttons->held & IN_ATTACK)) return;
 
     constexpr float interval = 1.f / 64.f;
 
