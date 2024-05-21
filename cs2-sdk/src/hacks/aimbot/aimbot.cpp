@@ -187,25 +187,29 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     if (!network) return;
 
     float simTime = target->records.front().simulationTime + network->GetClientInterp();
-    int tick = static_cast<int>(std::floorf(simTime / interval));
+    int tick = static_cast<int>((simTime / interval) + 0.5f);
 
-    Tickfrac_t tf{tick - g_Vars.m_tick, 1.f};
+    Tickfrac_t tf{tick, 1.f};
     InterpInfo_t cl, sv0, sv1;
     if (!target->Get()->m_hPawn().Get()->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return;
 
-    CLogger::Log("Attempted to backtrack {} to tick {} + {:.1f}", og, tf.tick, tf.fraction);
-
+    CLogger::Log("Attempted to backtrack {} to tick {} + {:.1f}", og, tick, 1.f);
+    subtick->nRenderTickCount = tick + 1;
+    
+    #if 0
     subtick->cl_interp->srcTick = tick;
     subtick->cl_interp->dstTick = tick + 1;
     subtick->cl_interp->fraction = 1.f;
 
     subtick->sv_interp0->srcTick = tick;
     subtick->sv_interp0->dstTick = tick + 1;
-    subtick->sv_interp0->fraction = sv0.fraction;
+    subtick->sv_interp0->fraction = sv0.fraction;  // sv0.fraction;
 
     subtick->sv_interp1->srcTick = tick + 1;
     subtick->sv_interp1->dstTick = tick + 2;
-    subtick->sv_interp1->fraction = sv1.fraction;
+    subtick->sv_interp1->fraction = sv1.fraction;  // sv1.fraction;
+    #else
+    #endif
 }
 
 bool CAimbot::Backtrack(const TargetData_t& data) {
