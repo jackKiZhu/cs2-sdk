@@ -166,15 +166,14 @@ void CAimbot::Render() {
 }
 
 void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
+    if (!g_Vars.m_Backtrack) return;
     if (!target || target->records.empty()) return;
 
     CCSGOInputHistoryEntryPB* subtick = historyEntry;
     if (!subtick || !subtick->pViewCmd || !subtick->cl_interp || !subtick->sv_interp0 || !subtick->sv_interp1) return;
 
-    recordInterp = CLagComp::Get().GetRecordInterp();
-    if (recordInterp.first == nullptr || recordInterp.second == nullptr) return;
-
-    // if (!(CGlobal::Get().cmd->csgoUserCmd.baseCmd->buttons->held & IN_ATTACK)) return;
+    const auto [simTime1, simTime2, fraction] = CLagComp::Get().GetOptimalSimtime();
+    if (fraction == -1.f) return;
 
     constexpr float interval = 1.f / 64.f;
 
@@ -184,9 +183,8 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     CNetworkGameClient* network = client->GetNetworkClient();
     if (!network) return;
 
-    //float simTime = target->records.front().simulationTime/* + network->GetClientInterp()*/;
-
-    float simTime = recordInterp.first->simulationTime /*+ network->GetClientInterp()*/;
+    float simTime = simTime1;
+    //simTime += network->GetClientInterp();
     int tick = static_cast<int>((simTime / interval) + 0.5f);
 
     Tickfrac_t tf{tick, 1.f};

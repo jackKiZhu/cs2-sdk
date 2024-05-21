@@ -19,6 +19,7 @@
 #include <math/math.hpp>
 
 #include <logger/logger.hpp>
+#include <vars/vars.hpp>
 
 #include <algorithm>
 
@@ -125,7 +126,10 @@ TargetData_t CLagComp::Find() {
 
         const Vector eyeDir = pawn->m_angEyeAngles().ToVector().Normalized();
 
-        for (size_t i = 0; i < cachedPlayer->records.size(); ++i) {
+        size_t i = 0;
+        if (!g_Vars.m_Backtrack)
+          i = cachedPlayer->records.size() - 2;
+        for (; i < cachedPlayer->records.size(); ++i) {
             CRecord& record = cachedPlayer->records[i];
             if (!record.IsValid()) continue;
 
@@ -217,8 +221,12 @@ float CLagComp::LastValidSimtime() {
     return CGlobalVars::Get()->currentTime - sv_maxunlag->GetValue<float>();
 }
 
-CRecordInterp CLagComp::GetRecordInterp() {
-    CRecordInterp result{nullptr, nullptr, 0.f};
+std::tuple<float, float, float> CLagComp::GetOptimalSimtime() {
+    CRecord* first = nullptr;
+    CRecord* second = nullptr;
+    float fraction = 0.f;
+    std::tuple<float, float, float> result = {0.f, 0.f, -1.f};
+
     if (!data.player || !data.pawn || !data.bestRecord || !data.records || data.records->empty()) return result;
 
     CGameSceneNode* gameSceneNode = data.pawn->m_pGameSceneNode();
@@ -250,13 +258,16 @@ CRecordInterp CLagComp::GetRecordInterp() {
                                                              prev->boneMatrix[parent].position);
     const float nextDist = CMath::Get().DistanceBetweenLines(CGlobal::Get().eyePos, end, next->boneMatrix[data.bestBone].position,
                                                              next->boneMatrix[parent].position);
-    result.first = prevDist < nextDist ? prev : data.bestRecord;
-    result.second = prevDist < nextDist ? data.bestRecord : next;
-    result.fraction = 0.f;
+    first = prevDist < nextDist ? prev : data.bestRecord;
+    second = prevDist < nextDist ? data.bestRecord : next;
+    std::get<0>(result) = first->simulationTime;
+    std::get<1>(result) = second->simulationTime;
+    std::get<2>(result) = 0.f;
 
-    if (result.first == result.second) return result;
+    if (first == second) return result;
 
     const float bestFullDist = (prevDist < nextDist ? prevDist : nextDist) + bestDist;
-    result.fraction = prevDist < nextDist ? prevDist / bestFullDist : bestDist / bestFullDist;
+    fraction = prevDist < nextDist ? prevDist / bestFullDist : bestDist / bestFullDist;
+    std::get<2>(result) = fraction;
     return result;
 }

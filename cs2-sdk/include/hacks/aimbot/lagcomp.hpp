@@ -41,13 +41,6 @@ class CRecord {
     Vector maxs;
 };
 
-class CRecordInterp {
-   public:
-    CRecord* first;
-    CRecord* second;
-    float fraction;
-};
-
 struct TargetData_t {
     CCachedPlayer* player = nullptr;
     CCSPlayerController* controller = nullptr;
@@ -70,7 +63,7 @@ class CLagComp {
     void Update();
 
     float LastValidSimtime();
-    CRecordInterp GetRecordInterp();
+    std::tuple<float, float, float> GetOptimalSimtime();
 
     TargetData_t data;
 };

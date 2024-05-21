@@ -31,9 +31,6 @@ class CAimbot {
 
     bool IsInSmoke(const Vector& start, const Vector& end);
 
-        // temp
-    CRecordInterp recordInterp;
-
    private:
 
     void Invalidate();

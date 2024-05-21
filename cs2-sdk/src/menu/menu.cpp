@@ -132,6 +132,7 @@ void CMenu::RenderMainMenu() {
         ImGui::Checkbox("Draw FOV", &g_Vars.m_DrawFov);
 
         ImGui::Checkbox("Triggerbot", &g_Vars.m_EnableTriggerbot);
+        ImGui::Checkbox("Backtrack", &g_Vars.m_Backtrack);
         ImGui::Spacing();
 
         ImGui::SliderFloat("World brightness", &g_Vars.m_NightMode, 0.f, 1.f);

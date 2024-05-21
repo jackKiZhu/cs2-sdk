@@ -30,6 +30,8 @@ struct Vars_t {
     float m_Bonus = 0.5f;
     bool m_DrawFov;
 
+    bool m_Backtrack = true;
+
     float m_RecoilX = 0.7f;
     float m_RecoilY = 0.4f;
 
