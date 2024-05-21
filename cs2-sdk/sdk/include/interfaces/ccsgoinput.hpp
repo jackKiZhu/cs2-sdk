@@ -113,7 +113,7 @@ class CMsgVector : public CBasePB {
     float w;
 };
 
-class CCSGOInterpolationInfo : public CBasePB {
+class CCSGOInterpolationInfoPB : public CBasePB {
    public:
     float fraction;
     int srcTick;
@@ -127,10 +127,10 @@ class CCSGOInputHistoryEntryPB : public CBasePB {
     CMsgVector* pTargetHeadOriginCmd;       // 0x28
     CMsgVector* pTargetAbsOriginCmd;        // 0x30
     CMsgQAngle* pTargetViewCmd;             // 0x38
-    CCSGOInterpolationInfo* cl_interp;      // 0x40
-    CCSGOInterpolationInfo* sv_interp0;     // 0x48
-    CCSGOInterpolationInfo* sv_interp1;     // 0x50
-    CCSGOInterpolationInfo* player_interp;  // 0x58
+    CCSGOInterpolationInfoPB* cl_interp;    // 0x40
+    CCSGOInterpolationInfoPB* sv_interp0;   // 0x48
+    CCSGOInterpolationInfoPB* sv_interp1;   // 0x50
+    CCSGOInterpolationInfoPB* player_interp;// 0x58
     int nRenderTickCount;                   // 0x60
     float flRenderTickFraction;             // 0x64
     int nPlayerTickCount;                   // 0x68

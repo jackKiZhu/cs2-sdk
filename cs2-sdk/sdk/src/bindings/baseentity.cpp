@@ -177,3 +177,8 @@ bool C_BaseEntity::IsEnemy(C_BaseEntity* other) {
     static ConVar* mp_teammates_are_enemies = CCVar::Get()->GetCvarByName("mp_teammates_are_enemies");
     return mp_teammates_are_enemies->GetValue<bool>() ? true : m_iTeamNum() != other->m_iTeamNum();
 }
+
+void C_BaseEntity::SetOrigin(const Vector& pos) {
+    static auto fn = signatures::SetOrigin.GetPtrAs<void (*)(void*, const Vector&)>();
+    if (fn) fn(this, pos);
+}

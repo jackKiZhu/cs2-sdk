@@ -111,6 +111,8 @@
     <ClCompile Include="api\src\hook\hook.cpp" />
     <ClCompile Include="api\src\module\module.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
+    <ClCompile Include="src\hacks\global\global.cpp" />
+    <ClCompile Include="sdk\src\bindings\collisionproperty.cpp" />
     <ClCompile Include="sdk\src\types\model.cpp" />
     <ClCompile Include="sdk\src\types\keyvalues.cpp" />
     <ClCompile Include="sdk\src\interfaces\memalloc.cpp" />
@@ -281,6 +283,7 @@
     <ClInclude Include="include\hacks\aimbot\lagcomp.hpp" />
     <ClInclude Include="include\hacks\chams\chams.hpp" />
     <ClInclude Include="include\hacks\esp\esp.hpp" />
+    <ClInclude Include="include\hacks\global\global.hpp" />
     <ClInclude Include="include\hacks\movement\movement.hpp" />
     <ClInclude Include="include\hacks\skinchanger\skinchanger.hpp" />
     <ClInclude Include="include\hacks\visuals\visuals.hpp" />

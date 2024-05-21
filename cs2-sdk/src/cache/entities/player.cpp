@@ -1,5 +1,9 @@
 #include "pch.hpp"
 
+#include <hacks/aimbot/aimbot.hpp>
+#include <hacks/aimbot/lagcomp.hpp>
+#include <hacks/global/global.hpp>
+
 #include <cache/entities/player.hpp>
 #include <cache/cache.hpp>
 
@@ -8,9 +12,13 @@
 
 #include <bindings/playercontroller.hpp>
 #include <bindings/playerpawn.hpp>
+#include <types/model.hpp>
 
 #include <interfaces/engineclient.hpp>
 #include <interfaces/cvar.hpp>
+#include <interfaces/globalvars.hpp>
+
+#include <math/math.hpp>
 
 #include <imgui/imgui_internal.h>
 
@@ -88,6 +96,50 @@ void CCachedPlayer::DrawESP() {
                                     IM_COL32(red, greenClamped, 0, 255));
         }
     }
+
+    if (g_Vars.m_Skeleton) {
+        if (CGameSceneNode* gameSceneNode = pawn->m_pGameSceneNode(); gameSceneNode) {
+            if (CSkeletonInstance* skeleton = gameSceneNode->GetSkeleton(); skeleton) {
+                skeleton->CalculateWorldSpaceBones(FLAG_HITBOX);
+                BoneData_t* bones = skeleton->m_modelState().bones;
+                if (CModel* model = skeleton->m_modelState().m_hModel().Get(); model && bones) {
+                    if (const uint32_t boneCount = model->BoneCount(); boneCount > 0) {
+                        for (uint32_t bone = 0; bone < boneCount; ++bone) {
+                            if (!(model->GetBoneFlags(bone) & FLAG_HITBOX)) continue;
+
+                            const uint32_t parent = model->GetBoneParent(bone);
+                            if (parent == -1) continue;
+
+                            ImVec2 boneScreenPos, parentScreenPos;
+                            if (CMath::Get().WorldToScreen(bones[bone].position, boneScreenPos) &&
+                                CMath::Get().WorldToScreen(bones[parent].position, parentScreenPos)) {
+                                drawList->AddLine(boneScreenPos, parentScreenPos, IM_COL32(255, 255, 255, 255));
+                                // drawList->AddText(boneScreenPos, IM_COL32(255, 255, 255, 255), std::format("{}:{}", model->GetBoneName(bone), bone).c_str());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (true) {
+        for (const auto& record : records) {
+            const float dist = CMath::Get().DistanceFromRay(record.eyePos, CGlobal::Get().eyePos, CGlobal::Get().eyePos + CGlobal::Get().rcsAngles.ToVector().Normalized() * 4096.f);
+            ImVec2 screenPos;
+            if (CMath::Get().WorldToScreen(record.eyePos, screenPos)) {
+                const bool inRange = dist < 100.f;
+                if ((CAimbot::Get().recordInterp.first && memcmp(&record, CAimbot::Get().recordInterp.first, sizeof(CRecord)) == 0) ||
+                    (CAimbot::Get().recordInterp.second && memcmp(&record, CAimbot::Get().recordInterp.second, sizeof(CRecord)) == 0))
+                {
+                    drawList->AddCircleFilled(screenPos, 2.f, IM_COL32(0, 0, 255, inRange ? 255 : 100));
+
+                }
+                else
+                  drawList->AddCircleFilled(screenPos, 2.f, IM_COL32(255, 255, 255, inRange ? 255 : 100));
+            }
+        }
+    }
 }
 
 void CCachedPlayer::CalculateDrawInfo() {
@@ -102,6 +154,7 @@ void CCachedPlayer::Reset() {
     visibleSince = 0.f;
     dot = 0.f;
     fitts = 0.f;
+    InvalidateRecords();
 }
 
 CCachedPlayer::Team CCachedPlayer::GetTeam() {
@@ -120,3 +173,74 @@ bool CCachedPlayer::IsEnemyWithTeam(Team team) {
 }
 
 bool CCachedPlayer::IsLocalPlayer() { return GetIndex() == CEngineClient::Get()->GetLocalPlayer(); }
+
+CRecordInterp CCachedPlayer::FindRecordInterp(const Vector& start, const Vector& end, float simTime) {
+    CRecordInterp result;
+    result.first = result.second = nullptr;
+
+    CCSPlayerController* controller = Get();
+    if (!controller) return result;
+    C_CSPlayerPawn* pawn = controller->m_hPawn().Get();
+    if (!pawn) return result;
+    CGameSceneNode* gameSceneNode = pawn->m_pGameSceneNode();
+    if (!gameSceneNode) return result;
+    CSkeletonInstance* skeleton = gameSceneNode->GetSkeleton();
+    if (!skeleton) return result;
+    const uint32_t boneCount = skeleton->m_modelState().m_hModel().Get()->BoneCount();
+    if (boneCount == 0) return result;
+
+    float bestDist = std::numeric_limits<float>::max();
+    uint32_t bestBone = -1, bestRecord = -1;
+
+    for (uint32_t bone = 0; bone < boneCount; ++bone) {
+        if (!(skeleton->m_modelState().m_hModel().Get()->GetBoneFlags(bone) & BoneFlags_t::FLAG_HITBOX)) continue;
+        const uint32_t parent = skeleton->m_modelState().m_hModel().Get()->GetBoneParent(bone);
+        if (parent == -1) continue;
+
+        for (uint32_t i = 0; i < records.size(); ++i) {
+            CRecord& record = records[i];
+            if (!record.IsValid()) continue;
+            if (record.simulationTime <= simTime) continue;
+
+            const float dist =
+                CMath::Get().DistanceBetweenLines(start, end, record.boneMatrix[bone].position, record.boneMatrix[parent].position);
+            if (dist < bestDist) {
+                bestDist = dist;
+                bestBone = bone;
+                bestRecord = i;
+            }
+        }
+    }
+
+    if (bestBone == -1 || bestRecord == -1) return result;
+
+    uint32_t nextIndex = bestRecord == records.size() - 1 ? 0 : bestRecord + 1;
+    if (!records[nextIndex].IsValid()) nextIndex = bestRecord;
+
+    uint32_t prevIndex = bestRecord == 0 ? 0 : bestRecord - 1;
+    if (!records[prevIndex].IsValid()) prevIndex = bestRecord;
+
+    CRecord* next = &records[nextIndex];
+    CRecord* prev = &records[prevIndex];
+
+    const CRecord& best = records[bestRecord];
+
+    uint32_t parent = skeleton->m_modelState().m_hModel().Get()->GetBoneParent(bestBone);
+    const float prevDist =
+        CMath::Get().DistanceBetweenLines(start, end, prev->boneMatrix[bestBone].position, prev->boneMatrix[bestBone].position);
+    const float nextDist =
+        CMath::Get().DistanceBetweenLines(start, end, next->boneMatrix[bestBone].position, next->boneMatrix[parent].position);
+
+    uint32_t first = prevDist < nextDist ? prevIndex : bestRecord;
+    uint32_t second = prevDist < nextDist ? bestRecord : nextIndex;
+
+    // records are the same
+    if (first == second) return {&records[first], &records[second], 0.0f};
+
+    const float bestFullDist = (prevDist < nextDist ? prevDist : nextDist) + bestDist;
+    const float fraction = prevDist < nextDist ? prevDist / bestFullDist : bestDist / bestFullDist;
+
+    return {&records[first], &records[second], fraction};
+}
+
+void CCachedPlayer::InvalidateRecords() { records.clear(); }

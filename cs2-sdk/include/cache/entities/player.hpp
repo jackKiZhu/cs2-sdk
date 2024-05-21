@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cache/entities/base.hpp>
 #include <hacks/aimbot/lagcomp.hpp>
+#include <cache/entities/base.hpp>
 
 class CCSPlayerController;
 
@@ -26,5 +26,8 @@ class CCachedPlayer : public CCachedBaseEntity {
     float dot;
     float fitts;
 
-    std::vector<CRecord> records;
+    std::deque<CRecord> records;
+
+    CRecordInterp FindRecordInterp(const Vector& start, const Vector& end, float simTime);
+    void InvalidateRecords();
 };

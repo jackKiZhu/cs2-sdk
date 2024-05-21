@@ -19,7 +19,8 @@ void CLogger::LogStringInternal(const std::string& str) {
 
 CLogger::~CLogger() {
 #if defined(SDK_ENABLE_LOGGING) && defined(_WIN32)
-    fclose(m_ConsoleStream);
+    if (m_ConsoleStream)
+      fclose(m_ConsoleStream);
     FreeConsole();
 #endif
 }

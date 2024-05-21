@@ -321,11 +321,42 @@ namespace signatures {
 
     CSigScan BoneParent("BoneParent", CConstants::CLIENT_LIB,
                       {
-                          {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 0F B7 04 50")},
+                          {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 0F BF 04 50")},
                       });
 
     CSigScan GetBone("GetBone", CConstants::CLIENT_LIB,
                         {
                             {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B FA 49 63 F0 BA ? ? ? ? 48 8B D9 E8 ? ? ? ? 48 8B 8B")},
                         });
+
+    CSigScan BoneCount("BoneCount", CConstants::CLIENT_LIB,
+                       {
+                           {SDK_SIG("E8 ? ? ? ? 8B D8 48 C7 44 24"),
+                            [](CPointer& ptr) { ptr.Absolute(1, 0); }},
+                       });
+
+    CSigScan SetOrigin("SetOrigin", CConstants::CLIENT_LIB,
+                       {
+                           {SDK_SIG("48 89 5C 24 ? 57 48 83 EC ? 48 8B 01 48 8B FA 48 8B D9 FF 90 ? ? ? ? 84 C0")},
+                       });
+
+    CSigScan SetCollisionBounds("SetCollisionBounds", CConstants::CLIENT_LIB,
+                       {
+                           {SDK_SIG("48 83 EC ? F2 0F 10 02 F3 0F 10 49")},
+                       });
+
+    CSigScan CalculateWorldSpaceBones("CalculateWorldSpaceBones", CConstants::CLIENT_LIB,
+                                {
+                                    {SDK_SIG("40 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 48 8D 6C 24 ? 48 8B F1")},
+                                });
+
+    CSigScan CalcInterpInfos("CalcInterpInfos", CConstants::CLIENT_LIB,
+                                      {
+                                          {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 8B F9 48 8D 44 24")},
+                                      });
+
+    CSigScan InputParser("InputParser", CConstants::CLIENT_LIB,
+                             {
+                                 {SDK_SIG("48 8B C4 4C 89 48 ? 55 56 41 56 48 8D 68")},
+                             });
 }  // namespace signatures

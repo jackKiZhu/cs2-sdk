@@ -13,6 +13,7 @@ struct Vars_t {
 
     bool m_Team;
     bool m_PlayerBoxes;
+    bool m_Skeleton;
     bool m_PlayerNames;
     bool m_PlayerHealthBar;
 
@@ -43,6 +44,7 @@ struct Vars_t {
     bool m_ChamsXQZ = true;
     Color_t m_ChamsColor = Color_t(0, 255, 125);
 
+    int m_tick = 3;
 };
 
 extern Vars_t g_Vars;

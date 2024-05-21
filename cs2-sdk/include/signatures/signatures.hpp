@@ -57,4 +57,10 @@ namespace signatures {
     extern CSigScan BoneName;
     extern CSigScan BoneParent;
     extern CSigScan GetBone;
+    extern CSigScan BoneCount;
+    extern CSigScan SetOrigin;
+    extern CSigScan SetCollisionBounds;
+    extern CSigScan CalculateWorldSpaceBones;
+    extern CSigScan CalcInterpInfos;
+    extern CSigScan InputParser;
 }  // namespace signatures

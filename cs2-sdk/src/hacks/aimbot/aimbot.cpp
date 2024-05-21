@@ -1,5 +1,8 @@
-#include "pch.hpp"
+#include <pch.hpp>
+
+#include <hacks/global/global.hpp>
 #include <hacks/aimbot/aimbot.hpp>
+#include <hacks/aimbot/lagcomp.hpp>
 
 #include <vars/vars.hpp>
 
@@ -13,6 +16,7 @@
 #include <bindings/playercontroller.hpp>
 #include <bindings/playerpawn.hpp>
 #include <bindings/weapon.hpp>
+#include <bindings/gamescenenode.hpp>
 
 #include <math/math.hpp>
 #include <math/fitts.hpp>
@@ -24,179 +28,102 @@
 
 bool CAimbot::IsEnabled() {
     if (!g_Vars.m_EnableAimbot || !CEngineClient::Get()->IsInGame()) return false;
-    C_CSPlayerPawn* localPawn = CMatchCache::Get().GetLocalPawn();
-    if (!localPawn) return false;
-
-    Vector* _punch = localPawn->GetLastAimPunch();
-    // if the aim punch is invalid, keep the last one
-    if (_punch) {
-        punch = *_punch;
-        punchDelta = (*_punch - oldPunch).NormalizedAngle();
-        oldPunch = *_punch;
-    }
-
-    C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
-    if (!weapon) return false;
-    CCSWeaponBaseVData* weaponData = weapon->GetWeaponData();
-    if (!weaponData || !weaponData->IsGun()) return false;
-
+    if (!CGlobal::Get().vdata->IsGun()) return false;
     return true;
 }
 
-void CAimbot::Run(CUserCmd* cmd) {
+void CAimbot::Run(const TargetData_t& data) {
     if (!IsEnabled()) {
         Invalidate();
         return;
     }
 
-    const ImVec2& screenSize = ImGui::GetIO().DisplaySize;
+    target = data.player;
     CMoveData& lastMove = *CCSGOInput::Get()->moves.AtPtr(CCSGOInput::Get()->moves.m_Size - 1);
-    CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
-    CCSPlayerController* localController = cachedLocal->Get();
-    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
-    C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
-    CCSWeaponBaseVData* weaponData = weapon->GetWeaponData();
-    const int weaponType = weaponData->m_WeaponType();
-    const bool wantsRecoil = localPawn->m_iShotsFired() > 1 && weaponType != WEAPONTYPE_SHOTGUN && weaponType != WEAPONTYPE_SNIPER_RIFLE && !weapon->m_bBurstMode();
-    Vector localPos;
-    localPawn->GetEyePos(&localPos);
+    const int weaponType = CGlobal::Get().vdata->m_WeaponType();
+    const bool wantsRecoil = CGlobal::Get().pawn->m_iShotsFired() > 1 && weaponType != WEAPONTYPE_SHOTGUN &&
+                             weaponType != WEAPONTYPE_SNIPER_RIFLE && !CGlobal::Get().weapon->m_bBurstMode();
 
-    Vector targetAngle;
     perfectAngle = lastMove.viewAngles;
 
-    rcsAngle = lastMove.viewAngles - punchDelta * 2.f;
-    rcsAngle.z = 0.f;
-    rcsAngle.NormalizeAngle();
-
     if (wantsRecoil) {
-        lastMove.viewAngles.x -= punchDelta.x * 2.f * g_Vars.m_RecoilX;
-        lastMove.viewAngles.y -= punchDelta.y * 2.f * g_Vars.m_RecoilY;
+        lastMove.viewAngles.x -= CGlobal::Get().punchDelta.x * 2.f * g_Vars.m_RecoilX;
+        lastMove.viewAngles.y -= CGlobal::Get().punchDelta.y * 2.f * g_Vars.m_RecoilY;
         lastMove.viewAngles.NormalizeAngle();
     }
 
     curAngle = lastMove.viewAngles;
     curAngle.z = 0.f;
 
-    const float inaccuracy = weapon->GetInaccuracy();
+    const float inaccuracy = CGlobal::Get().weapon->GetInaccuracy();
 
     if (inaccuracy > 0.05f) {
         Invalidate();
         return;
     }
 
+    const Vector end = CGlobal::Get().eyePos + CGlobal::Get().rcsAngles.ToVector().Normalized() * 4096.f;
+
     C_CSPlayerPawn* hitPawn = nullptr;
-    if (weapon->m_nNextPrimaryAttackTick() < localController->m_nTickBase()) {
-        const Vector end = localPos + rcsAngle.ToVector().Normalized() * 4096.f;
+    if (CGlobal::Get().weapon->m_nNextPrimaryAttackTick() < CGlobal::Get().controller->m_nTickBase()) {
         GameTrace_t trace;
-        if ( CEngineTrace::Get()->TraceShape(localPos, end, localPawn, 0x1C1003, 4, &trace) ) 
-            if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) 
-                hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);    
+        if (CEngineTrace::Get()->TraceShape(CGlobal::Get().eyePos, end, CGlobal::Get().pawn, 0x1C1003, 4, &trace))
+            if (trace.hitEntity && trace.hitEntity->IsPlayerPawn()) hitPawn = static_cast<C_CSPlayerPawn*>(trace.hitEntity);
     }
 
-    if (g_Vars.m_EnableTriggerbot && !wantsRecoil && hitPawn && hitPawn->IsEnemy(localPawn)) {
+    if (g_Vars.m_EnableTriggerbot && !wantsRecoil && hitPawn && hitPawn->IsEnemy(CGlobal::Get().pawn)) {
         lastMove.Scroll(IN_ATTACK);
     }
 
-    const std::lock_guard<std::mutex> lock(CMatchCache::GetLock());
+    const bool inDuel = g_Vars.m_EnableInDuel && (target ? target->dot >= g_Vars.m_ReactionTreshold : false);
 
-    const auto& cachedEntities = CMatchCache::GetCachedEntities();
-    target = nullptr;
-    Vector targetPos;
-
-    float currentFov = std::numeric_limits<float>::max();
-    for (const auto& it : cachedEntities) {
-        const auto& cachedEntity = it.second;
-        if (!cachedEntity->IsValid() || cachedEntity->GetType() != CCachedBaseEntity::Type::PLAYER) continue;
-
-        CCachedPlayer* cachedPlayer = dynamic_cast<CCachedPlayer*>(cachedEntity.get());
-        if (!cachedPlayer || !cachedPlayer->IsEnemyWithTeam(cachedLocal->GetTeam())) continue;
-
-        CCSPlayerController* controller = cachedPlayer->Get();
-        if (!controller->m_bPawnIsAlive()) continue;
-
-        C_CSPlayerPawn* pawn = controller->m_hPawn().Get();
-        if (!pawn || pawn->m_bGunGameImmunity()) continue;
-
-        Vector pos;
-        if (!pawn->GetHitboxPosition(0, pos)) continue;
-
-        if (IsInSmoke(localPos, pos)) {
-            cachedPlayer->Reset();
-            continue;
-        }
-
-        GameTrace_t trace;
-        if (!CEngineTrace::Get()->TraceShape(localPos, pos, localPawn, 0x1C1003, 4, &trace)) {
-            cachedPlayer->Reset();
-            continue;
-        }
-
-        if (trace.fraction < 0.97f) {
-            cachedPlayer->Reset();
-            continue;
-        }
-
+    if (target) {
         ImVec2 screenPos;
-        if (!CMath::Get().WorldToScreen(pos, screenPos)) {
-            cachedPlayer->Reset();
-            continue;
+        if (CMath::Get().WorldToScreen(data.aimPos, screenPos)) {
+            const ImVec2& screenSize = ImGui::GetIO().DisplaySize;
+            const float width = target->GetBBox().m_Maxs.x - target->GetBBox().m_Mins.x;
+            const ImVec2 screenDistance = screenPos - screenSize * 0.5f;
+            CFitts fitts(std::max(width, FLT_EPSILON), std::hypotf(screenDistance.x, screenDistance.y));
+            target->fitts = std::max(fitts.Compute(0.f, 0.2f), 0.f);
         }
 
-        Vector angle = CMath::Get().CalculateAngle(localPos, pos);
-
-        cachedPlayer->visibleSince += CGlobalVars::Get()->intervalPerTick;
-        cachedPlayer->dot = -pawn->m_angEyeAngles().ToVector().Normalized().DotProduct(angle.ToVector().Normalized());
-        const float width = cachedPlayer->GetBBox().m_Maxs.x - cachedPlayer->GetBBox().m_Mins.x;
-
-        const ImVec2 screenDistance = screenPos - screenSize * 0.5f;
-        CFitts fitts(std::max(width, FLT_EPSILON), std::hypotf(screenDistance.x, screenDistance.y));
-        cachedPlayer->fitts = std::max(fitts.Compute(0.f, 0.2f), 0.f);
-
-        const bool inDuel = cachedPlayer->dot >= g_Vars.m_ReactionTreshold;
-
-        if (cachedPlayer->visibleSince < 0.15f && !inDuel) continue;
-        const float fov = CMath::Get().Fov(rcsAngle, angle);
-        if (fov < currentFov) {
-            target = cachedPlayer;
-            targetPos = pos;
-            targetAngle = angle;
-            currentFov = fov;
-            targetScreen = screenPos;
+        if (IsInSmoke(CGlobal::Get().eyePos, data.aimPos)) {
+            target = nullptr;
         }
+
+        if (target && target->visibleSince < 0.15f && !inDuel) target = nullptr;
     }
 
     if (const bool isSwitchingTargets = oldTarget && oldTarget != target; isSwitchingTargets)
         lastTargetSwitchTime = CGlobalVars::Get()->currentTime;
 
     oldTarget = target;
-    const bool inDuel = g_Vars.m_EnableInDuel && (target ? target->dot >= g_Vars.m_ReactionTreshold : false);
 
     if (const bool inputDown = (lastMove.buttonsHeld & IN_ATTACK || lastMove.buttonsHeld & IN_SECOND_ATTACK); inputDown || inDuel)
         lastActiveTime = CGlobalVars::Get()->currentTime;
 
     const bool isSwitching = lastTargetSwitchTime - CGlobalVars::Get()->currentTime <= 0.15f;
     const float mouseLength = (float)std::hypot(lastMove.mouseDx, lastMove.mouseDy);
-    const bool shouldAim = currentFov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f;
+    const Vector angle = CMath::Get().CalculateAngle(CGlobal::Get().eyePos, data.aimPos);
+    const float fov = CMath::Get().Fov(CGlobal::Get().rcsAngles, angle);
+    shouldAim = target ? fov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f : false;
 
     if (target && shouldAim) {
-        if (hitPawn && currentFov <= g_Vars.m_DelayFov && hitPawn != target->Get()->m_hPawn().Get()) {
+        if (hitPawn && fov <= g_Vars.m_DelayFov && hitPawn != target->Get()->m_hPawn().Get()) {
             // prevent shoot
-            
         }
 
-        perfectAngle = targetAngle - punch * 2;
+        perfectAngle = angle - CGlobal::Get().aimPunch * 2.f;
         perfectAngle.NormalizeAngle();
 
-        const Vector smoothedAngle = curAngle + Smooth(rcsAngle, wantsRecoil ? perfectAngle : targetAngle);
+        const Vector smoothedAngle = curAngle + Smooth(CGlobal::Get().rcsAngles, wantsRecoil ? perfectAngle : angle);
         const Vector curDelta = (perfectAngle - lastMove.viewAngles).NormalizedAngle();
         const Vector smoothedDelta = (perfectAngle - smoothedAngle).NormalizedAngle();
 
         // only apply the angle if it's beneficial
-        if ( fabsf(curDelta.x) > fabsf(smoothedDelta.x) )
-            lastMove.viewAngles.x = smoothedAngle.x;
-        
-        if ( fabsf(curDelta.y) > fabsf(smoothedDelta.y) )
-            lastMove.viewAngles.y = smoothedAngle.y;
+        if (fabsf(curDelta.x) > fabsf(smoothedDelta.x)) lastMove.viewAngles.x = smoothedAngle.x;
+
+        if (fabsf(curDelta.y) > fabsf(smoothedDelta.y)) lastMove.viewAngles.y = smoothedAngle.y;
     } else {
         Invalidate();
     }
@@ -205,9 +132,9 @@ void CAimbot::Run(CUserCmd* cmd) {
 }
 
 void CAimbot::Update() {
-    //targetScreen = ImVec2(0, 0);
-    //if (!target) return;
-    //CMath::Get().WorldToScreen(targetPos, targetScreen);
+    // targetScreen = ImVec2(0, 0);
+    // if (!target) return;
+    // CMath::Get().WorldToScreen(targetPos, targetScreen);
 }
 
 void CAimbot::Render() {
@@ -224,7 +151,7 @@ void CAimbot::Render() {
         float scale = std::tanf(CMath::Deg2Rad(degrees)) / std::tanf(CMath::Deg2Rad(fov * 0.5f));
         return scale * screenSize.x * 0.5f;
     };
-    
+
     if (g_Vars.m_DrawFov) {
         float r = GetRadius(g_Vars.m_AimFov) * 0.75f;
         drawList->AddCircle(center, r, IM_COL32(255, 255, 255, 255));
@@ -237,15 +164,133 @@ void CAimbot::Render() {
     }
 }
 
+void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
+    if (!target || target->records.empty()) return;
+
+    CCSGOInputHistoryEntryPB* subtick = historyEntry;
+    if (!subtick || !subtick->pViewCmd || !subtick->sv_interp0 || !subtick->sv_interp1) return;
+
+    constexpr float interval = 1.f / 64.f;
+
+    int og = subtick->nPlayerTickCount;
+    // subtick->nPlayerTickCount = recordInterp.first->simulationTime / interval;
+    // subtick->flPlayerTickFraction = recordInterp.fraction;
+    //  subtick->nRenderTickCount -= og - subtick->nPlayerTickCount;
+
+    // subtick->nPlayerTickCount -= g_Vars.m_tick;
+
+    float simTime = target->records.front().simulationTime;
+    int tick = static_cast<int>(std::floorf(simTime / interval));
+
+    Tickfrac_t tf{tick - g_Vars.m_tick, 1.f};
+    InterpInfo_t cl, sv0, sv1;
+    if (!target->Get()->m_hPawn().Get()->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return;
+
+    CLogger::Log("Attempted to backtrack {} to tick {} + {:.1f}", og, tf.tick, tf.fraction);
+
+    subtick->cl_interp->srcTick = tick;
+    subtick->cl_interp->dstTick = tick + 1;
+    subtick->cl_interp->fraction = 1.f;
+
+    subtick->sv_interp0->srcTick = tick;
+    subtick->sv_interp0->dstTick = tick + 1;
+    subtick->sv_interp0->fraction = sv0.fraction;
+
+    subtick->sv_interp1->srcTick = tick + 1;
+    subtick->sv_interp1->dstTick = tick + 2;
+    subtick->sv_interp1->fraction = sv1.fraction;
+}
+
+bool CAimbot::Backtrack(const TargetData_t& data) {
+    return false;
+    // const float inaccuracy = CGlobal::Get().weapon->GetInaccuracy();
+    // if (inaccuracy > 0.05f) return false;
+    if (!target || target->records.empty()) return false;
+
+    recordInterp = CLagComp::Get().GetRecordInterp(data);
+    if (recordInterp.first == nullptr || recordInterp.second == nullptr) return false;
+
+    recordInterp = {&target->records.front(), &target->records.front(), 0.f};
+
+    if (CGlobal::Get().cmd->csgoUserCmd.nAttack1StartHistoryIndex == -1) return false;
+
+    CCSGOInputHistoryEntryPB* subtick = CGlobal::Get().cmd->GetInputHistoryEntry(CGlobal::Get().cmd->csgoUserCmd.nAttack1StartHistoryIndex);
+    if (!subtick || !subtick->pViewCmd || !subtick->sv_interp0 || !subtick->sv_interp1) return false;
+
+    constexpr float interval = 1.f / 64.f;
+
+    int og = subtick->nPlayerTickCount;
+    // subtick->nPlayerTickCount = recordInterp.first->simulationTime / interval;
+    // subtick->flPlayerTickFraction = recordInterp.fraction;
+    //  subtick->nRenderTickCount -= og - subtick->nPlayerTickCount;
+
+    // subtick->nPlayerTickCount -= g_Vars.m_tick;
+
+    float simTime = target->records.front().simulationTime;
+    int tick = static_cast<int>(std::floorf(simTime / interval));
+
+    Tickfrac_t tf{tick - g_Vars.m_tick, 1.f};
+    InterpInfo_t cl, sv0, sv1;
+    if (!data.pawn->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return false;
+
+    if (shouldAim) {
+        CLogger::Log("Attempted to backtrack {} to tick {} + {:.1f}", og, subtick->nPlayerTickCount, recordInterp.fraction);
+        subtick->cl_interp->srcTick = tick;
+        subtick->cl_interp->dstTick = tick + 1;
+        subtick->cl_interp->fraction = 1.f;
+
+        subtick->sv_interp0->srcTick = tick;
+        subtick->sv_interp0->dstTick = tick + 1;
+        subtick->sv_interp0->fraction = sv0.fraction;
+
+        subtick->sv_interp1->srcTick = tick + 1;
+        subtick->sv_interp1->dstTick = tick + 2;
+        subtick->sv_interp1->fraction = sv1.fraction;
+
+        // CGlobal::Get().cmd->csgoUserCmd.nAttack1StartHistoryIndex = 0;
+        // CGlobal::Get().cmd->csgoUserCmd.nAttack2StartHistoryIndex = 0;
+        // CGlobal::Get().cmd->csgoUserCmd.nAttack3StartHistoryIndex = 0;
+    }
+
+    return true;
+
+    const float bestTime = std::lerp(recordInterp.first->simulationTime, recordInterp.second->simulationTime, recordInterp.fraction);
+    const float bestTickTime = bestTime / interval;
+    int bestTick = static_cast<int>(std::floorf(bestTickTime));
+    const float remainder = bestTickTime - static_cast<float>(bestTick);
+
+    if (shouldAim) {
+        CLogger::Log("Attempted to backtrack to tick {} with fraction {}", bestTick, remainder);
+
+        bestTick--;  // ?
+
+        // bestTick += 3;
+
+        subtick->cl_interp->srcTick = bestTick;
+        subtick->cl_interp->dstTick = bestTick + 1;
+        subtick->cl_interp->fraction = remainder;
+
+        subtick->sv_interp0->srcTick = bestTick;
+        subtick->sv_interp0->dstTick = bestTick + 1;
+        subtick->sv_interp0->fraction = 0.f;
+
+        subtick->sv_interp1->srcTick = bestTick + 1;
+        subtick->sv_interp1->dstTick = bestTick + 2;
+        subtick->sv_interp1->fraction = 0.f;
+    }
+    return true;
+}
+
 void CAimbot::Invalidate() {
     target = nullptr;
     pid[0].Reset();
     pid[1].Reset();
     targetScreen = ImVec2(0, 0);
+    shouldAim = false;
 }
 
 bool CAimbot::IsInSmoke(const Vector& start, const Vector& end) {
-    static auto func = signatures::LineGoesThroughSmoke.GetPtrAs<float(*)(const Vector&, const Vector&, uintptr_t)>();
+    static auto func = signatures::LineGoesThroughSmoke.GetPtrAs<float (*)(const Vector&, const Vector&, uintptr_t)>();
     return func && func(start, end, 0) >= 1.0f;
 }
 

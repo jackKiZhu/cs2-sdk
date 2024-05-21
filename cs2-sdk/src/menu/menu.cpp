@@ -106,6 +106,7 @@ void CMenu::RenderMainMenu() {
         ImGui::Checkbox("Ignore team", &g_Vars.m_Team);
         ImGui::Checkbox("Players name", &g_Vars.m_PlayerNames);
         ImGui::Checkbox("Players healthbar", &g_Vars.m_PlayerHealthBar);
+        ImGui::Checkbox("Players skeletons", &g_Vars.m_Skeleton);
 
         ImGui::Checkbox("Weapons box", &g_Vars.m_WeaponBoxes);
         ImGui::Checkbox("Chickens box", &g_Vars.m_ChickenBoxes);
@@ -127,6 +128,7 @@ void CMenu::RenderMainMenu() {
         ImGui::SliderFloat("Damp", &g_Vars.m_Damp, 0.f, 1.f);
         ImGui::SliderFloat("Reaction", &g_Vars.m_ReactionTreshold, 0.f, 1.f);
         ImGui::SliderFloat("Bonus", &g_Vars.m_Bonus, 0.f, 1.f);
+        ImGui::SliderInt("ticks", &g_Vars.m_tick, 0, 20);
 
         ImGui::Checkbox("Draw FOV", &g_Vars.m_DrawFov);
 

@@ -52,3 +52,82 @@ float CMath::Fov(const Vector& angSrc, const Vector& angDst) const {
     delta.NormalizeAngle();
     return std::hypotf(delta.x, delta.y);
 }
+
+float CMath::DistanceFromRay(const Vector& pos, const Vector& start, const Vector& end) { 
+    const Vector ap = pos - start;
+    const Vector ab = end - start;
+    const float ab2 = ab.LengthSqr();
+    const float ap_ab = ap.DotProduct(ab);
+    const float t = ap_ab / ab2;
+
+    if (t < 0.0f) return ap.Length();
+    if (t > 1.0f) return (pos - end).Length();
+    return (start + ab * t - pos).Length();
+}
+
+float CMath::DistanceBetweenLines(const Vector& start1, const Vector& end1, const Vector& start2, const Vector& end2) { 
+    const Vector u = end1 - start1;
+    const Vector v = end2 - start2;
+    const Vector w = start1 - start2;
+    const float a = u.LengthSqr();
+    const float b = u.DotProduct(v);
+    const float c = v.LengthSqr();
+    const float d = u.DotProduct(w);
+    const float e = v.DotProduct(w);
+    const float D = a * c - b * b;
+    float sc, sN, sD = D;
+    float tc, tN, tD = D;
+
+    if ( D < FLT_EPSILON )
+    {
+        sN = 0.0f;
+        sD = 1.0f;
+        tN = e;
+        tD = c;
+    }
+    else
+    {
+        sN = b * e - c * d;
+        tN = a * e - b * d;
+        if ( sN < 0.0f )
+        {
+            sN = 0.0f;
+            tN = e;
+            tD = c;
+        }
+        else if ( sN > sD )
+        {
+            sN = sD;
+            tN = e + b;
+            tD = c;
+        }
+    }
+
+    if (tN < 0.0f) {
+        tN = 0.0f;
+        if (-d < 0.0f)
+            sN = 0.0f;
+        else if (-d > a)
+            sN = sD;
+        else {
+            sN = -d;
+            sD = a;
+        }
+    } else if (tN > tD) {
+        tN = tD;
+        if (-d + b < 0.0f)
+            sN = 0;
+        else if (-d + b > a)
+            sN = sD;
+        else {
+            sN = -d + b;
+            sD = a;
+        }
+    }
+
+    sc = std::abs(sN) < FLT_EPSILON ? 0.0f : sN / sD;
+    tc = std::abs(tN) < FLT_EPSILON ? 0.0f : tN / tD;
+
+    const Vector dP = w + (u * sc) - (v * tc);
+    return dP.Length();
+}

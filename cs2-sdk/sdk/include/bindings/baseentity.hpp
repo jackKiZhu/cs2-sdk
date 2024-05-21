@@ -39,12 +39,18 @@ class C_BaseEntity : public CEntityInstance {
     SCHEMA(CBaseHandle, m_hGroundEntity, "C_BaseEntity", "m_hGroundEntity");
     SCHEMA(CCollisionProperty*, m_pCollision, "C_BaseEntity", "m_pCollision");
     SCHEMA(uint8_t, m_iTeamNum, "C_BaseEntity", "m_iTeamNum");
+    SCHEMA(uint32_t, m_fFlags, "C_BaseEntity", "m_fFlags");
     SCHEMA(int, m_iHealth, "C_BaseEntity", "m_iHealth");
     SCHEMA(int, m_nSubclassID, "C_BaseEntity", "m_nSubclassID");
+    SCHEMA(int, m_nSimulationTick, "C_BaseEntity", "m_nSimulationTick");
+    SCHEMA(float, m_flSimulationTime, "C_BaseEntity", "m_flSimulationTime");
+    SCHEMA(Vector, m_vecVelocity, "C_BaseEntity", "m_vecVelocity");
+    SCHEMA(Vector, m_vecAbsVelocity, "C_BaseEntity", "m_vecAbsVelocity");
     SCHEMA_EXTENDED(void*, GetVData, CConstants::CLIENT_LIB, "C_BaseEntity", "m_nSubclassID", 0x8);
 
-    VIRTUAL_METHOD(void, GetEyePos, 160, (Vector* angles), angles);
+    VIRTUAL_METHOD(void, GetEyePos, 160, (Vector* pos), pos);
     VIRTUAL_METHOD(void, GetEyeAngles, 161, (Vector* angles), angles);
 
     bool IsEnemy(C_BaseEntity* other);
+    void SetOrigin(const Vector& pos);
 };

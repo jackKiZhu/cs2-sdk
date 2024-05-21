@@ -8,6 +8,7 @@
 #include <signatures/signatures.hpp>
 #include <constants/constants.hpp>
 
+#include <hacks/global/global.hpp>
 #include <hacks/esp/esp.hpp>
 #include <hacks/chams/chams.hpp>
 #include <cache/cache.hpp>
@@ -83,20 +84,15 @@ static CHook g_CreateMove;
 static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     if (!CEngineClient::Get()->IsInGame()) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
     if (rcx->moves.m_Size == 0) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
-    CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
-    if (!cachedLocal) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
-    CCSPlayerController* localController = cachedLocal->Get();
-    if (!localController) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
-    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
-    if (!localPawn) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
     CUserCmd* cmd = rcx->GetUserCmd();
-    if (!cmd || !cmd->vftable) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
+    if (!CGlobal::Get().Update(cmd)) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
 
-    // CMoveData* move = rcx->moves.AtPtr(rcx->moves.m_Size - 1);
+    const bool grounded = CGlobal::Get().pawn->m_hGroundEntity().Get() != nullptr;
 
-    const bool grounded = localPawn->m_hGroundEntity().Get() != nullptr;
+    CLagComp::Get().Update();
 
-    CAimbot::Get().Run(cmd);
+    auto targetData = CLagComp::Get().Find();
+    CAimbot::Get().Run(targetData);
 
 #if 0
     static bool shouldInputJump = false;
@@ -126,8 +122,10 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
 
-    cmd->csgoUserCmd.baseCmd->buttons->scroll |= IN_JUMP;  
-    cmd->GetBaseCmdButtons();
+    CAimbot::Get().Backtrack(targetData);
+
+    //cmd->csgoUserCmd.baseCmd->buttons->scroll |= IN_JUMP;  
+    //cmd->GetBaseCmdButtons();
 
     #if 0
     static auto SerializePartialToArray = signatures::SerializePartialToArray.GetPtrAs<bool (*)(void*, CUtlBuffer*, int)>();
@@ -232,6 +230,15 @@ static void hkDrawObject(void* animatableSceneObjectDesc, void* dx11, CMeshData*
     g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
 }
 
+static CHook g_InputParser;
+static void hkInputParser(void* inputMsg, CCSGOInputHistoryEntryPB* historyEntry, bool a3, void* a4, void* a5, C_CSPlayerPawn* pawn) {
+    g_InputParser.CallOriginal<void>(inputMsg, historyEntry, a3, a4, a5, pawn);
+
+    if (pawn == CGlobal::Get().pawn) {
+        CAimbot::Get().Test(historyEntry);
+    }
+}
+
 void CGameHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
@@ -249,4 +256,5 @@ void CGameHooks::Initialize() {
     g_SetModel.Hook(signatures::SetModel.GetPtrAs<void*>(), SDK_HOOK(hkSetModel));
     g_IsLoadoutAllowed.Hook(signatures::IsLoadoutAllowed.GetPtrAs<void*>(), SDK_HOOK(hkIsLoadoutAllowed));
     g_DrawObject.Hook(signatures::DrawObject.GetPtrAs<void*>(), SDK_HOOK(hkDrawObject));
+    g_InputParser.Hook(signatures::InputParser.GetPtrAs<void*>(), SDK_HOOK(hkInputParser));
 }

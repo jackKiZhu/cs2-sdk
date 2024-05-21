@@ -50,11 +50,11 @@ class Vector {
         return vec;
     }
 
-    float Length() { return std::sqrt(x * x + y * y + z * z); }
+    float Length() const { return std::sqrt(x * x + y * y + z * z); }
 
-    float LengthSqr() { return x * x + y * y + z * z; }
+    float LengthSqr() const { return x * x + y * y + z * z; }
 
-    float Length2D() { return std::sqrt(x * x + y * y); }
+    float Length2D() const { return std::sqrt(x * x + y * y); }
 
     void Normalize() {
         float length = Length();
@@ -81,6 +81,8 @@ class Vector {
 
     float DotProduct(const Vector& rhs) const { return x * rhs.x + y * rhs.y + z * rhs.z; }
     float DotProductAbsolute(const Vector& rhs) const { return std::abs(x * rhs.x) + std::abs(y * rhs.y) + std::abs(z * rhs.z); }
+
+    float DistTo(const Vector& rhs) const { return (*this - rhs).Length(); }
 
     Vector Min(const Vector& rhs) const { return Vector{std::min(x, rhs.x), std::min(y, rhs.y), std::min(z, rhs.z)}; }
     Vector Max(const Vector& rhs) const { return Vector{std::max(x, rhs.x), std::max(y, rhs.y), std::max(z, rhs.z)}; }

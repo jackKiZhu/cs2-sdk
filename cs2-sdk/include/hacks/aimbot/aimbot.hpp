@@ -1,14 +1,17 @@
 #pragma once
 
-#include <math/types/vector.hpp>
+#include <deque>
 
 #include <hacks/aimbot/pid.hpp>
+#include <hacks/aimbot/lagcomp.hpp>
 
 #include <interfaces/ccsgoinput.hpp>
 
 #include <cache/cache.hpp>
 
 #include <imgui/imgui_internal.h> // vec2
+
+#include <math/types/vector.hpp>
 
 class C_CSPlayerPawn;
 
@@ -20,15 +23,22 @@ class CAimbot {
     }
 
     bool IsEnabled();
-    void Run(CUserCmd* cmd);
+    void Run(const TargetData_t& data);
+    bool Backtrack(const TargetData_t& data);
     void Update();
     void Render();
+    void Test(CCSGOInputHistoryEntryPB* historyEntry);
 
     bool IsInSmoke(const Vector& start, const Vector& end);
+
+        // temp
+    CRecordInterp recordInterp;
 
    private:
 
     void Invalidate();
+
+    bool shouldAim = false;
 
     Vector Smooth(const Vector& from, const Vector& to);
 
@@ -44,17 +54,8 @@ class CAimbot {
 
     float lastActiveTime = 0.f;
 
-    // current (sub)tick punch
-    Vector punch;
-    // previous (sub)tick punch
-    Vector oldPunch;
-    // current punch - previous punch
-    Vector punchDelta;
-
     // the angle that would hit the enemy with 100% accuracy
     Vector perfectAngle;
-    // the angle with current view angles with perfect recoil
-    Vector rcsAngle;
     // the angle with current view angles with settings recoil
     Vector curAngle;
 
