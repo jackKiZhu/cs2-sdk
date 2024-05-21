@@ -353,6 +353,7 @@
     <ClInclude Include="sdk\include\bindings\hostage.hpp" />
     <ClInclude Include="sdk\include\bindings\vdata.hpp" />
     <ClInclude Include="sdk\include\bindings\viewmodelservices.hpp" />
+    <ClInclude Include="sdk\include\interfaces\cnetworkgameclient.hpp" />
     <ClInclude Include="sdk\include\interfaces\csgcclientsystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\localize.hpp" />
     <ClInclude Include="sdk\include\interfaces\materialsystem.hpp" />

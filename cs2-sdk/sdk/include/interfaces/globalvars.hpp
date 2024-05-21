@@ -34,6 +34,6 @@ class CGlobalVars {
     }
 };
 
-#define TICK_INTERVAL (CGlobalVars::Get()->intervalPerTick)
+#define TICK_INTERVAL 1.f / 64.f
 #define TICKS_TO_TIME(ticks) (TICK_INTERVAL * static_cast<float>(ticks))
 #define TIME_TO_TICKS(time) static_cast<int>(0.5f + static_cast<float>(time) / TICK_INTERVAL)

@@ -11,7 +11,7 @@ namespace vt {
     }
 }  // namespace vt
 
-#define VIRTUAL_METHOD(returnType, name, index, args, argsRaw) \
+#define VIRTUAL_METHOD(returnType, name, index, args, ...) \
 	returnType name args { \
-		return vt::CallMethod<returnType>(this, index, argsRaw); \
+		return vt::CallMethod<returnType>(this, index, __VA_ARGS__); \
 	}

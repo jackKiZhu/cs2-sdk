@@ -225,5 +225,6 @@
     <ClInclude Include="sdk\include\types\utlstringtoken.hpp" />
     <ClInclude Include="include\hacks\aimbot\lagcomp.hpp" />
     <ClInclude Include="include\hacks\global\global.hpp" />
+    <ClInclude Include="sdk\include\interfaces\cnetworkgameclient.hpp" />
   </ItemGroup>
 </Project>

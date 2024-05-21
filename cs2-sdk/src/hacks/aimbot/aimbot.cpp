@@ -11,6 +11,7 @@
 #include <interfaces/ccsgoinput.hpp>
 #include <interfaces/globalvars.hpp>
 #include <interfaces/cvar.hpp>
+#include <interfaces/cnetworkgameclient.hpp>
 
 #include <cache/entities/player.hpp>
 #include <bindings/playercontroller.hpp>
@@ -179,7 +180,13 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
 
     // subtick->nPlayerTickCount -= g_Vars.m_tick;
 
-    float simTime = target->records.front().simulationTime;
+    INetworkGameClient* client = INetworkGameClient::Get();
+    if (!client) return;
+
+    CNetworkGameClient* network = client->GetNetworkClient();
+    if (!network) return;
+
+    float simTime = target->records.front().simulationTime + network->GetClientInterp();
     int tick = static_cast<int>(std::floorf(simTime / interval));
 
     Tickfrac_t tf{tick - g_Vars.m_tick, 1.f};
