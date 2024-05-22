@@ -127,14 +127,11 @@ TargetData_t CLagComp::Find() {
         const Vector eyeDir = pawn->m_angEyeAngles().ToVector().Normalized();
 
         size_t i = 0;
-        if (!g_Vars.m_Backtrack)
-          i = cachedPlayer->records.size() - 2;
-        for (; i < cachedPlayer->records.size(); ++i) {
-            CRecord& record = cachedPlayer->records[i];
+        if (!g_Vars.m_Backtrack) {
+            CRecord& record = cachedPlayer->records.back();
             if (!record.IsValid()) continue;
 
             const Vector& bonePos = record.boneMatrix[BONE_HEAD_0].position;
-            // TODO: check for visibility for the record and not the player.
             Vector angle = CMath::Get().CalculateAngle(CGlobal::Get().eyePos, bonePos);
             cachedPlayer->dot = -eyeDir.DotProduct(angle.ToVector().Normalized());
 
@@ -149,6 +146,28 @@ TargetData_t CLagComp::Find() {
             data.bestRecord = &record;
             data.bestRecordIndex = i;
             data.aimPos = bonePos;
+        } else {
+            for (; i < cachedPlayer->records.size(); ++i) {
+                CRecord& record = cachedPlayer->records[i];
+                if (!record.IsValid()) continue;
+
+                const Vector& bonePos = record.boneMatrix[BONE_HEAD_0].position;
+                // TODO: check for visibility for the record and not the player.
+                Vector angle = CMath::Get().CalculateAngle(CGlobal::Get().eyePos, bonePos);
+                cachedPlayer->dot = -eyeDir.DotProduct(angle.ToVector().Normalized());
+
+                const float distance = CMath::Get().DistanceFromRay(record.eyePos, CGlobal::Get().eyePos, end);
+                if (distance >= bestRecordDistance) continue;
+
+                bestRecordDistance = distance;
+                data.player = cachedPlayer;
+                data.controller = controller;
+                data.pawn = pawn;
+                data.records = &cachedPlayer->records;
+                data.bestRecord = &record;
+                data.bestRecordIndex = i;
+                data.aimPos = bonePos;
+            }
         }
     }
 

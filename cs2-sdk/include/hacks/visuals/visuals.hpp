@@ -8,6 +8,7 @@ class CVisuals {
     }
 
     void OnFrameStageNotify(int stage);
+    void DynamicLightTest();
 
    private:
     float minExposureBackup;

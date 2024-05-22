@@ -63,4 +63,6 @@ namespace signatures {
     extern CSigScan CalculateWorldSpaceBones;
     extern CSigScan CalcInterpInfos;
     extern CSigScan InputParser;
+    extern CSigScan DynamicLightManager;
+    extern CSigScan CreateDynamicLight;
 }  // namespace signatures

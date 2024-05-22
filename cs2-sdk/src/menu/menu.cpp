@@ -27,6 +27,16 @@
 
 #include <imgui/imgui.h>
 
+static bool ColorEdit4(const char* label, Color_t& col, ImGuiColorEditFlags flags) {
+    float base[4];
+    col.BaseAlpha(base);
+    if (ImGui::ColorEdit4(label, base, flags)) {
+        col = Color_t::FromBase4(base);
+        return true;
+    }
+    return false;
+}
+
 void CMenu::Render() {
     if (ImGui::IsKeyPressed(ImGuiKey_Insert, false)) {
         Toggle(!IsOpen());
@@ -65,8 +75,8 @@ void CMenu::RenderWatermark() {
     auto drawList = CRenderer::GetBackgroundDrawList();
 
     char framerate[128];
-    snprintf(framerate, IM_ARRAYSIZE(framerate), "Welcome [%d]\nFPS: %d\n\n%s %s",
-             CEngineClient::Get()->GetEngineBuildNumber(), static_cast<int>(ImGui::GetIO().Framerate), __DATE__, __TIME__);
+    snprintf(framerate, IM_ARRAYSIZE(framerate), "Welcome [%d]\nFPS: %d\n\n%s %s", CEngineClient::Get()->GetEngineBuildNumber(),
+             static_cast<int>(ImGui::GetIO().Framerate), __DATE__, __TIME__);
 
     drawList->AddText({17, 9}, IM_COL32(0, 0, 0, 255), framerate);
     drawList->AddText({16, 8}, IM_COL32(27, 227, 200, 255), framerate);
@@ -136,14 +146,12 @@ void CMenu::RenderMainMenu() {
         ImGui::Spacing();
 
         ImGui::SliderFloat("World brightness", &g_Vars.m_NightMode, 0.f, 1.f);
+        ColorEdit4("##World color", g_Vars.m_WorldColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
         ImGui::SliderFloat("FOV", &g_Vars.m_Fov, 0.f, 20.f);
         ImGui::SliderFloat("Viewmodel FOV", &g_Vars.m_ViewmodelFov, 0.f, 20.f);
         ImGui::Checkbox("Chams", &g_Vars.m_Chams);
         ImGui::SameLine();
-        static float clr[4];
-        if (ImGui::ColorEdit4("##Chams color", clr, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
-            g_Vars.m_ChamsColor = Color_t(clr[0], clr[1], clr[2], clr[3]);
-        }
+        ColorEdit4("##Chams color", g_Vars.m_ChamsColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
         if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CSkinChanger::Get().Shutdown(), CInstance::Get().FreeLibrary();
     }
@@ -184,11 +192,10 @@ void CMenu::RenderInventoryWindow() {
             const bool isWeapon = pItem->IsWeapon();
             const bool isKnife = pItem->IsKnife(true);
             const bool isGloves = pItem->IsGloves(true);
-            const bool isAgent = pItem->IsAgent(true); 
+            const bool isAgent = pItem->IsAgent(true);
 
-            if (!isWeapon && !isKnife && !isGloves && !isAgent) 
-                continue;
-            
+            if (!isWeapon && !isKnife && !isGloves && !isAgent) continue;
+
             // Some items don't have names.
             const char* itemBaseName = pItem->m_pszItemBaseName;
             if (!itemBaseName || itemBaseName[0] == '\0') continue;
@@ -196,7 +203,7 @@ void CMenu::RenderInventoryWindow() {
             const uint16_t defIdx = pItem->m_nDefIndex;
 
             DumpedItem_t dumpedItem;
-            dumpedItem.m_name = CLocalize::Get()->FindSafe(itemBaseName); 
+            dumpedItem.m_name = CLocalize::Get()->FindSafe(itemBaseName);
             dumpedItem.m_defIdx = defIdx;
             dumpedItem.m_rarity = pItem->m_nItemRarity;
 
@@ -205,7 +212,7 @@ void CMenu::RenderInventoryWindow() {
             // Add vanilla knives
             if (isKnife) {
                 dumpedItem.m_dumpedSkins.emplace_back("Vanilla", 0, IR_ANCIENT);
-            }                
+            }
 
             if (isAgent) {
                 const std::string_view itemBaseName = pItem->m_pszItemBaseName;

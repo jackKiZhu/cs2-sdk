@@ -295,44 +295,44 @@ namespace signatures {
                         });
 
     CSigScan CalculateCRC("CalculateCRC", CConstants::CLIENT_LIB,
-                        {
-                            {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 BF")},
-                        });
+                          {
+                              {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 BF")},
+                          });
 
     CSigScan SetCRC("SetCRC", CConstants::CLIENT_LIB,
-                          {
-                              {SDK_SIG("48 89 5C 24 ? 55 56 57 48 83 EC ? 49 8B C0")},
-                          });
+                    {
+                        {SDK_SIG("48 89 5C 24 ? 55 56 57 48 83 EC ? 49 8B C0")},
+                    });
 
-    CSigScan SerializePartialToArray("SerializePartialToArray", CConstants::CLIENT_LIB,
-                          {
-                              {SDK_SIG("48 89 5C 24 ? 55 56 57 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 ? ? ? ? 49 63 F0")},
-                          });
-
-    CSigScan BoneFlags("BoneFlags", CConstants::CLIENT_LIB,
+    CSigScan SerializePartialToArray(
+        "SerializePartialToArray", CConstants::CLIENT_LIB,
         {
-            {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 8B 04 90")},
+            {SDK_SIG("48 89 5C 24 ? 55 56 57 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 ? ? ? ? 49 63 F0")},
         });
 
-    CSigScan BoneName("BoneName", CConstants::CLIENT_LIB,
+    CSigScan BoneFlags("BoneFlags", CConstants::CLIENT_LIB,
                        {
-                           {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 48 8B 0C D0")},
+                           {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 8B 04 90")},
                        });
 
-    CSigScan BoneParent("BoneParent", CConstants::CLIENT_LIB,
+    CSigScan BoneName("BoneName", CConstants::CLIENT_LIB,
                       {
-                          {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 0F BF 04 50")},
+                          {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 48 8B 0C D0")},
                       });
 
-    CSigScan GetBone("GetBone", CConstants::CLIENT_LIB,
+    CSigScan BoneParent("BoneParent", CConstants::CLIENT_LIB,
                         {
-                            {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B FA 49 63 F0 BA ? ? ? ? 48 8B D9 E8 ? ? ? ? 48 8B 8B")},
+                            {SDK_SIG("85 D2 78 ? 3B 91 ? ? ? ? 7D ? 48 8B 81 ? ? ? ? 48 63 D2 0F BF 04 50")},
                         });
+
+    CSigScan GetBone("GetBone", CConstants::CLIENT_LIB,
+                     {
+                         {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B FA 49 63 F0 BA ? ? ? ? 48 8B D9 E8 ? ? ? ? 48 8B 8B")},
+                     });
 
     CSigScan BoneCount("BoneCount", CConstants::CLIENT_LIB,
                        {
-                           {SDK_SIG("E8 ? ? ? ? 8B D8 48 C7 44 24"),
-                            [](CPointer& ptr) { ptr.Absolute(1, 0); }},
+                           {SDK_SIG("E8 ? ? ? ? 8B D8 48 C7 44 24"), [](CPointer& ptr) { ptr.Absolute(1, 0); }},
                        });
 
     CSigScan SetOrigin("SetOrigin", CConstants::CLIENT_LIB,
@@ -341,22 +341,33 @@ namespace signatures {
                        });
 
     CSigScan SetCollisionBounds("SetCollisionBounds", CConstants::CLIENT_LIB,
-                       {
-                           {SDK_SIG("48 83 EC ? F2 0F 10 02 F3 0F 10 49")},
-                       });
-
-    CSigScan CalculateWorldSpaceBones("CalculateWorldSpaceBones", CConstants::CLIENT_LIB,
                                 {
-                                    {SDK_SIG("40 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 48 8D 6C 24 ? 48 8B F1")},
+                                    {SDK_SIG("48 83 EC ? F2 0F 10 02 F3 0F 10 49")},
                                 });
 
-    CSigScan CalcInterpInfos("CalcInterpInfos", CConstants::CLIENT_LIB,
+    CSigScan CalculateWorldSpaceBones("CalculateWorldSpaceBones", CConstants::CLIENT_LIB,
                                       {
-                                          {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 8B F9 48 8D 44 24")},
+                                          {SDK_SIG("40 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 48 8D 6C 24 ? 48 8B F1")},
                                       });
 
-    CSigScan InputParser("InputParser", CConstants::CLIENT_LIB,
+    CSigScan CalcInterpInfos("CalcInterpInfos", CConstants::CLIENT_LIB,
                              {
-                                 {SDK_SIG("48 8B C4 4C 89 48 ? 55 56 41 56 48 8D 68")},
+                                 {SDK_SIG("48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 8B F9 48 8D 44 24")},
                              });
+
+    CSigScan InputParser("InputParser", CConstants::CLIENT_LIB,
+                         {
+                             {SDK_SIG("48 8B C4 4C 89 48 ? 55 56 41 56 48 8D 68")},
+                         });
+
+    CSigScan DynamicLightManager("DynamicLightManager", CConstants::CLIENT_LIB,
+                                 {
+                                     {SDK_SIG("48 8B 1D ? ? ? ? 48 8D 15 ? ? ? ? 4C 8B F1"),
+                                      [](CPointer& ptr) { ptr.Absolute(3, 0); }},
+                                 });
+
+    CSigScan CreateDynamicLight("CreateDynamicLight", CConstants::CLIENT_LIB,
+                         {
+                             {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8D B1 ? ? ? ? 41 8B D8")},
+                         });
 }  // namespace signatures

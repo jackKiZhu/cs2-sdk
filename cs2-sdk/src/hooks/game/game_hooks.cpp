@@ -65,7 +65,7 @@ static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToV
 
     if (!CEngineClient::Get()->IsInGame()) return;
 
-    if (auto local = CMatchCache::Get().GetLocalPlayer(); local && local->IsValid()) {
+    if (auto local = CMatchCache::Get().GetLocalPlayer(); local && local->IsValid(false)) {
         if (auto pawn = local->Get()->m_hPawn().Get(); !pawn->m_bIsScoped()) {
             view->fov += g_Vars.m_Fov;
             view->viewmodelFov += g_Vars.m_ViewmodelFov;
@@ -118,14 +118,14 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     //     }
     // }
 
-    //CLogger::Log("Pre checksum: {}", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
+    // CLogger::Log("Pre checksum: {}", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
 
-    //cmd->csgoUserCmd.baseCmd->buttons->scroll |= IN_JUMP;  
-    //cmd->GetBaseCmdButtons();
+    // cmd->csgoUserCmd.baseCmd->buttons->scroll |= IN_JUMP;
+    // cmd->GetBaseCmdButtons();
 
-    #if 0
+#if 0
     static auto SerializePartialToArray = signatures::SerializePartialToArray.GetPtrAs<bool (*)(void*, CUtlBuffer*, int)>();
     static auto CalculateCRC = signatures::CalculateCRC.GetPtrAs<void(*)(void*, const void*, size_t)>();
     static auto SetCRC = signatures::SetCRC.GetPtrAs<void (*)(void*, void*, void*)>();
@@ -148,7 +148,7 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     SetCRC(cmd->csgoUserCmd.baseCmd, crc, v95);
 
     CLogger::Log("Post checksum: {}\n", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
-    #endif
+#endif
 
     const CInButtonState originalButtons = cmd->buttons;
 
@@ -157,8 +157,7 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
 
     // cmd->buttons.changed |= IN_JUMP;
 
-
-    #if 0
+#if 0
     if (CBaseUserCmdPB* baseCmd = cmd->csgoUserCmd.baseCmd; baseCmd && baseCmd->subticksMoveSteps.currentSize > 0) {
         CLogger::Log("cmd: {} {:#x} {:#x} {:#x}", cmd->csgoUserCmd.baseCmd->commandNumber, cmd->buttons.held, cmd->buttons.changed,
                      cmd->buttons.scroll);
@@ -178,7 +177,7 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
             }
         }
     }
-    #endif
+#endif
 }
 
 static CHook g_CreateMove2;
@@ -216,16 +215,19 @@ static void* hkSetModel(void* rcx, const char* model) {
 static CHook g_IsLoadoutAllowed;
 static bool hkIsLoadoutAllowed() { return true; }
 
-static CHook g_DrawObject;
-static void hkDrawObject(void* animatableSceneObjectDesc, void* dx11, CMeshData* meshDraw, int dataCount, void* sceneView, void* sceneLayer,
-                         void* unk, void* unk2) {
+// static CHook g_DrawObject;
+static void hkDrawObject(void* animatableSceneObjectDesc, void* dx11, CSceneData* meshDraw, int dataCount, void* sceneView,
+                         void* sceneLayer, void* unk, void* unk2) {
     if (!CEngineClient::Get()->IsInGame())
-        return g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
+        return CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView,
+                                                                 sceneLayer, unk, unk2);
 
     if (!CChams::Get().OnDrawObject(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2))
-        return g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
+        return CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView,
+                                                                 sceneLayer, unk, unk2);
 
-    g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
+    CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk,
+                                                      unk2);
 }
 
 static CHook g_InputParser;

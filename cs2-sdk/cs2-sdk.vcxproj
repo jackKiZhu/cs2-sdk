@@ -361,6 +361,7 @@
     <ClInclude Include="sdk\include\interfaces\resourcesystem.hpp" />
     <ClInclude Include="sdk\include\interfaces\viewrender.hpp" />
     <ClInclude Include="sdk\include\types\color.hpp" />
+    <ClInclude Include="sdk\include\types\dynamiclight.hpp" />
     <ClInclude Include="sdk\include\types\econitem.hpp" />
     <ClInclude Include="sdk\include\types\econitemdefinition.hpp" />
     <ClInclude Include="sdk\include\types\econitemschema.hpp" />

@@ -135,9 +135,9 @@ CCachedPlayer* CMatchCache::GetLocalPlayer() {
     return nullptr;
 }
 
-C_CSPlayerPawn* CMatchCache::GetLocalPawn() {
+C_CSPlayerPawn* CMatchCache::GetLocalPawn(bool aliveCheck) {
     CCachedPlayer* localPlayer = GetLocalPlayer();
-    if (!localPlayer || !localPlayer->IsValid()) return nullptr;
+    if (!localPlayer || !localPlayer->IsValid(aliveCheck)) return nullptr;
     return localPlayer->Get()->m_hPawn().Get();
 }
 

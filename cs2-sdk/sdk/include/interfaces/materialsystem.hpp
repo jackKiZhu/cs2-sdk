@@ -25,25 +25,34 @@ class CObjectInfo {
     int id;
 };
 
+class CSkeletonInstance;
+
 class CSceneAnimatableObject {
     PAD(0xB0);
 
    public:
     int owner;
+
+   private:
+    PAD(0x4C);
+
+   public:
+    CSkeletonInstance* skeleton;
 };
 
-class CMeshData {
+class CSceneData {
    public:
     void SetShaderType(const char* shaderName);
     void SetMaterialFunction(const char* functionName, int value);
 
-    PAD(0x18);                                       // 0x0
-    CSceneAnimatableObject* sceneAnimatableObject;   // 0x18
-    CMaterial2* material;                            // 0x20
-    PAD(0x18);                                       // 0x28
-    Color_t color;                                   // 0x40
-    PAD(0x4);                                        // 0x44
-    CObjectInfo* objectInfo;                         // 0x48
+    PAD(0x18);                                      // 0x0
+    CSceneAnimatableObject* sceneAnimatableObject;  // 0x18
+    CMaterial2* material;                           // 0x20
+    CMaterial2* material2;                          // 0x28
+    PAD(0x10);                                      // 0x30
+    Color_t color;                                  // 0x40
+    PAD(0x4);                                       // 0x44
+    CObjectInfo* objectInfo;                        // 0x48
 };
 
 class CMaterialSystem {

@@ -22,9 +22,9 @@
 
 #include <imgui/imgui_internal.h>
 
-bool CCachedPlayer::IsValid() {
+bool CCachedPlayer::IsValid(bool aliveCheck) {
     CCSPlayerController* controller = Get();
-    if (!controller || !controller->m_bPawnIsAlive()) {
+    if (!controller || (aliveCheck && !controller->m_bPawnIsAlive())) {
         return false;
     }
 

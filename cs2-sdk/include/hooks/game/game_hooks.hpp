@@ -1,5 +1,7 @@
 #pragma once
 
+#include <hook/hook.hpp>
+
 class CGameHooks {
    public:
     static CGameHooks& Get() {
@@ -8,4 +10,6 @@ class CGameHooks {
     }
 
     void Initialize();
+
+    CHook g_DrawObject;
 };

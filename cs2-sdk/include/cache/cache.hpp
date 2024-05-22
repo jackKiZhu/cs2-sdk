@@ -27,7 +27,7 @@ class CMatchCache {
 
     CachedEntityPtr& GetEntityByIndex(int i);
     CCachedPlayer* GetLocalPlayer();
-    C_CSPlayerPawn* GetLocalPawn();
+    C_CSPlayerPawn* GetLocalPawn(bool aliveCheck = false);
 
    private:
     CachedEntityPtr CreateCachedEntityPointer(C_BaseEntity* ent);
