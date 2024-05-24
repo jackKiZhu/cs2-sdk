@@ -31,10 +31,13 @@ bool CGlobal::Update(CUserCmd* cmd) {
     }
     pawn->GetEyePos(&eyePos);
 
-    CMoveData& lastMove = *CCSGOInput::Get()->moves.AtPtr(CCSGOInput::Get()->moves.m_Size - 1);
-    viewAngles = lastMove.viewAngles;
-    rcsAngles = lastMove.viewAngles - punchDelta * 2.f;
-    rcsAngles.z = 0.f;
-    rcsAngles.NormalizeAngle();
+    const CUtlVector<CMoveData>& moves = CCSGOInput::Get()->moves;
+    if (moves.m_Size > 0) {
+        CMoveData& lastMove = *CCSGOInput::Get()->moves.AtPtr(CCSGOInput::Get()->moves.m_Size - 1);
+        viewAngles = lastMove.viewAngles;
+        rcsAngles = lastMove.viewAngles - punchDelta * 2.f;
+        rcsAngles.z = 0.f;
+        rcsAngles.NormalizeAngle();
+    }
     return true;
 }

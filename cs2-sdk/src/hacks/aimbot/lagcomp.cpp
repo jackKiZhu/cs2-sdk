@@ -101,7 +101,7 @@ TargetData_t CLagComp::Find() {
         if (!cachedEntity->IsValid() || cachedEntity->GetType() != CCachedBaseEntity::Type::PLAYER) continue;
 
         CCachedPlayer* cachedPlayer = dynamic_cast<CCachedPlayer*>(cachedEntity.get());
-        if (!cachedPlayer || !cachedPlayer->IsEnemyWithTeam(CGlobal::Get().player->GetTeam())) continue;
+        if (!cachedPlayer || !cachedPlayer->IsEnemyWithTeam(CGlobal::Get().player->GetTeam()) || cachedPlayer == CGlobal::Get().player) continue;
 
         CCSPlayerController* controller = cachedPlayer->Get();
         if (!controller->m_bPawnIsAlive()) continue;
@@ -121,7 +121,7 @@ TargetData_t CLagComp::Find() {
             continue;
         }
 
-        cachedPlayer->visibleSince += CGlobalVars::Get()->intervalPerTick;
+        cachedPlayer->visibleSince += CGlobalVars::Get()->intervalPerSubtick;
         if (cachedPlayer->visibleSince < 0.15f) continue;
 
         const Vector eyeDir = pawn->m_angEyeAngles().ToVector().Normalized();

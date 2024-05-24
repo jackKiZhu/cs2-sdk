@@ -58,7 +58,7 @@ void CChams::Initialize() {
     id.pad[0] = 0x469806E97412167C;
     id.pad[1] = 0xE73790B53EE6F2AF;
 
-    if (!kv->Load(glowVisible, &id, nullptr)) return;
+    if (!kv->Load(glowVisible, &id, nullptr)) return; // crasj
 
     CStrongHandle<CMaterial2> mat;
     CMaterialSystem::Get()->CreateMaterial(&mat, "glow_vis", kv, 0, 1);

@@ -13,7 +13,6 @@ namespace signatures {
     extern CSigScan GetFunctions2;
     extern CSigScan CSVCMsg_UserMessage_Setup;
     extern CSigScan GetUserCmd;
-    extern CSigScan SetViewAngles;
     extern CSigScan CanFire;
     extern CSigScan GetEngineTrace;
     extern CSigScan TraceShape;
@@ -43,7 +42,6 @@ namespace signatures {
     extern CSigScan GetBool;
     extern CSigScan LineGoesThroughSmoke;
     extern CSigScan SetButtonStates;
-    extern CSigScan MoveData;
     extern CSigScan MemAlloc;
     extern CSigScan FindKeyVar;
     extern CSigScan SetMaterialShaderType;

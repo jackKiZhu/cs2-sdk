@@ -15,7 +15,7 @@ class C_BasePlayerWeapon : public C_EconEntity {
     SCHEMA(int, m_iClip2, "C_BasePlayerWeapon", "m_iClip2");
 
     bool CanFire() { return signatures::CanFire.GetPtrAs<bool (*)(C_BasePlayerWeapon*)>()(this); }
-    float GetInaccuracy() { return signatures::GetInaccuracy.GetPtrAs<float (*)(C_BasePlayerWeapon*)>()(this); }
+    float GetInaccuracy(float* x = nullptr, float* y = nullptr) { return signatures::GetInaccuracy.GetPtrAs<float (*)(C_BasePlayerWeapon*, float*, float*)>()(this, x, y); }
 
     float GetSpread() { return vt::CallMethod<float>(this, 351); }
     float GetInaccuracyV() { return vt::CallMethod<float>(this, 397); }

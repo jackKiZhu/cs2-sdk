@@ -48,8 +48,8 @@ class C_BaseEntity : public CEntityInstance {
     SCHEMA(Vector, m_vecAbsVelocity, "C_BaseEntity", "m_vecAbsVelocity");
     SCHEMA_EXTENDED(void*, GetVData, CConstants::CLIENT_LIB, "C_BaseEntity", "m_nSubclassID", 0x8);
 
-    VIRTUAL_METHOD(void, GetEyePos, 160, (Vector* pos), pos);
-    VIRTUAL_METHOD(void, GetEyeAngles, 161, (Vector* angles), angles);
+    VIRTUAL_METHOD(void, GetEyePos, 166, (Vector* pos), pos); // 166 ?
+    VIRTUAL_METHOD(void, GetEyeAngles, 167, (Vector* angles), angles);
 
     bool IsEnemy(C_BaseEntity* other);
     void SetOrigin(const Vector& pos);

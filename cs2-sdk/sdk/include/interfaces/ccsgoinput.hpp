@@ -248,19 +248,15 @@ class CCSGOInput {
 
     PAD(0x250);                                  // 0x0 (0x250)
     CUserCmd commands[MAX_SPLITSCREEN_PLAYERS];  // 0x250 (0x4FB0)
-    PAD(0x1);                                    // 0x5200 (0x1)
-    bool inThirdperson;                          // 0x5201 (0x1)
-    PAD(0x6);
-    Vector thirdPersonAngle;  // 0x5208
-    PAD(0x10);
-    int sequenceNumber;             // 0x5224 (0x4)
-    int moveDataCount;              // 0x5228 (0x4)
-    PAD(0x4);                       // 0x522C (0x4)
-    double platFloatTime;           // 0x5230 (0x8)
-    CMoveData moveData;             // 0x5238 (0x158)
-    uint32_t lastSwitchWeaponTick;  // 0x53a0
-    PAD(0x84);
-    CUtlVector<CMoveData> moves;  // 0x5428
+    PAD(0xAC);                                   // 0x5200 (0xAC)
+    int sequenceNumber;             // 0x52AC (0x4)
+    int moveDataCount;              // 0x52B0 (0x4)
+    PAD(0x4);                       // 0x52B4 (0x4)
+    double platFloatTime;           // 0x52B8 (0x8)
+    CMoveData moveData;             // 0x52C0 (0x168)
+    uint32_t lastSwitchWeaponTick;  // 0x5428 (0x4)
+    PAD(0x84);                      // 0x542C (0x84)
+    CUtlVector<CMoveData> moves;    // 0x54B0 (0x18)
 
     CUserCmd* GetUserCmd();
     CUserCmd* GetUserCmd(uint32_t sequenceNumber);

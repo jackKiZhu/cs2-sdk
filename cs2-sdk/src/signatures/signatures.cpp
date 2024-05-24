@@ -90,11 +90,6 @@ namespace signatures {
                             {SDK_SIG("40 57 48 83 EC ? 41 8B F8")},
                         });
 
-    CSigScan SetViewAngles("SetViewAngles", CConstants::CLIENT_LIB,
-                           {
-                               {SDK_SIG("85 D2 0F 85 ? ? ? ? 57")},
-                           });
-
     CSigScan CanFire("C_BasePlayerWeapon::CanFire", CConstants::CLIENT_LIB,
                      {
                          {SDK_SIG("40 53 48 83 EC ? 48 8B 41 ? 48 8B D9 48 8D 4C 24 ? 8B 50 ? E8 ? ? ? ? F3 0F 10 05")},
@@ -162,7 +157,7 @@ namespace signatures {
 
     CSigScan FindSOCache("CCSGCClient::FindSOCache", CConstants::CLIENT_LIB,
                          {
-                             {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 54 41 56 41 57 48 83 EC ? 48 8D B9")},
+                             {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 44 0F B7 89")},
                          });
 
     CSigScan CreateBaseTypeCache("CreateBaseTypeCache", CConstants::CLIENT_LIB,
@@ -224,7 +219,7 @@ namespace signatures {
 
     CSigScan GetInaccuracy("GetInaccuracy", CConstants::CLIENT_LIB,
                            {
-                               {SDK_SIG("48 89 5C 24 ? 57 48 81 EC ? ? ? ? 0F 29 B4 24 ? ? ? ? 48 8B D9")},
+                               {SDK_SIG("48 89 5C 24 ? 55 56 57 48 81 EC ? ? ? ? 0F 29 B4 24")},
                            });
 
     CSigScan GetWeaponData("GetWeaponData", CConstants::CLIENT_LIB,
@@ -256,11 +251,6 @@ namespace signatures {
                                  {SDK_SIG("48 89 5C 24 ? 48 8B D9 41 BA ? ? ? ? 41 F6 C0")},
                              });
 
-    CSigScan MoveData("MoveData", CConstants::CLIENT_LIB,
-                      {
-                          {SDK_SIG("40 53 56 41 56 48 83 EC ? 48 8B F1 48 63 CA")},
-                      });
-
     CSigScan MemAlloc("g_pMemAlloc", CConstants::CLIENT_LIB,
                       {
                           {SDK_SIG("48 8B 05 ? ? ? ? 48 8B 08 48 8B 01 FF 50 ? 45 33 E4"),
@@ -287,7 +277,7 @@ namespace signatures {
 
     CSigScan DrawObject("DrawObject", CConstants::SCENESYSTEM_LIB,
                         {
-                            {SDK_SIG("48 8B C4 48 89 50 ? 55 41 56")},
+                            {SDK_SIG("48 8B C4 48 89 50 ? 53")},
                         });
 
     CSigScan CalculateCRC("CalculateCRC", CConstants::CLIENT_LIB,

@@ -11,17 +11,17 @@ class CGlobalVars {
     float frameTime; // 0x8 (0x4)
     float absoluteFrameTime; // 0xC (0x4)
     int maxClients; // 0x10 (0x4)
-    PAD(0xC); // 0x14 (0xC)
-    PAD(0x8); // 0x20 (0x8)
-    float intervalPerTick; // 0x28 (0x4)
-    float currentTime; // 0x2C (0x4)
-    float currentTime2; // 0x30 (0x4)
-    PAD(0xC); // 0x34 (0xC)
-    int currentTick; // 0x40 (0x4)
-    float currentTickRatio; // 0x44 (0x4)
-    PAD(0x138); // 0x48 (0x138)
-    char* currentMap; // 0x180 (0x8)
-    char* currentMapName; // 0x188 (0x8)
+    PAD(0x1C); // 0x14 (0x1C)
+    float intervalPerSubtick; 
+    float currentTime; 
+    float currentTime2;
+    PAD(0xC); 
+    int currentTick; 
+    float currentTickRatio; 
+    void* netChannel;        
+    PAD(0x158);          
+    char* currentMap;
+    char* currentMapName; 
 
     auto GetCurrentTickRounded() { 
         float ratio = currentTickRatio;

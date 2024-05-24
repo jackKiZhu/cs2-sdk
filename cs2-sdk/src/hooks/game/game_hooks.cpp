@@ -66,10 +66,10 @@ static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToV
     if (!CEngineClient::Get()->IsInGame()) return;
 
     if (auto local = CMatchCache::Get().GetLocalPlayer(); local && local->IsValid(false)) {
-        if (auto pawn = local->Get()->m_hPawn().Get(); !pawn->m_bIsScoped()) {
-            view->fov += g_Vars.m_Fov;
-            view->viewmodelFov += g_Vars.m_ViewmodelFov;
-        }
+        //if (auto pawn = local->Get()->m_hPawn().Get(); pawn && !pawn->m_bIsScoped()) {
+        //    view->fov += g_Vars.m_Fov;
+        //    view->viewmodelFov += g_Vars.m_ViewmodelFov;
+        //}
     }
 
     CMath::Get().UpdateViewMatrix(pWorldToProjection);
@@ -249,7 +249,7 @@ void CGameHooks::Initialize() {
     // g_CreateMove2.VHook(CCSGOInput::Get(), platform::Constant(15, 15), SDK_HOOK(hkCreateMove2));
     g_OnAddEntity.VHook(CGameEntitySystem::Get(), platform::Constant(14, 15), SDK_HOOK(hkOnAddEntity));
     g_OnRemoveEntity.VHook(CGameEntitySystem::Get(), platform::Constant(15, 16), SDK_HOOK(hkOnRemoveEntity));
-    g_FrameStageNotify.VHook(CSource2Client::Get(), platform::Constant(35, 36), SDK_HOOK(hkFrameStageNotify));
+    g_FrameStageNotify.VHook(CSource2Client::Get(), platform::Constant(36, 37), SDK_HOOK(hkFrameStageNotify));
     g_EquipItemInLoadout.VHook(CCSInventoryManager::Get(), platform::Constant(52, 53), SDK_HOOK(hkEquipItemInLoadout));
     g_GetMatricesForView.Hook(signatures::GetMatricesForView.GetPtrAs<void*>(), SDK_HOOK(hkGetMatricesForView));
     g_FireEventClientSide.Hook(signatures::FireEventClientSide.GetPtrAs<void*>(), SDK_HOOK(hkFireEventClientSide));
