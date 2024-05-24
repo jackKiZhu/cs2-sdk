@@ -195,7 +195,7 @@ void CLagComp::Update() {
         if (!cachedEntity->IsValid() || cachedEntity->GetType() != CCachedBaseEntity::Type::PLAYER) continue;
 
         CCachedPlayer* cachedPlayer = dynamic_cast<CCachedPlayer*>(cachedEntity.get());
-        if (!cachedPlayer || !cachedPlayer->IsEnemyWithTeam(CGlobal::Get().player->GetTeam())) {
+        if (!cachedPlayer || !cachedPlayer->IsEnemyWithTeam(CGlobal::Get().player->GetTeam()) || cachedPlayer == CGlobal::Get().player) {
             continue;
         }
 
