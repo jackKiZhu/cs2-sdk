@@ -34,7 +34,7 @@ bool CCSInventoryManager::EquipItemInLoadout(int team, int slot, uint64_t itemID
 }
 
 CCSPlayerInventory* CCSInventoryManager::GetLocalInventory() { 
-    return vt::CallMethod<CCSPlayerInventory*>(this, 57);
+    return vt::CallMethod<CCSPlayerInventory*>(this, 59);
 }
 
 CCSPlayerInventory* CCSPlayerInventory::Get() { 

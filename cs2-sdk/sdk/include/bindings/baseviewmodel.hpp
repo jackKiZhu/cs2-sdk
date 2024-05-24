@@ -45,8 +45,8 @@ class CAnimationGraphInstance {
 
 class C_CSGOViewModel : public C_BaseViewModel {
    public:
-    char pad_0x0000[0xD08]; // 0x0000
-    CAnimationGraphInstance* animationGraphInstance;  // 0x0D08
+    char pad_0x0000[0xD00]; // 0x0000
+    CAnimationGraphInstance* animationGraphInstance;  // 0x0D00
 
     CViewmodelMaterialInfo* GetMaterialInfo();
     void InvalidateViewmodelMaterial();

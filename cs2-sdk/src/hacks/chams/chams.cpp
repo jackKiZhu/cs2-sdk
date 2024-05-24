@@ -22,6 +22,8 @@
 
 #include <hooks/game/game_hooks.hpp>
 
+#include <logger/logger.hpp>
+
 void CChams::Initialize() {
     static constexpr char glowVisible[] = R"#(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}
 			format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
@@ -79,21 +81,38 @@ bool CChams::OnDrawObject(void* animatableSceneObjectDesc, void* dx11, CSceneDat
     if (!hOwner.IsValid()) return false;
     C_CSPlayerPawn* entity = CGameResourceService::Get()->GetGameEntitySystem()->GetBaseEntity<C_CSPlayerPawn>(hOwner.GetEntryIndex());
     if (!entity || !entity->IsPlayerPawn() || entity->m_iTeamNum() == CGlobal::Get().pawn->m_iTeamNum()) return false;
-    //CSkeletonInstance* skeleton = meshDraw->sceneAnimatableObject->skeleton;
-    //if (!skeleton || !skeleton->m_modelState().bones) return false;
-    //CModel* model = skeleton->m_modelState().m_hModel().Get();
-    //if (!model) return false;
-    //uint32_t boneCount = model->BoneCount();
-    //if (boneCount == 0) return false;
 
-    //if (entity == CLagComp::Get().data.pawn && CLagComp::Get().data.bestRecord) {
-    //    // keep track of the original pointer, replace with best record pointer matrix then restore 
-    //    BoneData_t* backup = skeleton->m_modelState().bones;
-    //    skeleton->m_modelState().bones = CLagComp::Get().data.bestRecord->boneMatrix.data();
-    //    OverrideMaterial(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
-    //    CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
-    //    skeleton->m_modelState().bones = backup;
+    auto skeleton = entity->m_pGameSceneNode()->GetSkeleton();
+
+    auto ptr = (uintptr_t)meshDraw->sceneAnimatableObject;
+    // scan some bytes near ptr to find some specific data
+    //for (int i = 0; i < 0x500; i++) {
+    //    if (*(uintptr_t*)(ptr + i) == (uintptr_t)skeleton) {
+    //        CLogger::Log("Found skeleton at offset {}", i);
+    //        break;
+    //    }
+
+    //    if (*(uintptr_t*)(ptr + i) == (uintptr_t)entity->m_pGameSceneNode()) {
+    //        CLogger::Log("Found skeleton at offset {}", i);
+    //        break;
+    //    }
     //}
+
+    // CSkeletonInstance* skeleton = meshDraw->sceneAnimatableObject->skeleton;
+    // if (!skeleton || !skeleton->m_modelState().bones) return false;
+    // CModel* model = skeleton->m_modelState().m_hModel().Get();
+    // if (!model) return false;
+    // uint32_t boneCount = model->BoneCount();
+    // if (boneCount == 0) return false;
+
+    // if (entity == CLagComp::Get().data.pawn && CLagComp::Get().data.bestRecord) {
+    //     // keep track of the original pointer, replace with best record pointer matrix then restore
+    //     BoneData_t* backup = skeleton->m_modelState().bones;
+    //     skeleton->m_modelState().bones = CLagComp::Get().data.bestRecord->boneMatrix.data();
+    //     OverrideMaterial(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
+    //     CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer,
+    //     unk, unk2); skeleton->m_modelState().bones = backup;
+    // }
 
     return OverrideMaterial(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
 }
