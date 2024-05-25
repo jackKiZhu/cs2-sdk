@@ -1,7 +1,7 @@
 #include <pch.hpp>
 
 #include <types/econitemdefinition.hpp>
-#include <fnv/fnv1a.hpp>
+#include <hash/fnv1a.hpp>
 
 bool CEconItemDefinition::IsWeapon() { return m_iStickerSlots >= 4; }
 

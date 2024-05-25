@@ -6,6 +6,8 @@
 #include <bindings/collisionproperty.hpp>
 #include <bindings/hitbox.hpp>
 
+#include <types/utlstringtoken.hpp>
+
 #include <virtual/virtual.hpp>
 
 struct BBox_t;
@@ -23,9 +25,9 @@ class C_BaseEntity : public CEntityInstance {
 
     bool IsViewmodelV(); // 242
 
-    //bool IsPlayerControllerV(); 144
-    //bool IsPlayerPawnV(); 147
-    //bool IsWeaponV(); 150
+    //bool IsPlayerControllerV(); 
+    //bool IsPlayerPawnV(); 
+    //bool IsWeaponV(); 156
 
     bool CalculateBBoxByCollision(BBox_t& out);
     bool CalculateBBoxByHitbox(BBox_t& out);
@@ -41,7 +43,7 @@ class C_BaseEntity : public CEntityInstance {
     SCHEMA(uint8_t, m_iTeamNum, "C_BaseEntity", "m_iTeamNum");
     SCHEMA(uint32_t, m_fFlags, "C_BaseEntity", "m_fFlags");
     SCHEMA(int, m_iHealth, "C_BaseEntity", "m_iHealth");
-    SCHEMA(int, m_nSubclassID, "C_BaseEntity", "m_nSubclassID");
+    SCHEMA(CUtlStringToken, m_nSubclassID, "C_BaseEntity", "m_nSubclassID");
     SCHEMA(int, m_nSimulationTick, "C_BaseEntity", "m_nSimulationTick");
     SCHEMA(float, m_flSimulationTime, "C_BaseEntity", "m_flSimulationTime");
     SCHEMA(Vector, m_vecVelocity, "C_BaseEntity", "m_vecVelocity");
@@ -53,4 +55,5 @@ class C_BaseEntity : public CEntityInstance {
 
     bool IsEnemy(C_BaseEntity* other);
     void SetOrigin(const Vector& pos);
+    void UpdateSubclass();
 };

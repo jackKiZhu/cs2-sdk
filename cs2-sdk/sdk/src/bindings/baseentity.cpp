@@ -182,3 +182,8 @@ void C_BaseEntity::SetOrigin(const Vector& pos) {
     static auto fn = signatures::SetOrigin.GetPtrAs<void (*)(void*, const Vector&)>();
     if (fn) fn(this, pos);
 }
+
+void C_BaseEntity::UpdateSubclass() {
+    static auto fn = signatures::UpdateSubclass.GetPtrAs<void (*)(void*)>();
+    if (fn) fn(this);
+}

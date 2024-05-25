@@ -41,5 +41,5 @@ CMaterial2** CMaterialSystem::CreateMaterial(void* out, const char* materialName
 }
 
 void CMaterialSystem::SetCreateDataByMaterial(CMaterial2*** const in, const void* data) {
-    return vt::CallMethod<void>(this, 37, in, data);
+    return vt::CallMethod<void>(this, 38, in, data);
 }

@@ -5,7 +5,7 @@
 
 #include <sigscan/sigscan.hpp>
 
-#include <fnv/fnv1a.hpp>
+#include <hash/fnv1a.hpp>
 
 void CMemory::Initialize() {
     SDK_LOG_PROLOGUE();

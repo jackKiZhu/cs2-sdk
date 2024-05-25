@@ -1,6 +1,7 @@
 #pragma once
 
 #include <types/color.hpp>
+#include <bindings/baseentity.hpp>
 
 class CMaterial2 {
    public:
@@ -28,16 +29,13 @@ class CObjectInfo {
 class CSkeletonInstance;
 
 class CSceneAnimatableObject {
-    PAD(0xB0);
+    PAD(0xB8);
 
    public:
-    int owner;
+    CHandle<C_BaseEntity> ownerHandle;
 
    private:
     PAD(0x4C);
-
-   public:
-    CSkeletonInstance* skeleton;
 };
 
 class CSceneData {

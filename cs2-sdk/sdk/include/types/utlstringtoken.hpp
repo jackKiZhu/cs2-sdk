@@ -1,23 +1,22 @@
 #pragma once
 
-#include <fnv/fnv1a.hpp>
+#include <hash/murmurhash2.hpp>
 
 #define STRINGTOKEN_MURMURHASH_SEED 0x31415926
 
 #pragma pack(push, 8)
 class CUtlStringToken {
    public:
-    explicit CUtlStringToken(const char* szKeyName) {
-        uHashCode = FNV1A::Hash(szKeyName);
-        szDebugName = szKeyName;
+    CUtlStringToken() = default;
+
+    explicit CUtlStringToken(std::string_view keyName) {
+        uHashCode = MurmurHash2(keyName.data(), keyName.size(), STRINGTOKEN_MURMURHASH_SEED);
+        szDebugName = keyName.data();
     }
 
-    constexpr CUtlStringToken(const FNV1A uHashCode, const char* szKeyName) : uHashCode(uHashCode), szDebugName(szKeyName) {}
-
+    constexpr CUtlStringToken(const uint32_t uHashCode, const char* szKeyName) : uHashCode(uHashCode), szDebugName(szKeyName) {}
     bool operator==(const CUtlStringToken& other) const { return (other.uHashCode == uHashCode); }
-
     bool operator!=(const CUtlStringToken& other) const { return (other.uHashCode != uHashCode); }
-
     bool operator<(const CUtlStringToken& other) const { return (uHashCode < other.uHashCode); }
 
    public:
@@ -25,3 +24,7 @@ class CUtlStringToken {
     const char* szDebugName = nullptr; // 0x08 
 };
 #pragma pack(pop)
+
+inline consteval CUtlStringToken MakeStringToken(std::string_view keyName) {
+    return {MurmurHash2(keyName.data(), keyName.size(), STRINGTOKEN_MURMURHASH_SEED), keyName.data()};
+}

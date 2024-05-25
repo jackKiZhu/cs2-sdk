@@ -49,4 +49,7 @@ class CCSWeaponBaseVData : public CBasePlayerWeaponVData
     SCHEMA(CFiringModeFloat, m_flMaxSpeed, "CCSWeaponBaseVData", "m_flMaxSpeed");
 
     bool IsGun();
+
+    PAD(0x10);
+    const char* subclassID;
 };

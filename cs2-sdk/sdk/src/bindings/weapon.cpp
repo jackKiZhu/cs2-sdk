@@ -4,6 +4,9 @@
 
 #include <interfaces/globalvars.hpp>
 
+#include <signatures/signatures.hpp>
+#include <memory/memory.hpp>
+
 bool C_CSWeaponBaseGun::CanPrimaryAttack(const int weaponType, const float serverTime) { 
 	if (weaponType == WEAPONTYPE_KNIFE) return true;
 	if (m_bBurstMode() && m_iBurstShotsRemaining() > 0) return true;
@@ -43,4 +46,16 @@ bool C_CSWeaponBaseGun::CanSecondaryAttack(const int weaponType, const float ser
     if (tick > attackTick) return true;
     if (tick == attackTick) return attackTickRatio <= ratio;
     return false;
+}
+
+void C_CSWeaponBase::UpdateCompositeMaterial() {
+    static auto fn = signatures::UpdateCompositeMaterial.GetPtrAs<void (*)(void*, char)>();
+    if (fn) {
+        void* compositeMaterialOwner = (void*)((uintptr_t)this + 0x548);
+        if (compositeMaterialOwner) {
+            fn(compositeMaterialOwner, 1);
+            vt::CallMethod<void>(this, 7, 1);
+            vt::CallMethod<void>(this, 100, 1);
+        }
+    }
 }

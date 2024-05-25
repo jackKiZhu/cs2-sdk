@@ -220,17 +220,9 @@ void CLagComp::Update() {
         // remove every record that are invalid
         std::erase_if(cachedPlayer->records, [](const CRecord& record) { return !record.valid; });
 
-        const size_t size = cachedPlayer->records.size();
-
-        #if 0
         cachedPlayer->records.erase(std::unique(cachedPlayer->records.begin(), cachedPlayer->records.end(),
                                                 [](const CRecord& a, const CRecord& b) { return a.simulationTime == b.simulationTime && a.origin == b.origin; }),
                                     cachedPlayer->records.end());
-        #endif
-
-        if (size != cachedPlayer->records.size()) {
-            CLogger::Log("Removed {} duplicate records", size - cachedPlayer->records.size());
-        }
     }
 }
 

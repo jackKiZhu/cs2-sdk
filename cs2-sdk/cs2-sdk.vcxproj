@@ -111,6 +111,7 @@
     <ClCompile Include="api\src\hook\hook.cpp" />
     <ClCompile Include="api\src\module\module.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
+    <ClCompile Include="include\hash\murmurhash2.cpp" />
     <ClCompile Include="src\hacks\global\global.cpp" />
     <ClCompile Include="sdk\src\bindings\collisionproperty.cpp" />
     <ClCompile Include="sdk\src\types\model.cpp" />
@@ -278,7 +279,8 @@
     <ClInclude Include="include\cache\entities\player.hpp" />
     <ClInclude Include="include\cache\entities\gun.hpp" />
     <ClInclude Include="include\constants\constants.hpp" />
-    <ClInclude Include="include\fnv\fnv1a.hpp" />
+    <ClInclude Include="include\hash\fnv1a.hpp" />
+    <ClInclude Include="include\hash\murmurhash2.hpp" />
     <ClInclude Include="include\hacks\aimbot\aimbot.hpp" />
     <ClInclude Include="include\hacks\aimbot\lagcomp.hpp" />
     <ClInclude Include="include\hacks\chams\chams.hpp" />

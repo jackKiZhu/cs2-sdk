@@ -4,7 +4,7 @@
 
 #include <pointer/pointer.hpp>
 
-#include <fnv/fnv1a.hpp>
+#include <hash/fnv1a.hpp>
 
 CModule::CModule(const char* name) {
     m_Name = name;

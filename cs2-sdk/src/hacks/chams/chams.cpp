@@ -77,7 +77,7 @@ bool CChams::IsEnabled() { return g_Vars.m_Chams; }
 bool CChams::OnDrawObject(void* animatableSceneObjectDesc, void* dx11, CSceneData* meshDraw, int dataCount, void* sceneView,
                           void* sceneLayer, void* unk, void* unk2) {
     if (!IsEnabled() || !CGlobal::Get().pawn || !meshDraw || !meshDraw->sceneAnimatableObject) return false;
-    CBaseHandle hOwner = meshDraw->sceneAnimatableObject->owner;
+    CBaseHandle hOwner = meshDraw->sceneAnimatableObject->ownerHandle;
     if (!hOwner.IsValid()) return false;
     C_CSPlayerPawn* entity = CGameResourceService::Get()->GetGameEntitySystem()->GetBaseEntity<C_CSPlayerPawn>(hOwner.GetEntryIndex());
     if (!entity || !entity->IsPlayerPawn() || entity->m_iTeamNum() == CGlobal::Get().pawn->m_iTeamNum()) return false;

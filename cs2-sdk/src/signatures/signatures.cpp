@@ -277,7 +277,7 @@ namespace signatures {
 
     CSigScan DrawObject("DrawObject", CConstants::SCENESYSTEM_LIB,
                         {
-                            {SDK_SIG("48 8B C4 48 89 50 ? 53")},
+                            {SDK_SIG("48 8B C4 53 41 54 41 55 48 81 EC ? ? ? ? 4D 63 E1")},
                         });
 
     CSigScan CalculateCRC("CalculateCRC", CConstants::CLIENT_LIB,
@@ -356,4 +356,19 @@ namespace signatures {
                          {
                              {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8D B1 ? ? ? ? 41 8B D8")},
                          });
+
+    CSigScan UpdateSubclass("UpdateSubclass", CConstants::CLIENT_LIB,
+                                {
+                                    {SDK_SIG("40 53 48 83 EC 30 48 8B 41 10 48 8B D9 8B 50 30")},
+                                });
+
+    CSigScan CAnimationGraphInstance("CAnimationGraphInstance", CConstants::ANIMATIONSYSTEM_LIB,
+                            {
+                                {SDK_SIG("4C 89 44 24 ? 55 53 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 45 33 FF")},
+                            });
+
+    CSigScan UpdateCompositeMaterial("UpdateCompositeMaterial", CConstants::CLIENT_LIB,
+                                     {
+                                         {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC ? 44 0F B6 F2")},
+                                     });
 }  // namespace signatures

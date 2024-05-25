@@ -18,6 +18,8 @@ class INetworkGameClient {
     PAD(0x8);
     int deltaTick;
 
+    // 0xA8 GetNetworkClient
+
     VIRTUAL_METHOD(CNetworkGameClient*, GetNetworkClient, 23, ());
 };
 

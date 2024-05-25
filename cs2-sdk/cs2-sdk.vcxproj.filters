@@ -99,6 +99,7 @@
     <ClCompile Include="sdk\src\types\model.cpp" />
     <ClCompile Include="sdk\src\bindings\collisionproperty.cpp" />
     <ClCompile Include="src\hacks\global\global.cpp" />
+    <ClCompile Include="include\hash\murmurhash2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -137,7 +138,7 @@
     <ClInclude Include="include\renderer\renderer.hpp" />
     <ClInclude Include="include\virtual\virtual.hpp" />
     <ClInclude Include="api\include\module\module.hpp" />
-    <ClInclude Include="include\fnv\fnv1a.hpp" />
+    <ClInclude Include="include\hash\fnv1a.hpp" />
     <ClInclude Include="include\memory\memory.hpp" />
     <ClInclude Include="include\constants\constants.hpp" />
     <ClInclude Include="include\stb\stb.hh" />
@@ -227,5 +228,6 @@
     <ClInclude Include="include\hacks\global\global.hpp" />
     <ClInclude Include="sdk\include\interfaces\cnetworkgameclient.hpp" />
     <ClInclude Include="sdk\include\types\dynamiclight.hpp" />
+    <ClInclude Include="include\hash\murmurhash2.hpp" />
   </ItemGroup>
 </Project>

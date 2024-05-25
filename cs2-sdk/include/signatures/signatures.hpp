@@ -63,4 +63,7 @@ namespace signatures {
     extern CSigScan InputParser;
     extern CSigScan DynamicLightManager;
     extern CSigScan CreateDynamicLight;
+    extern CSigScan UpdateSubclass;
+    extern CSigScan CAnimationGraphInstance;
+    extern CSigScan UpdateCompositeMaterial;
 }  // namespace signatures

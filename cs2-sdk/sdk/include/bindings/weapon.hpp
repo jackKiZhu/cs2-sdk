@@ -31,6 +31,8 @@ class C_CSWeaponBase : public C_BasePlayerWeapon {
     SCHEMA(int, m_iOriginalTeamNumber, "C_CSWeaponBase", "m_iOriginalTeamNumber");
     PSCHEMA_EXTENDED(void, m_hStattrakAttachment, CConstants::CLIENT_LIB, "C_CSWeaponBase", "m_iNumEmptyAttacks", 4);
     PSCHEMA_EXTENDED(void, m_hNametagAttachment, CConstants::CLIENT_LIB, "C_CSWeaponBase", "m_iNumEmptyAttacks", 20);
+
+    void UpdateCompositeMaterial();
 };
 
 class C_CSWeaponBaseGun : public C_CSWeaponBase {

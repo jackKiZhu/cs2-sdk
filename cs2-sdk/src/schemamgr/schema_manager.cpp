@@ -5,7 +5,7 @@
 
 #include <interfaces/schemasystem.hpp>
 
-#include <fnv/fnv1a.hpp>
+#include <hash/fnv1a.hpp>
 
 std::optional<int32_t> CSchemaManager::GetSchemaOffsetInternal(const char* moduleName, const char* bindingName, const char* fieldName) {
     CSchemaSystemTypeScope* typeScope = CSchemaSystem::Get()->FindTypeScopeForModule(moduleName);

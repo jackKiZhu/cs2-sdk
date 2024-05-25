@@ -6,7 +6,7 @@
 #include <memory/memory.hpp>
 #include <constants/constants.hpp>
 
-#include <fnv/fnv1a.hpp>
+#include <hash/fnv1a.hpp>
 
 #include <virtual/virtual.hpp>
 

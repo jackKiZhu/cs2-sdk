@@ -60,6 +60,9 @@ void CVisuals::DynamicLightTest() {
     void* dynamicLightManager = (void*)signatures::DynamicLightManager.GetPtr().Dereference().Get();
     static CDynamicLight* light = nullptr;
 
+    return;
+
+    // game scene node crash
     if (!CEngineClient::Get()->IsInGame() || !dynamicLightManager || !CGlobal::Get().pawn || !CGlobal::Get().pawn->m_pGameSceneNode()) {
         light = nullptr;
         return;

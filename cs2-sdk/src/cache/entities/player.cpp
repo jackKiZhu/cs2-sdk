@@ -49,7 +49,7 @@ void CCachedPlayer::DrawESP() {
 
     CCSPlayerController* controller = Get();
     C_CSPlayerPawnBase* pawn = controller->m_hPawn().Get();
-    if (pawn->IsObserverPawn()) return;
+    if (!pawn || pawn->IsObserverPawn()) return;
 
     const bool isEnemy = IsEnemyWithTeam(cachedLocalPlayer->GetTeam());
     if (g_Vars.m_Team && !isEnemy) return;
@@ -133,9 +133,9 @@ void CCachedPlayer::DrawESP() {
 }
 
 void CCachedPlayer::CalculateDrawInfo() {
-    CCSPlayerController* controller = Get();
+    CCSPlayerController* controller = Get();      
     C_BaseEntity* pawn = controller->m_hPawn().Get();
-    if (!pawn->CalculateBBoxByCollision(m_BBox)) {
+    if (!controller->m_bPawnIsAlive() || !pawn || !pawn->CalculateBBoxByCollision(m_BBox)) {
         return InvalidateDrawInfo();
     }
 }

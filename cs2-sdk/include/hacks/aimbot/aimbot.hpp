@@ -32,9 +32,9 @@ class CAimbot {
     bool IsInSmoke(const Vector& start, const Vector& end);
 
    private:
-
     void Invalidate();
 
+    int backtrackTick = -1;
     bool shouldAim = false;
 
     Vector Smooth(const Vector& from, const Vector& to);

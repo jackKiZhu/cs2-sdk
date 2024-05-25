@@ -110,6 +110,12 @@ void CAimbot::Run(const TargetData_t& data) {
     shouldAim = target ? fov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f : false;
 
     if (target && shouldAim) {
+        if (g_Vars.m_Backtrack) {
+            auto cmd = CGlobal::Get().cmd;
+            if (cmd->csgoUserCmd.nAttack1StartHistoryIndex != -1)
+                backtrackTick = cmd->GetInputHistoryEntry(cmd->csgoUserCmd.nAttack1StartHistoryIndex)->nPlayerTickCount;
+        }
+
         if (hitPawn && fov <= g_Vars.m_DelayFov && hitPawn != target->Get()->m_hPawn().Get()) {
             // prevent shoot
         }
@@ -123,7 +129,6 @@ void CAimbot::Run(const TargetData_t& data) {
 
         // only apply the angle if it's beneficial
         if (fabsf(curDelta.x) > fabsf(smoothedDelta.x)) lastMove.viewAngles.x = smoothedAngle.x;
-
         if (fabsf(curDelta.y) > fabsf(smoothedDelta.y)) lastMove.viewAngles.y = smoothedAngle.y;
     } else {
         Invalidate();
@@ -172,6 +177,8 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     CCSGOInputHistoryEntryPB* subtick = historyEntry;
     if (!subtick || !subtick->pViewCmd || !subtick->cl_interp || !subtick->sv_interp0 || !subtick->sv_interp1) return;
 
+    if (subtick->nPlayerTickCount != backtrackTick) return; // not a shot cmd
+
     const auto [simTime1, simTime2, fraction] = CLagComp::Get().GetOptimalSimtime();
     if (fraction == -1.f) return;
 
@@ -183,7 +190,7 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     CNetworkGameClient* network = client->GetNetworkClient();
     if (!network) return;
 
-    float simTime = simTime1;
+    float simTime = fraction > 1.f - interval ? simTime2 : simTime1;
     //simTime += network->GetClientInterp();
     int tick = static_cast<int>((simTime / interval) + 0.5f);
 
@@ -191,7 +198,8 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     InterpInfo_t cl, sv0, sv1;
     if (!target->Get()->m_hPawn().Get()->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return;
 
-    CLogger::Log("Attempted to backtrack {} to tick {} + {:.1f}", subtick->nPlayerTickCount, tick, 1.f);
+    CLogger::Log("[Backtrack] tick [{} + {:.1f}] to tick [{} + 1.f]", subtick->nPlayerTickCount, fraction, tf.tick, tf.fraction);
+
     subtick->nRenderTickCount = cl.dstTick;
 
     subtick->cl_interp->srcTick = cl.srcTick;
@@ -205,18 +213,6 @@ void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
     subtick->sv_interp1->srcTick = sv1.srcTick;
     subtick->sv_interp1->dstTick = sv1.dstTick;
     subtick->sv_interp1->fraction = sv1.fraction;
-
-    //subtick->cl_interp->srcTick = tick;
-    //subtick->cl_interp->dstTick = tick + 1;
-    //subtick->cl_interp->fraction = 1.f;
-
-    //subtick->sv_interp0->srcTick = tick;
-    //subtick->sv_interp0->dstTick = tick+1;
-    //subtick->sv_interp0->fraction = 0.f;
-
-    //subtick->sv_interp1->srcTick = tick+1;
-    //subtick->sv_interp1->dstTick = tick+2;
-    //subtick->sv_interp1->fraction = 0.f;
 }
 
 void CAimbot::Invalidate() {

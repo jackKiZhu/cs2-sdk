@@ -30,6 +30,7 @@
 #include <interfaces/inventory.hpp>
 #include <interfaces/viewrender.hpp>
 #include <interfaces/materialsystem.hpp>
+#include <interfaces/memalloc.hpp>
 
 #include <hacks/aimbot/aimbot.hpp>
 #include <hacks/visuals/visuals.hpp>
@@ -66,10 +67,10 @@ static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToV
     if (!CEngineClient::Get()->IsInGame()) return;
 
     if (auto local = CMatchCache::Get().GetLocalPlayer(); local && local->IsValid(false)) {
-        //if (auto pawn = local->Get()->m_hPawn().Get(); pawn && !pawn->m_bIsScoped()) {
-        //    view->fov += g_Vars.m_Fov;
-        //    view->viewmodelFov += g_Vars.m_ViewmodelFov;
-        //}
+        // if (auto pawn = local->Get()->m_hPawn().Get(); pawn && !pawn->m_bIsScoped()) {
+        //     view->fov += g_Vars.m_Fov;
+        //     view->viewmodelFov += g_Vars.m_ViewmodelFov;
+        // }
     }
 
     CMath::Get().UpdateViewMatrix(pWorldToProjection);
@@ -78,6 +79,44 @@ static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToV
     //  Find a better function that won't microstutter,
     //  should also consider "host_timescale" factor.
     CESP::Get().Update();
+}
+
+static bool RecomputeMoveCRC(CCSGOUserCmdPB* cmdPB) {
+    const char* prevChecksum = cmdPB->baseCmd->moveCRC;
+
+    static auto SerializePartialToArray = signatures::SerializePartialToArray.GetPtrAs<bool (*)(void*, CUtlBuffer&, int)>();
+    static auto CalculateCRC = signatures::CalculateCRC.GetPtrAs<void (*)(void*, const void*, size_t)>();
+    static auto SetCRC = signatures::SetCRC.GetPtrAs<void (*)(void*, void*, void*)>();
+
+    CUtlBuffer buffer = CUtlBuffer(0, 0, 0);
+    const int CRCSize = cmdPB->baseCmd->Checksum();
+    buffer.EnsureCapacity(CRCSize + 1);
+    if (!SerializePartialToArray(cmdPB->baseCmd, buffer, CRCSize)) {
+        CLogger::Log("Failed to serialize partial to array");
+        return false;
+    }
+
+    uint64_t crc[4];
+    memset(crc, 0, sizeof(crc));
+    CalculateCRC(crc, &buffer, CRCSize);
+
+    uint64_t* v95 = (uint64_t*)(*(uint64_t*)&cmdPB->baseCmd->hasBits & 0xFFFFFFFFFFFFFFFC);
+    if (cmdPB->baseCmd->hasBits & 1) 
+      v95 = (uint64_t*)*v95;
+
+    SetCRC(cmdPB->baseCmd, crc, v95);
+
+    if (crc[3] > 0x10) {
+        CMemAlloc::Get().Free((void*)crc[0]);
+    }
+
+    CLogger::Log("checksum: {} -> {}\n", (uintptr_t)prevChecksum, (uintptr_t)cmdPB->baseCmd->moveCRC);
+
+
+
+    // CMemAlloc::Get().Free();
+
+    return true;
 }
 
 static CHook g_CreateMove;
@@ -125,32 +164,9 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     // cmd->csgoUserCmd.baseCmd->buttons->scroll |= IN_JUMP;
     // cmd->GetBaseCmdButtons();
 
-#if 0
-    static auto SerializePartialToArray = signatures::SerializePartialToArray.GetPtrAs<bool (*)(void*, CUtlBuffer*, int)>();
-    static auto CalculateCRC = signatures::CalculateCRC.GetPtrAs<void(*)(void*, const void*, size_t)>();
-    static auto SetCRC = signatures::SetCRC.GetPtrAs<void (*)(void*, void*, void*)>();
-
-    auto buffer = CUtlBuffer();
-    const int CRCSize = cmd->csgoUserCmd.baseCmd->Checksum();
-    buffer.EnsureCapacity(CRCSize + 1);
-    if (!SerializePartialToArray(cmd->csgoUserCmd.baseCmd, &buffer, CRCSize)) {
-        CLogger::Log("Failed to serialize partial to array");
-        return;
-    }
-
-    uint64_t crc[4];
-    memset(crc, 0, sizeof(crc));
-    CalculateCRC(crc, buffer.Base(), CRCSize);
-
-    uint64_t* v95 = (uint64_t*)(*(uint64_t*)&cmd->csgoUserCmd.hasBits & 0xFFFFFFFFFFFFFFFC);
-    if ( cmd->csgoUserCmd.hasBits & 1)
-      v95 = (uint64_t*)*v95;
-    SetCRC(cmd->csgoUserCmd.baseCmd, crc, v95);
-
-    CLogger::Log("Post checksum: {}\n", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
-#endif
-
     const CInButtonState originalButtons = cmd->buttons;
+
+    // RecomputeMoveCRC(&cmd->csgoUserCmd);
 
     // after this, all the subticks have been processed into the protobufs messages
     // it is better to change the message _before_ calling original but for that you need to meddle with CMoveData and i can't bother.
@@ -239,6 +255,18 @@ static void hkInputParser(void* inputMsg, CCSGOInputHistoryEntryPB* historyEntry
     }
 }
 
+// ctor
+static CHook g_CAnimationGraphInstance;
+static void* hkCAnimationGraphInstance(void* rcx, void* rdx, void* data) {
+    if (const char* model = *(const char**)((uintptr_t)data + 0x8); model && strstr(model, "weapons/models/knife")) {
+        void* m_animGraphNetworkedVars = *(void**)((uintptr_t)rdx + 0x30);
+        m_animGraphNetworkedVars = nullptr;
+        CLogger::Log("CAnimationGraphInstance: {}", model);
+    }
+
+    return g_CAnimationGraphInstance.CallOriginal<void*>(rcx, rdx, data);
+}
+
 void CGameHooks::Initialize() {
     SDK_LOG_PROLOGUE();
 
@@ -257,4 +285,5 @@ void CGameHooks::Initialize() {
     g_IsLoadoutAllowed.Hook(signatures::IsLoadoutAllowed.GetPtrAs<void*>(), SDK_HOOK(hkIsLoadoutAllowed));
     g_DrawObject.Hook(signatures::DrawObject.GetPtrAs<void*>(), SDK_HOOK(hkDrawObject));
     g_InputParser.Hook(signatures::InputParser.GetPtrAs<void*>(), SDK_HOOK(hkInputParser));
+    g_CAnimationGraphInstance.Hook(signatures::CAnimationGraphInstance.GetPtrAs<void*>(), SDK_HOOK(hkCAnimationGraphInstance));
 }

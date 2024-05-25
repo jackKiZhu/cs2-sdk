@@ -19,8 +19,9 @@
 #include <bindings/viewmodelservices.hpp>
 #include <types/econitemschema.hpp>
 #include <types/econitem.hpp>
+#include <types/utlstringtoken.hpp>
 
-#include <fnv/fnv1a.hpp>
+#include <hash/fnv1a.hpp>
 #include <logger/logger.hpp>
 
 bool CSkinChanger::IsEnabled() { return true; }
@@ -103,6 +104,7 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
         itemView->m_iItemIDHigh() = loadoutItemView->m_iItemIDHigh();
         itemView->m_iItemIDLow() = loadoutItemView->m_iItemIDLow();
         itemView->m_iAccountID() = uint32_t(steamID);
+        // weapon->UpdateCompositeMaterial();
 
         if (!weapon->m_bUIWeapon()) {
             // TODO:
@@ -110,14 +112,25 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
 
         if (isKnife) {
             itemView->m_iItemDefinitionIndex() = loadoutItemDefinition->m_nDefIndex;
-            //*itemDefinition = *loadoutItemDefinition;
             const char* knifeModel = loadoutItemDefinition->m_pszBaseDisplayModel;
-            //itemDefinition->m_iSubType = loadoutItemDefinition->m_iSubType;
-            
+            CUtlStringToken token(std::to_string(loadoutItemDefinition->m_nDefIndex).c_str());
+            const CUtlStringToken oToken = weapon->m_nSubclassID();
+            weapon->m_nSubclassID() = token;
+            CCSWeaponBaseVData* vdata = weapon->GetWeaponData();
+            vdata->subclassID = token.szDebugName;
+            // vdata + 0x10 = str(m_nDefIndex)
+            // vdata + 0xC20 itemType ?
+
+            weapon->UpdateSubclass();
+            /*
+            auto& penis = *(const char**)(std::uintptr_t(weapon->get_weapon_data()) + 0x10);
+            penis = item_definition_loadout->get_weapon_name();
+            weapon->get_weapon_data()->name() = item_definition_loadout->get_weapon_name();
+            */
+
             weapon->SetModel(knifeModel);
             if (viewmodel->m_hWeapon() == weaponHandle) {
                 viewmodel->SetModel(knifeModel);
-                //viewmodel->m_nSubclassID() = loadoutItemDefinition->m_iSubType;
             }
             viewmodel->animationGraphInstance->animGraphNetworkedVariables = nullptr;
         } 
