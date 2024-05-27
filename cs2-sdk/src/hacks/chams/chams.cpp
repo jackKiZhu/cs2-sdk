@@ -74,17 +74,21 @@ void CChams::Shutdown() {}
 
 bool CChams::IsEnabled() { return g_Vars.m_Chams; }
 
-bool CChams::OnDrawObject(void* animatableSceneObjectDesc, void* dx11, CSceneData* meshDraw, int dataCount, void* sceneView,
-                          void* sceneLayer, void* unk, void* unk2) {
-    if (!IsEnabled() || !CGlobal::Get().pawn || !meshDraw || !meshDraw->sceneAnimatableObject) return false;
-    CBaseHandle hOwner = meshDraw->sceneAnimatableObject->ownerHandle;
+bool CChams::OnDrawObject(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw,
+                          const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
+                          const CMaterial2* material) {
+    if (!IsEnabled() || !CGlobal::Get().pawn || !renderList || !renderList->m_pObject) return false;
+
+    CLogger::Log("OnDrawObject: {}", (uintptr_t)renderList->m_pObject);
+
+    CBaseHandle hOwner = renderList->m_pObject->ownerHandle;
     if (!hOwner.IsValid()) return false;
     C_CSPlayerPawn* entity = CGameResourceService::Get()->GetGameEntitySystem()->GetBaseEntity<C_CSPlayerPawn>(hOwner.GetEntryIndex());
     if (!entity || !entity->IsPlayerPawn() || entity->m_iTeamNum() == CGlobal::Get().pawn->m_iTeamNum()) return false;
 
     auto skeleton = entity->m_pGameSceneNode()->GetSkeleton();
 
-    auto ptr = (uintptr_t)meshDraw->sceneAnimatableObject;
+    auto ptr = (uintptr_t)renderList->m_pObject;
     // scan some bytes near ptr to find some specific data
     //for (int i = 0; i < 0x500; i++) {
     //    if (*(uintptr_t*)(ptr + i) == (uintptr_t)skeleton) {
@@ -110,11 +114,11 @@ bool CChams::OnDrawObject(void* animatableSceneObjectDesc, void* dx11, CSceneDat
     //     BoneData_t* backup = skeleton->m_modelState().bones;
     //     skeleton->m_modelState().bones = CLagComp::Get().data.bestRecord->boneMatrix.data();
     //     OverrideMaterial(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
-    //     CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer,
+    //     CGameHooks::Get().g_DrawArray.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer,
     //     unk, unk2); skeleton->m_modelState().bones = backup;
     // }
 
-    return OverrideMaterial(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
+    return OverrideMaterial(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material);
 }
 
 CStrongHandle<CMaterial2> CChams::CreateMaterial(const char* name) {
@@ -149,7 +153,7 @@ CStrongHandle<CMaterial2> CChams::CreateMaterial(const char* name) {
 
 CMaterial2* CChams::CreateMaterial(const char* name, const char* materialVMAT, const char* shaderType, bool blendMode, bool translucent,
                                    bool disableZ) {
-    CSceneData* data = (CSceneData*)(std::bit_cast<byte*>(CMemAlloc::Get().Alloc(0x200)) + 0x50);
+    CMeshDrawPrimitive_t* data = (CMeshDrawPrimitive_t*)(std::bit_cast<byte*>(CMemAlloc::Get().Alloc(0x200)) + 0x50);
     CMaterial2** prototype;
 
     CMaterialSystem::Get()->FindOrCreateFromResource(&prototype, materialVMAT);
@@ -170,10 +174,11 @@ CMaterial2* CChams::CreateMaterial(const char* name, const char* materialVMAT, c
     return *mat;
 }
 
-bool CChams::OverrideMaterial(void* animatableSceneObjectDesc, void* dx11, CSceneData* meshDraw, int dataCount, void* sceneView,
-                              void* sceneLayer, void* unk, void* unk2) {
+bool CChams::OverrideMaterial(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw,
+                              const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
+                              const CMaterial2* material) {
     CMaterial2* mat = materials[MAT_FLAT];
-    meshDraw->material = mat;
-    meshDraw->color = g_Vars.m_ChamsColor;
+    renderList->m_pMaterial = mat;
+    renderList->m_rgba = g_Vars.m_ChamsColor;
     return true;
 }

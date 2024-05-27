@@ -106,7 +106,7 @@ static bool RecomputeMoveCRC(CCSGOUserCmdPB* cmdPB) {
 
     SetCRC(cmdPB->baseCmd, crc, v95);
 
-    if (crc[3] > 0x10) {
+    if (crc[3] > 0x10 && crc[0]) {
         CMemAlloc::Get().Free((void*)crc[0]);
     }
 
@@ -231,19 +231,18 @@ static void* hkSetModel(void* rcx, const char* model) {
 static CHook g_IsLoadoutAllowed;
 static bool hkIsLoadoutAllowed() { return true; }
 
-// static CHook g_DrawObject;
-static void hkDrawObject(void* animatableSceneObjectDesc, void* dx11, CSceneData* meshDraw, int dataCount, void* sceneView,
-                         void* sceneLayer, void* unk, void* unk2) {
+static void hkDrawArray(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw, const ISceneView* view,
+                         ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats, const CMaterial2* material) {
     if (!CEngineClient::Get()->IsInGame())
-        return CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView,
-                                                                 sceneLayer, unk, unk2);
+        return CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view,
+                                                                 layer, perFrameStats, material);
 
-    if (!CChams::Get().OnDrawObject(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2))
-        return CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView,
-                                                                 sceneLayer, unk, unk2);
+    if (!CChams::Get().OnDrawObject(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material))
+        return CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view,
+                                                                 layer, perFrameStats, material);
 
-    CGameHooks::Get().g_DrawObject.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk,
-                                                      unk2);
+    CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats,
+                                                      material);
 }
 
 static CHook g_InputParser;
@@ -283,7 +282,7 @@ void CGameHooks::Initialize() {
     g_FireEventClientSide.Hook(signatures::FireEventClientSide.GetPtrAs<void*>(), SDK_HOOK(hkFireEventClientSide));
     g_SetModel.Hook(signatures::SetModel.GetPtrAs<void*>(), SDK_HOOK(hkSetModel));
     g_IsLoadoutAllowed.Hook(signatures::IsLoadoutAllowed.GetPtrAs<void*>(), SDK_HOOK(hkIsLoadoutAllowed));
-    g_DrawObject.Hook(signatures::DrawObject.GetPtrAs<void*>(), SDK_HOOK(hkDrawObject));
+    g_DrawArray.Hook(signatures::DrawObject.GetPtrAs<void*>(), SDK_HOOK(hkDrawArray));
     g_InputParser.Hook(signatures::InputParser.GetPtrAs<void*>(), SDK_HOOK(hkInputParser));
     g_CAnimationGraphInstance.Hook(signatures::CAnimationGraphInstance.GetPtrAs<void*>(), SDK_HOOK(hkCAnimationGraphInstance));
 }

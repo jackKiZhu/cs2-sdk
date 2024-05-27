@@ -11,5 +11,5 @@ class CGameHooks {
 
     void Initialize();
 
-    CHook g_DrawObject;
+    CHook g_DrawArray;
 };

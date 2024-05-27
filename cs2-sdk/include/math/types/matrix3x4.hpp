@@ -6,3 +6,8 @@ struct matrix3x4_t {
 
     float m_flMatVal[3][4];
 };
+
+struct matrix3x4a_t : matrix3x4_t
+{
+
+};

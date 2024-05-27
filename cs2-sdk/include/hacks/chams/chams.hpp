@@ -5,7 +5,12 @@
 #include <types/handle.hpp>
 #include <types/keyvalues.hpp>
 
-class CSceneData;
+class ISceneObjectDesc;
+class IRenderContext;
+class CMeshDrawPrimitive_t;
+class ISceneView;
+class ISceneLayer;
+class SceneSystemPerFrameStats_t;
 class CMaterial2;
 
 class CChams {
@@ -31,16 +36,18 @@ class CChams {
 
     bool IsEnabled();
    
-    bool OnDrawObject(void* animatableSceneObjectDesc, void* dx11, CSceneData* meshDraw, int dataCount, void* sceneView, void* sceneLayer,
-                      void* unk, void* unk2);
+    bool OnDrawObject(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw,
+                      const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
+                      const CMaterial2* material);
 
     CStrongHandle<CMaterial2> CreateMaterial(const char* name);
 
    private:
     CMaterial2* CreateMaterial(const char* name, const char* materialVMAT, const char* shaderType, bool blendMode, bool translucent, bool disableZ);
 
-    bool OverrideMaterial(void* animatableSceneObjectDesc, void* dx11, CSceneData* meshDraw, int dataCount, void* sceneView,
-                          void* sceneLayer, void* unk, void* unk2);
+    bool OverrideMaterial(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw,
+                          const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
+                          const CMaterial2* material);
 
     std::array<CMaterial2*, MAT_TYPE_COUNT> materials;
 };
