@@ -115,8 +115,8 @@ TargetData_t CLagComp::Find() {
         if (CGlobal::Get().vdata && distance > CGlobal::Get().vdata->m_flRange()) continue;
 
         GameTrace_t trace;
-        if (!CEngineTrace::Get()->TraceShape(CGlobal::Get().eyePos, eyePos, CGlobal::Get().pawn, 0x1C1003, 4, &trace) ||
-            trace.fraction < 0.97f) {
+        CEngineTrace::Get()->TraceShape(CGlobal::Get().eyePos, eyePos, CGlobal::Get().pawn, 0x1C1003, 4, &trace);
+        if (trace.fraction < 0.97f) {
             cachedPlayer->Reset();
             continue;
         }

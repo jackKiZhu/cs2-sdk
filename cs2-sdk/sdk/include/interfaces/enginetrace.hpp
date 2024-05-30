@@ -20,7 +20,7 @@ struct SurfaceData_t {
 };
 
 struct TraceHitboxData_t {
-    PAD(0x58);
+    PAD(0x38);
     int hitgroup;
     PAD(0x4);
     int hitbox;
@@ -34,17 +34,19 @@ struct GameTrace_t {
     void* surface; // 0x0
     C_BaseEntity* hitEntity; // 0x8
     TraceHitboxData_t* hitboxData; // 0x10
-    PAD(0x10); // 0x18
-    uint32_t contents; // 0x28
-    PAD(0x4C); // 0x2C
-    Vector start; // 0x78
-    Vector end; // 0x84
-    PAD(0x1C); // 0x90
-    float fraction; // 0xAC
-    int dwordb0; // 0xB0
-    uint16_t wordb4; // 0xB4
-    char b6; // 0xB6
-    uint16_t wordb7; // 0xB7 
+    PAD(0x38); // 0x18
+    uint32_t contents; 
+    PAD(0x24); 
+    Vector start; 
+    Vector end; 
+    Vector normal;
+    Vector position;
+    PAD(0x4);
+    float fraction; 
+    int dwordb0; 
+    uint16_t wordb4;
+    char allSolid; 
+    PAD(0x4D);
 };
 
 struct TraceFilter_t {

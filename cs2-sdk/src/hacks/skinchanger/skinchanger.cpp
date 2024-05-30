@@ -113,13 +113,13 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
             const char* knifeModel = loadoutItemDefinition->m_pszBaseDisplayModel;
             CUtlStringToken token(std::to_string(loadoutItemDefinition->m_nDefIndex).c_str());
             const CUtlStringToken oToken = weapon->m_nSubclassID();
-            weapon->m_nSubclassID() = token;
+            //weapon->m_nSubclassID() = token;
             CCSWeaponBaseVData* vdata = weapon->GetWeaponData();
-            vdata->subclassID = token.szDebugName;
+            //vdata->subclassID = token.szDebugName;
             // vdata + 0x10 = str(m_nDefIndex)
             // vdata + 0xC20 itemType ?
 
-            weapon->UpdateSubclass();
+            //weapon->UpdateSubclass();
             /*
             auto& penis = *(const char**)(std::uintptr_t(weapon->get_weapon_data()) + 0x10);
             penis = item_definition_loadout->get_weapon_name();
@@ -146,7 +146,7 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
                 if (viewmodelSceneNode) viewmodelSceneNode->SetMeshGroupMask(1 + static_cast<int>(usesOldModel));
             }
 
-            //weapon->UpdateCompositeMaterial();
+            // weapon->UpdateCompositeMaterial();
         }
     }
 
@@ -215,9 +215,14 @@ void CSkinChanger::OnPreFireEvent(CGameEvent* _event) {
     const char* eventName = _event->GetName();
     if (!eventName) return;
     if (FNV1A::Hash(eventName) != FNV1A::HashConst("player_death")) return;
-    if (!CGlobal::Get().player || !CGlobal::Get().pawn || !CGlobal::Get().weapon) return;
-
-    C_CSWeaponBaseGun* weapon = CGlobal::Get().weapon;
+    CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
+    if (!cachedLocal || !cachedLocal->IsValid()) return;
+    CCSPlayerController* localController = cachedLocal->Get();
+    if (!localController) return;
+    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
+    if (!localPawn) return;
+    C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
+    if (!weapon) return;
     C_AttributeContainer* attributes = weapon->m_AttributeManager();
     if (!attributes) return;
     C_EconItemView* itemView = attributes->m_Item();
@@ -294,9 +299,7 @@ void CSkinChanger::OnSetModel(C_BaseModelEntity* entity, const char*& model) {
     model = loadoutItemDefinition->m_pszBaseDisplayModel;
 }
 
-void CSkinChanger::AddEconItemToList(CEconItem* item) { 
-  addedItemIDs.insert(item->m_ulID); 
-}
+void CSkinChanger::AddEconItemToList(CEconItem* item) { addedItemIDs.insert(item->m_ulID); }
 
 void CSkinChanger::Shutdown() {
     CCSPlayerInventory* inventory = CCSPlayerInventory::Get();
