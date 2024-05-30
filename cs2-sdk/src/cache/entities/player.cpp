@@ -127,7 +127,7 @@ void CCachedPlayer::DrawESP() {
         }
     }
 
-    if (true) {
+    if (g_Vars.m_Backtrack && g_Vars.m_PlayerBoxes) {
         for (const auto& record : records) {
             ImVec2 screenPos;
             if (CMath::Get().WorldToScreen(record.eyePos, screenPos)) {
