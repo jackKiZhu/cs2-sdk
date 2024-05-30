@@ -66,8 +66,7 @@ void CChams::Initialize() {
     CMaterialSystem::Get()->CreateMaterial(&mat, "glow_vis", kv, 0, 1);
     materials[MAT_FLAT] = mat.Get();
 
-    void* ptrToFree = (void*)((uintptr_t)buffer - 0x100);
-    CMemAlloc::Get().Free(ptrToFree);
+    CMemAlloc::Get().Free(buffer);
     // CreateMaterial("primary_white", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true, false);
     // materials[MAT_FLAT_Z] = CreateMaterial("primary_white_z", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true,
     // true); materials[MAT_REGULAR] = mat.Get(); // CreateMaterial("regular_white", "materials/dev/primary_white.vmat",
@@ -151,17 +150,19 @@ CStrongHandle<CMaterial2> CChams::CreateMaterial(const char* name) {
 
     CStrongHandle<CMaterial2> mat;
     CMaterialSystem::Get()->CreateMaterial(&mat, name, kv, 0, 1);
+    CMemAlloc::Get().Free(kv);
     return mat;
 }
 
 CMaterial2* CChams::CreateMaterial(const char* name, const char* materialVMAT, const char* shaderType, bool blendMode, bool translucent,
                                    bool disableZ) {
-    CMeshDrawPrimitive_t* data = (CMeshDrawPrimitive_t*)(std::bit_cast<byte*>(CMemAlloc::Get().Alloc(0x200)) + 0x50);
+    void* buffer = CMemAlloc::Get().Alloc(0x200);
+    CMeshDrawPrimitive_t* data = (CMeshDrawPrimitive_t*)(std::bit_cast<byte*>(buffer) + 0x50);
     CMaterial2** prototype;
 
     CMaterialSystem::Get()->FindOrCreateFromResource(&prototype, materialVMAT);
     if (prototype == nullptr) {
-        CMemAlloc::Get().Free(data);
+        CMemAlloc::Get().Free(buffer);
         return nullptr;
     }
 
@@ -174,7 +175,7 @@ CMaterial2* CChams::CreateMaterial(const char* name, const char* materialVMAT, c
     CMaterial2** mat;
     CMaterialSystem::Get()->CreateMaterial(&mat, name, data, 0, 1);
     void* ptrToFree = (void*)((uintptr_t)data - 0x50);
-    CMemAlloc::Get().Free(ptrToFree);
+    CMemAlloc::Get().Free(buffer);
     return *mat;
 }
 
