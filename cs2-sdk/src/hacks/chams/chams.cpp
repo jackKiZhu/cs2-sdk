@@ -60,11 +60,14 @@ void CChams::Initialize() {
     id.pad[0] = 0x469806E97412167C;
     id.pad[1] = 0xE73790B53EE6F2AF;
 
-    if (!kv->Load(glowVisible, &id, nullptr)) return;  // crasj
+    if (!kv->Load(glowVisible, &id, nullptr)) return;  // crash
 
     CStrongHandle<CMaterial2> mat;
     CMaterialSystem::Get()->CreateMaterial(&mat, "glow_vis", kv, 0, 1);
     materials[MAT_FLAT] = mat.Get();
+
+    void* ptrToFree = (void*)((uintptr_t)buffer - 0x100);
+    CMemAlloc::Get().Free(ptrToFree);
     // CreateMaterial("primary_white", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true, false);
     // materials[MAT_FLAT_Z] = CreateMaterial("primary_white_z", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true,
     // true); materials[MAT_REGULAR] = mat.Get(); // CreateMaterial("regular_white", "materials/dev/primary_white.vmat",
@@ -102,6 +105,8 @@ bool CChams::OnDrawObject(ISceneObjectDesc* const desc, IRenderContext* ctx, CMe
 
     // DrawBacktrack(pawn, renderList->m_pTransform);
     [&]() {
+        return;
+
         const TargetData_t& lagcomp = CLagComp::Get().data;
         if (!lagcomp.player || pawn != lagcomp.pawn) return;
         if (lagcomp.player->records.empty()) return;
@@ -168,7 +173,8 @@ CMaterial2* CChams::CreateMaterial(const char* name, const char* materialVMAT, c
 
     CMaterial2** mat;
     CMaterialSystem::Get()->CreateMaterial(&mat, name, data, 0, 1);
-    CMemAlloc::Get().Free(data);
+    void* ptrToFree = (void*)((uintptr_t)data - 0x50);
+    CMemAlloc::Get().Free(ptrToFree);
     return *mat;
 }
 

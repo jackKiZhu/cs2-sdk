@@ -145,6 +145,8 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
                 CGameSceneNode* viewmodelSceneNode = viewmodel->m_pGameSceneNode();
                 if (viewmodelSceneNode) viewmodelSceneNode->SetMeshGroupMask(1 + static_cast<int>(usesOldModel));
             }
+
+            //weapon->UpdateCompositeMaterial();
         }
     }
 
@@ -257,17 +259,6 @@ void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) {
     if (!curSOCData) return;
 
     inventory->SOUpdated(inventory->GetOwner(), (CSharedObject*)curSOCData, eSOCacheEvent_Incremental);
-
-    C_CSWeaponBaseGun* weapon = CGlobal::Get().weapon;
-    if (!weapon) return;
-    C_AttributeContainer* attributes = weapon->m_AttributeManager();
-    if (!attributes) return;
-    C_EconItemView* itemView = attributes->m_Item();
-    if (!itemView) return;
-    CEconItemDefinition* itemDefinition = itemView->GetStaticData();
-    if (!itemDefinition || !itemDefinition->IsKnife(true)) return;
-
-    weapon->UpdateCompositeMaterial();
 }
 
 void CSkinChanger::OnSetModel(C_BaseModelEntity* entity, const char*& model) {
@@ -303,7 +294,9 @@ void CSkinChanger::OnSetModel(C_BaseModelEntity* entity, const char*& model) {
     model = loadoutItemDefinition->m_pszBaseDisplayModel;
 }
 
-void CSkinChanger::AddEconItemToList(CEconItem* item) { addedItemIDs.insert(item->m_ulID); }
+void CSkinChanger::AddEconItemToList(CEconItem* item) { 
+  addedItemIDs.insert(item->m_ulID); 
+}
 
 void CSkinChanger::Shutdown() {
     CCSPlayerInventory* inventory = CCSPlayerInventory::Get();
