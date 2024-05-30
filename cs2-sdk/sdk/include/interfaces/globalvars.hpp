@@ -12,12 +12,12 @@ class CGlobalVars {
     float absoluteFrameTime; // 0xC (0x4)
     int maxClients; // 0x10 (0x4)
     PAD(0x1C); // 0x14 (0x1C)
-    float intervalPerSubtick; 
-    float currentTime; 
-    float currentTime2;
+    float intervalPerSubtick;  // 0x30 (0x4)
+    float currentTime;         // 0x34 (0x4)
+    float currentTime2;        // 0x38 (0x4)
     PAD(0xC); 
-    int currentTick; 
-    float currentTickRatio; 
+    int currentTick;  // 0x48 (0x4)
+    float currentTickRatio;  // 0x4C (0x4)
     void* netChannel;        
     PAD(0x158);          
     char* currentMap;

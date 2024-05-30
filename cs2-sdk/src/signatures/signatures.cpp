@@ -29,10 +29,12 @@ namespace signatures {
 #endif
                                    });
 
-    CSigScan GetCSGOInput("CCSGOInput", CConstants::CLIENT_LIB,
-                          {
-                              {SDK_SIG("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8D 05 ? ? ? ? 48 C7 05 ? ? ? ? ? ? ? ? 48 89 05 ? ? ? ? 48 8D 0D ? ? ? ? 48 8D 05"), [](CPointer& ptr) { ptr.Absolute(3, 0); }},
-                          });
+    CSigScan GetCSGOInput(
+        "CCSGOInput", CConstants::CLIENT_LIB,
+        {
+            {SDK_SIG("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8D 05 ? ? ? ? 48 C7 05 ? ? ? ? ? ? ? ? 48 89 05 ? ? ? ? 48 8D 0D ? ? ? ? 48 8D 05"),
+             [](CPointer& ptr) { ptr.Absolute(3, 0); }},
+        });
 
     // '%s:  %f tick(%d) curtime(%f)'
     CSigScan GetGlobalVars("GlobalVars", CConstants::CLIENT_LIB,
@@ -141,7 +143,7 @@ namespace signatures {
 
     CSigScan GetInventoryManager("InventoryManager", CConstants::CLIENT_LIB,
                                  {
-                                     {SDK_SIG("E8 ? ? ? ? 48 63 BB ? ? ? ? 48 8D 68 28 83 FF FF"),
+                                     {SDK_SIG("E8 ? ? ? ? 48 8B CB 48 8D 78 50"),
                                       [](CPointer& ptr) { ptr.Absolute(1, 0).Absolute(3, 0); }},
                                  });
 
@@ -348,24 +350,23 @@ namespace signatures {
 
     CSigScan DynamicLightManager("DynamicLightManager", CConstants::CLIENT_LIB,
                                  {
-                                     {SDK_SIG("48 8B 1D ? ? ? ? 48 8D 15 ? ? ? ? 4C 8B F1"),
-                                      [](CPointer& ptr) { ptr.Absolute(3, 0); }},
+                                     {SDK_SIG("48 8B 1D ? ? ? ? 48 8D 15 ? ? ? ? 4C 8B F1"), [](CPointer& ptr) { ptr.Absolute(3, 0); }},
                                  });
 
     CSigScan CreateDynamicLight("CreateDynamicLight", CConstants::CLIENT_LIB,
-                         {
-                             {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8D B1 ? ? ? ? 41 8B D8")},
-                         });
-
-    CSigScan UpdateSubclass("UpdateSubclass", CConstants::CLIENT_LIB,
                                 {
-                                    {SDK_SIG("40 53 48 83 EC 30 48 8B 41 10 48 8B D9 8B 50 30")},
+                                    {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8D B1 ? ? ? ? 41 8B D8")},
                                 });
 
-    CSigScan CAnimationGraphInstance("CAnimationGraphInstance", CConstants::ANIMATIONSYSTEM_LIB,
+    CSigScan UpdateSubclass("UpdateSubclass", CConstants::CLIENT_LIB,
                             {
-                                {SDK_SIG("4C 89 44 24 ? 55 53 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 45 33 FF")},
+                                {SDK_SIG("40 53 48 83 EC 30 48 8B 41 10 48 8B D9 8B 50 30")},
                             });
+
+    CSigScan CAnimationGraphInstance("CAnimationGraphInstance", CConstants::ANIMATIONSYSTEM_LIB,
+                                     {
+                                         {SDK_SIG("4C 89 44 24 ? 55 53 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 45 33 FF")},
+                                     });
 
     CSigScan UpdateCompositeMaterial("UpdateCompositeMaterial", CConstants::CLIENT_LIB,
                                      {

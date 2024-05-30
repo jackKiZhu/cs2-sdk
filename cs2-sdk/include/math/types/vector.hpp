@@ -1,6 +1,6 @@
 #pragma once
 
-#include <math/types/matrix3x4.hpp>
+struct matrix3x4_t;
 
 class Vector {
    public:
@@ -73,11 +73,7 @@ class Vector {
         return vec;
     }
 
-    Vector Transform(const matrix3x4_t& matrix) const {
-        return Vector{x * matrix[0][0] + y * matrix[0][1] + z * matrix[0][2] + matrix[0][3],
-                      x * matrix[1][0] + y * matrix[1][1] + z * matrix[1][2] + matrix[1][3],
-                      x * matrix[2][0] + y * matrix[2][1] + z * matrix[2][2] + matrix[2][3]};
-    }
+    Vector Transform(const matrix3x4_t* matrix) const;
 
     float DotProduct(const Vector& rhs) const { return x * rhs.x + y * rhs.y + z * rhs.z; }
     float DotProductAbsolute(const Vector& rhs) const { return std::abs(x * rhs.x) + std::abs(y * rhs.y) + std::abs(z * rhs.z); }

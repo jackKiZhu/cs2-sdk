@@ -1,8 +1,9 @@
 #pragma once
 
+#include <math/types/vector.hpp>
+#include <math/types/matrix3x4.hpp>
 #include <math/types/transform.hpp>
 #include <math/types/vmatrix.hpp>
-#include <math/types/vector.hpp>
 
 struct ImVec2;
 
@@ -21,6 +22,9 @@ class CMath {
     float Fov(const Vector& angSrc, const Vector& angDst) const;
     float DistanceFromRay(const Vector& pos, const Vector& start, const Vector& end);
     float DistanceBetweenLines(const Vector& start1, const Vector& end1, const Vector& start2, const Vector& end2);
+
+    void TransformMatrix(const CTransform& transform, matrix3x4_t& out);
+    void QuaternionMatrix(const Quaternion& q, const Vector& origin, matrix3x4_t& out);
 
     constexpr static float Deg2Rad(float deg) { return deg * ((float)M_PI / 180.f); }
     constexpr static float Rad2Deg(float rad) { return rad * (180.f / (float)M_PI); }

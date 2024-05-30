@@ -241,8 +241,8 @@ static void hkDrawArray(ISceneObjectDesc* const desc, IRenderContext* ctx, CMesh
         return CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view,
                                                                  layer, perFrameStats, material);
 
-    CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats,
-                                                      material);
+    //CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats,
+    //                                                  material);
 }
 
 static CHook g_InputParser;
@@ -286,3 +286,34 @@ void CGameHooks::Initialize() {
     g_InputParser.Hook(signatures::InputParser.GetPtrAs<void*>(), SDK_HOOK(hkInputParser));
     g_CAnimationGraphInstance.Hook(signatures::CAnimationGraphInstance.GetPtrAs<void*>(), SDK_HOOK(hkCAnimationGraphInstance));
 }
+
+class CTakeDamageInfo
+{
+   public:
+    void* vftable;
+    Vector m_vecDamageForce;
+    Vector m_vecDamagePosition;
+    Vector m_vecReportedPosition;
+    Vector m_vecDamageDirection;
+    CHandle<C_BaseEntity> m_hInflictor;
+    CHandle<C_BaseEntity> m_hAttacker;
+    CHandle<C_BaseEntity> m_hWeapon;
+    float m_flDamage;
+    float m_flMaxDamage;
+    float m_flBaseDamage;
+    int m_bitsDamageType;
+    int m_iDamageCustom;
+    int m_iAmmoType;
+    float m_flRadius;
+    void* m_hBodyPart;
+    bool m_bCanHeadshot;
+    float m_flOriginalDamage;
+    int m_nDamageTaken;
+    int16_t m_iRecord;
+    float m_flStabilityDamage;
+    int m_bitsDotaDamageType;
+    int m_nDotaDamageCategory;
+    bool m_bAllowFriendlyFire;
+    bool m_bCanBeBlocked;
+    void* m_hScriptInstance;
+};

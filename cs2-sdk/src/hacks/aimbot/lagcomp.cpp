@@ -229,7 +229,19 @@ void CLagComp::Update() {
 float CLagComp::LastValidSimtime() {
     static auto sv_maxunlag = CCVar::Get()->GetCvarByName("sv_maxunlag");
     // more to do
-    return CGlobalVars::Get()->currentTime - sv_maxunlag->GetValue<float>();
+    float time = CGlobalVars::Get()->currentTime - sv_maxunlag->GetValue<float>();
+    int tick = static_cast<int>(time / (1.f / 64.f) + 0.5f);
+    float fraction = time / (1.f / 64.f) - tick;
+
+    Tickfrac_t tf{tick, 1.f};
+    InterpInfo_t cl, sv0, sv1;
+    if (!CGlobal::Get().pawn->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return time;
+
+    float newTime = cl.srcTick * (1.f / 64.f);
+
+    CLogger::Log("LastValidSimtime: {} -> {}", time, newTime);
+
+    return newTime;
 }
 
 std::tuple<float, float, float> CLagComp::GetOptimalSimtime() {

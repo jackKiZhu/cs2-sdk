@@ -1,6 +1,14 @@
 #include "pch.hpp"
 
 #include <math/types/transform.hpp>
+#include <math/types/matrix3x4.hpp>
+
+CTransform CTransform::FromMatrix(const matrix3x4_t& m) {
+    CTransform t;
+    t.m_Orientation = Quaternion(&m);
+    t.m_Position = m.GetAxis(3);
+    return t;
+}
 
 matrix3x4_t CTransform::ToMatrix() const {
     matrix3x4_t matrix{};

@@ -112,6 +112,8 @@
     <ClCompile Include="api\src\module\module.cpp" />
     <ClCompile Include="api\src\pointer\pointer.cpp" />
     <ClCompile Include="include\hash\murmurhash2.cpp" />
+    <ClCompile Include="src\math\types\quaternion.cpp" />
+    <ClCompile Include="src\math\types\vector.cpp" />
     <ClCompile Include="src\hacks\global\global.cpp" />
     <ClCompile Include="sdk\src\bindings\collisionproperty.cpp" />
     <ClCompile Include="sdk\src\types\model.cpp" />

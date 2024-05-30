@@ -24,6 +24,8 @@
 #include <hash/fnv1a.hpp>
 #include <logger/logger.hpp>
 
+#include <hacks/global/global.hpp>
+
 bool CSkinChanger::IsEnabled() { return true; }
 
 void CSkinChanger::OnFrameStageNotify(int stage) {
@@ -35,13 +37,9 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
     CCachedPlayer* cachedLocal = CMatchCache::Get().GetLocalPlayer();
     if (!cachedLocal || !cachedLocal->IsValid()) return;
 
-    CCSPlayerController* localController = cachedLocal->Get();
-    if (!localController) return;
+    if (!CGlobal::Get().player || !CGlobal::Get().pawn || !CGlobal::Get().player->IsValid()) return;
 
-    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
-    if (!localPawn) return;
-
-    CCSPlayer_ViewModelServices* viewModelServices = localPawn->m_pViewModelServices();
+    CCSPlayer_ViewModelServices* viewModelServices = CGlobal::Get().pawn->m_pViewModelServices();
     if (!viewModelServices) return;
 
     CHandle<C_CSGOViewModel>* viewModels = viewModelServices->m_hViewModel();
@@ -50,7 +48,7 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
     C_CSGOViewModel* viewmodel = viewModels[0].Get();
     if (!viewmodel) return;
 
-    CCSPlayer_WeaponServices* weaponServices = localPawn->m_pWeaponServices();
+    CCSPlayer_WeaponServices* weaponServices = CGlobal::Get().pawn->m_pWeaponServices();
     if (!weaponServices) return;
 
     const uint64_t steamID = inventory->GetOwner().id;
@@ -133,81 +131,31 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
                 viewmodel->SetModel(knifeModel);
             }
             viewmodel->animationGraphInstance->animGraphNetworkedVariables = nullptr;
-        } 
-        else {
+        } else {
             // Use legacy weapon models only for skins that require them.
             // Probably need to cache this if you really care that much about
             // performance.
 
-            std::optional<CPaintKit*> paintKit = CSource2Client::Get()->GetEconItemSystem()->GetEconItemSchema()->GetPaintKits().FindByKey(loadoutItemView->GetCustomPaintKitIndex());
+            std::optional<CPaintKit*> paintKit = CSource2Client::Get()->GetEconItemSystem()->GetEconItemSchema()->GetPaintKits().FindByKey(
+                loadoutItemView->GetCustomPaintKitIndex());
             const bool usesOldModel = paintKit.has_value() && paintKit.value()->bUseLegacyModel;
 
             weaponSceneNode->SetMeshGroupMask(1 + static_cast<int>(usesOldModel));
             if (viewmodel->m_hWeapon() == weaponHandle) {
                 CGameSceneNode* viewmodelSceneNode = viewmodel->m_pGameSceneNode();
-                if (viewmodelSceneNode) 
-                    viewmodelSceneNode->SetMeshGroupMask(1 + static_cast<int>(usesOldModel));
+                if (viewmodelSceneNode) viewmodelSceneNode->SetMeshGroupMask(1 + static_cast<int>(usesOldModel));
             }
-        }
-    }
-
-    const auto& wearables = localPawn->m_hMyWearables();
-    for (const auto& wearableHandle : wearables) {
-        C_EconWearable* wearable = wearableHandle.Get();
-        if (!wearable) continue;
-
-        C_AttributeContainer* attributes = wearable->m_AttributeManager();
-        if (!attributes) continue;
-
-        C_EconItemView* itemView = attributes->m_Item();
-        if (!itemView) continue;
-
-        CEconItemDefinition* itemDefinition = itemView->GetStaticData();
-        if (!itemDefinition) continue;
-
-        const std::string_view itemBaseName = itemDefinition->m_pszItemBaseName;
-        CLogger::Log("{} - {} - {}", itemBaseName.data(), CLocalize::Get()->FindSafe(itemBaseName.data()), itemDefinition->m_nDefIndex);
-
-        uint16_t idi = itemView->m_iItemDefinitionIndex();
-        if (idi >= 43 && idi <= 49) continue;
-
-        constexpr int INVENTORY_SLOTS = 57;
-
-        C_EconItemView* loadoutItemView = inventory->GetItemInLoadout(localPawn->m_iTeamNum(), itemDefinition->m_iLoadoutSlot);
-        if (!loadoutItemView) continue;
-
-        if (!addedItemIDs.contains(loadoutItemView->m_iItemID())) continue;
-
-        CEconItemDefinition* loadoutItemDefinition = loadoutItemView->GetStaticData();
-        if (!loadoutItemDefinition) continue;
-
-        const bool isAgent = loadoutItemDefinition->IsAgent();
-        if (!isAgent && loadoutItemDefinition->m_nDefIndex != itemDefinition->m_nDefIndex) continue;
-
-        itemView->m_bDisallowSOC() = false;
-        itemView->m_iItemID() = loadoutItemView->m_iItemID();
-        itemView->m_iItemIDHigh() = loadoutItemView->m_iItemIDHigh();
-        itemView->m_iItemIDLow() = loadoutItemView->m_iItemIDLow();
-        itemView->m_iAccountID() = uint32_t(steamID);
-
-        if (isAgent) {
-            itemView->m_iItemDefinitionIndex() = loadoutItemDefinition->m_nDefIndex;
-            const char* agentModel = loadoutItemDefinition->m_pszBaseDisplayModel;
-
-            localPawn->SetModel(agentModel);
-            //if (viewmodel->m_hWeapon() == weaponHandle) viewmodel->SetModel(knifeModel);
-            //viewmodel->animationGraphInstance->animGraphNetworkedVariables = nullptr;
         }
     }
 
     // gloves
     [&]() {
         static int glovesUpdateFrames = 0;
-        C_EconItemView& glovesView = localPawn->m_EconGloves();
+        C_EconItemView& glovesView = CGlobal::Get().pawn->m_EconGloves();
         CEconItemDefinition* glovesDefinition = glovesView.GetStaticData();
         if (!glovesDefinition) return;
 
-        C_EconItemView* loadoutGlovesView = inventory->GetItemInLoadout(localController->m_iTeamNum(), LOADOUT_SLOT_CLOTHING_HANDS);
+        C_EconItemView* loadoutGlovesView = inventory->GetItemInLoadout(CGlobal::Get().pawn->m_iTeamNum(), LOADOUT_SLOT_CLOTHING_HANDS);
         if (!loadoutGlovesView) return;
         if (!addedItemIDs.contains(loadoutGlovesView->m_iItemID())) return;
 
@@ -237,9 +185,10 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
         }
 
         if (glovesUpdateFrames > 0) {
-            CLogger::Log("i: {} | handle: {:#x} | typeidx: {} | static: {}", glovesUpdateFrames, currentRecord->handle, currentRecord->typeIndex, currentRecord->_static);
+            CLogger::Log("i: {} | handle: {:#x} | typeidx: {} | static: {}", glovesUpdateFrames, currentRecord->handle,
+                         currentRecord->typeIndex, currentRecord->_static);
             glovesView.m_bInitialized() = true;
-            localPawn->m_bNeedToReApplyGloves() = true;
+            CGlobal::Get().pawn->m_bNeedToReApplyGloves() = true;
             viewmodel->InvalidateViewmodelMaterial();
             glovesUpdateFrames--;
         }
@@ -247,15 +196,15 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
 
     // agent
     [&]() {
-        C_EconItemView* loadoutAgentView = inventory->GetItemInLoadout(localController->m_iTeamNum(), LOADOUT_SLOT_CLOTHING_CUSTOMPLAYER);
+        C_EconItemView* loadoutAgentView =
+            inventory->GetItemInLoadout(CGlobal::Get().pawn->m_iTeamNum(), LOADOUT_SLOT_CLOTHING_CUSTOMPLAYER);
         if (!loadoutAgentView) return;
         if (!addedItemIDs.contains(loadoutAgentView->m_iItemID())) return;
 
         CEconItemDefinition* loadoutGlovesDefinition = loadoutAgentView->GetStaticData();
         if (!loadoutGlovesDefinition || !loadoutGlovesDefinition->IsAgent(true)) return;
 
-        if (loadoutGlovesDefinition->m_pszBaseDisplayModel)
-          localPawn->SetModel(loadoutGlovesDefinition->m_pszBaseDisplayModel);
+        if (loadoutGlovesDefinition->m_pszBaseDisplayModel) CGlobal::Get().pawn->SetModel(loadoutGlovesDefinition->m_pszBaseDisplayModel);
     }();
 }
 
@@ -264,31 +213,25 @@ void CSkinChanger::OnPreFireEvent(CGameEvent* _event) {
     const char* eventName = _event->GetName();
     if (!eventName) return;
     if (FNV1A::Hash(eventName) != FNV1A::HashConst("player_death")) return;
-    
-    CCachedPlayer* localPlayer = CMatchCache::Get().GetLocalPlayer();
-    if (!localPlayer) return;
-    CCSPlayerController* localController = localPlayer->Get();
-    if (!localController) return;
-    C_CSPlayerPawn* localPawn = localController->m_hPawn().Get();
-    if (!localPawn) return;
-    C_CSWeaponBaseGun* weapon = localPawn->GetActiveWeapon();
-    if (!weapon) return;
+    if (!CGlobal::Get().player || !CGlobal::Get().pawn || !CGlobal::Get().weapon) return;
+
+    C_CSWeaponBaseGun* weapon = CGlobal::Get().weapon;
     C_AttributeContainer* attributes = weapon->m_AttributeManager();
     if (!attributes) return;
     C_EconItemView* itemView = attributes->m_Item();
     if (!itemView) return;
     CEconItemDefinition* itemDefinition = itemView->GetStaticData();
     if (!itemDefinition || !itemDefinition->IsKnife(true)) return;
-    
+
     CCSPlayerController* attackerController = _event->GetPlayerController("attacker");
     CCSPlayerController* victimController = _event->GetPlayerController("userid");
     if (attackerController == victimController) return;
-    if (attackerController != localController) return;
+    if (attackerController != CGlobal::Get().controller) return;
 
     _event->SetString("weapon", itemDefinition->m_pszDefinitionName);
 }
 
-void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) { 
+void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) {
     if (!addedItemIDs.count(itemID)) return;
     CCSInventoryManager* inventoryManager = CCSInventoryManager::Get();
     if (!inventoryManager) return;
@@ -301,7 +244,7 @@ void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) {
     CEconItemDefinition* currentDefinition = currentView->GetStaticData();
     if (!currentDefinition) return;
 
-    CLogger::Log("Equipping {}", CLocalize::Get()->FindSafe(currentDefinition->m_pszBaseDisplayModel));
+    // CLogger::Log("Equipping {}", CLocalize::Get()->FindSafe(currentDefinition->m_pszBaseDisplayModel));
 
     if (currentDefinition->IsGloves(false) || currentDefinition->IsKnife(false) ||
         currentDefinition->m_nDefIndex == toEquipView->m_iItemDefinitionIndex())
@@ -314,9 +257,20 @@ void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) {
     if (!curSOCData) return;
 
     inventory->SOUpdated(inventory->GetOwner(), (CSharedObject*)curSOCData, eSOCacheEvent_Incremental);
+
+    C_CSWeaponBaseGun* weapon = CGlobal::Get().weapon;
+    if (!weapon) return;
+    C_AttributeContainer* attributes = weapon->m_AttributeManager();
+    if (!attributes) return;
+    C_EconItemView* itemView = attributes->m_Item();
+    if (!itemView) return;
+    CEconItemDefinition* itemDefinition = itemView->GetStaticData();
+    if (!itemDefinition || !itemDefinition->IsKnife(true)) return;
+
+    weapon->UpdateCompositeMaterial();
 }
 
-void CSkinChanger::OnSetModel(C_BaseModelEntity* entity, const char*& model) { 
+void CSkinChanger::OnSetModel(C_BaseModelEntity* entity, const char*& model) {
     if (!entity || !entity->IsViewmodelV()) return;
 
     C_BaseViewModel* viewModel = static_cast<C_BaseViewModel*>(entity);
@@ -354,7 +308,6 @@ void CSkinChanger::AddEconItemToList(CEconItem* item) { addedItemIDs.insert(item
 void CSkinChanger::Shutdown() {
     CCSPlayerInventory* inventory = CCSPlayerInventory::Get();
     if (!inventory) return;
-    for (uint64_t itemID : addedItemIDs) 
-        inventory->RemoveEconItem(inventory->GetSOCDataForItem(itemID));
+    for (uint64_t itemID : addedItemIDs) inventory->RemoveEconItem(inventory->GetSOCDataForItem(itemID));
     addedItemIDs.clear();
 }

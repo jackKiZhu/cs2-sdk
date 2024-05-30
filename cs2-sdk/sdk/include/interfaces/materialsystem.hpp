@@ -1,6 +1,8 @@
 #pragma once
 
 #include <types/color.hpp>
+#include <math/types/vector.hpp>
+#include <math/types/matrix3x4.hpp>
 #include <bindings/baseentity.hpp>
 
 class ISceneObjectDesc
@@ -64,10 +66,10 @@ class CSceneObject {
     uint32_t m_hExternalOwner;
     CUtlStringToken m_nLayerMatchID;
 };
-#pragma pop(pack);
+#pragma pack()
 
 class CSceneAnimatableObject : public CSceneObject {
-    PAD(0xC);
+    PAD(0xB8 - sizeof(CSceneObject));
 
    public:
     CHandle<C_BaseEntity> ownerHandle;
@@ -88,16 +90,17 @@ class CMeshDrawPrimitive_t
         CMeshInstance* m_pMeshInstance;
         void* m_pPayload;
     };
+    PAD(0x8);
     const CSceneAnimatableObject* m_pObject;
     const CMaterial2* m_pMaterial;
     const CSceneSystemStencilState* m_pStencilStateOverride;
-    int16_t m_nEnvironmentMapId;
-    int16_t m_nLightProbeVolumeId;
-    PAD(0x4);
+    //int16_t m_nEnvironmentMapId;
+    //int16_t m_nLightProbeVolumeId;
+    //PAD(0x4);
     const CSceneSystemBakedLightingInfo* m_pBakedLightingInfo;
     uint16_t m_perInstanceBakedLightingParams[4];
     Color_t m_rgba;
-    const matrix3x4_t* m_pTransform;
+    matrix3x4_t* m_pTransform;
     uint16_t m_nRequiredTextureSize;
     uint8_t m_nDrawCall;
     uint8_t m_nObjectClassSettings;
@@ -125,8 +128,8 @@ struct SceneSystemPerFrameStats_t
 
 class CMaterial2 {
    public:
-    virtual const char* GetName() = 0;
-    virtual const char* GetSharedName() = 0;
+    virtual const char* GetName() const = 0;
+    virtual const char* GetSharedName() const = 0;
 };
 
 struct MaterialKeyVar_t {

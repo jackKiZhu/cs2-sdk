@@ -22,6 +22,8 @@
 
 #include <imgui/imgui_internal.h>
 
+#include <logger/logger.hpp>
+
 bool CCachedPlayer::IsValid(bool aliveCheck) {
     CCSPlayerController* controller = Get();
     if (!controller || (aliveCheck && !controller->m_bPawnIsAlive())) {
@@ -104,6 +106,8 @@ void CCachedPlayer::DrawESP() {
                 if (CModel* model = skeleton->m_modelState().m_hModel().Get(); model && bones) {
                     if (const uint32_t boneCount = model->BoneCount(); boneCount > 0) {
                         for (uint32_t bone = 0; bone < boneCount; ++bone) {
+                            //CLogger::Log("{} - {}", bone, model->GetBoneName(bone));
+
                             if (!(model->GetBoneFlags(bone) & FLAG_HITBOX)) continue;
 
                             const uint32_t parent = model->GetBoneParent(bone);
@@ -113,7 +117,8 @@ void CCachedPlayer::DrawESP() {
                             if (CMath::Get().WorldToScreen(bones[bone].position, boneScreenPos) &&
                                 CMath::Get().WorldToScreen(bones[parent].position, parentScreenPos)) {
                                 drawList->AddLine(boneScreenPos, parentScreenPos, IM_COL32(255, 255, 255, 255));
-                                // drawList->AddText(boneScreenPos, IM_COL32(255, 255, 255, 255), std::format("{}:{}", model->GetBoneName(bone), bone).c_str());
+                                // drawList->AddText(boneScreenPos, IM_COL32(255, 255, 255, 255), std::format("{}:{}",
+                                // model->GetBoneName(bone), bone).c_str());
                             }
                         }
                     }
@@ -133,7 +138,7 @@ void CCachedPlayer::DrawESP() {
 }
 
 void CCachedPlayer::CalculateDrawInfo() {
-    CCSPlayerController* controller = Get();      
+    CCSPlayerController* controller = Get();
     C_BaseEntity* pawn = controller->m_hPawn().Get();
     if (!controller->m_bPawnIsAlive() || !pawn || !pawn->CalculateBBoxByCollision(m_BBox)) {
         return InvalidateDrawInfo();
@@ -162,4 +167,3 @@ bool CCachedPlayer::IsEnemyWithTeam(Team team) {
 }
 
 bool CCachedPlayer::IsLocalPlayer() { return GetIndex() == CEngineClient::Get()->GetLocalPlayer(); }
-

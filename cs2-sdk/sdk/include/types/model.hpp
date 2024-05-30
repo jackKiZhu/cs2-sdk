@@ -3,6 +3,7 @@
 #include <schemamgr/schema_manager.hpp>
 
 #include <math/types/vector.hpp>
+#include <math/types/matrix3x4.hpp>
 
 #include <types/handle.hpp>
 
@@ -52,12 +53,13 @@ enum BoneIndex_t {
     BONE_LEG_UPPER_R = 25,
     BONE_LEG_LOWER_R = 26,
     BONE_ANKLE_R = 27,
+    BONE_ROOT_MOTION = 28,
 };
 
 struct BoneData_t {
     Vector position;
     float scale;
-    float rotation[4];
+    Quaternion rotation;
 };
 
 class CModel {
@@ -74,7 +76,7 @@ class CAnimationState {
 
 class CSimulationState {
    public:
-    matrix3x4a_t* m_pTransforms;  
+    CTransform* m_pTransforms;  
     uint32_t* m_pReadableBones;
     int m_nTotalTransformCount;
     int m_nBoneCount;

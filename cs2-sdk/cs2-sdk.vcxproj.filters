@@ -100,6 +100,8 @@
     <ClCompile Include="sdk\src\bindings\collisionproperty.cpp" />
     <ClCompile Include="src\hacks\global\global.cpp" />
     <ClCompile Include="include\hash\murmurhash2.cpp" />
+    <ClCompile Include="src\math\types\vector.cpp" />
+    <ClCompile Include="src\math\types\quaternion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />

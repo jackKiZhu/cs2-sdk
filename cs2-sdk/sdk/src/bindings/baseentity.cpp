@@ -94,7 +94,8 @@ bool C_BaseEntity::CalculateBBoxByCollision(BBox_t& out) {
     for (int i = 0; i < 8; ++i) {
         const Vector worldPoint{i & 1 ? maxs.x : mins.x, i & 2 ? maxs.y : mins.y, i & 4 ? maxs.z : mins.z};
 
-        if (!CMath::Get().WorldToScreen(worldPoint.Transform(node->m_nodeToWorld().ToMatrix()), out.m_Vertices[i])) return false;
+        const matrix3x4_t& nodeToWorld = node->m_nodeToWorld().ToMatrix();
+        if (!CMath::Get().WorldToScreen(worldPoint.Transform(&nodeToWorld), out.m_Vertices[i])) return false;
 
         out.m_Mins = ImMin(out.m_Mins, out.m_Vertices[i]);
         out.m_Maxs = ImMax(out.m_Maxs, out.m_Vertices[i]);

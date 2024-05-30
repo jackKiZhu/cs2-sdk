@@ -34,7 +34,7 @@ void CMath::TransformAABB(const matrix3x4_t& transform, const Vector& minsIn, co
     const Vector worldAxisY{mat[1][0], mat[1][1], mat[1][2]};
     const Vector worldAxisZ{mat[2][0], mat[2][1], mat[2][2]};
 
-    const Vector worldCenter = localCenter.Transform(transform);
+    const Vector worldCenter = localCenter.Transform(&transform);
     const Vector worldExtent{
         localExtent.DotProductAbsolute(worldAxisX),
         localExtent.DotProductAbsolute(worldAxisY),
@@ -47,13 +47,13 @@ void CMath::TransformAABB(const matrix3x4_t& transform, const Vector& minsIn, co
 
 Vector CMath::CalculateAngle(const Vector& src, const Vector& dst) const { return (dst - src).ToAngle(); }
 
-float CMath::Fov(const Vector& angSrc, const Vector& angDst) const { 
+float CMath::Fov(const Vector& angSrc, const Vector& angDst) const {
     Vector delta = (angSrc - angDst);
     delta.NormalizeAngle();
     return std::hypotf(delta.x, delta.y);
 }
 
-float CMath::DistanceFromRay(const Vector& pos, const Vector& start, const Vector& end) { 
+float CMath::DistanceFromRay(const Vector& pos, const Vector& start, const Vector& end) {
     const Vector ap = pos - start;
     const Vector ab = end - start;
     const float ab2 = ab.LengthSqr();
@@ -65,7 +65,7 @@ float CMath::DistanceFromRay(const Vector& pos, const Vector& start, const Vecto
     return (start + ab * t - pos).Length();
 }
 
-float CMath::DistanceBetweenLines(const Vector& start1, const Vector& end1, const Vector& start2, const Vector& end2) { 
+float CMath::DistanceBetweenLines(const Vector& start1, const Vector& end1, const Vector& start2, const Vector& end2) {
     const Vector u = end1 - start1;
     const Vector v = end2 - start2;
     const Vector w = start1 - start2;
@@ -78,25 +78,19 @@ float CMath::DistanceBetweenLines(const Vector& start1, const Vector& end1, cons
     float sc, sN, sD = D;
     float tc, tN, tD = D;
 
-    if ( D < FLT_EPSILON )
-    {
+    if (D < FLT_EPSILON) {
         sN = 0.0f;
         sD = 1.0f;
         tN = e;
         tD = c;
-    }
-    else
-    {
+    } else {
         sN = b * e - c * d;
         tN = a * e - b * d;
-        if ( sN < 0.0f )
-        {
+        if (sN < 0.0f) {
             sN = 0.0f;
             tN = e;
             tD = c;
-        }
-        else if ( sN > sD )
-        {
+        } else if (sN > sD) {
             sN = sD;
             tN = e + b;
             tD = c;
@@ -131,3 +125,9 @@ float CMath::DistanceBetweenLines(const Vector& start1, const Vector& end1, cons
     const Vector dP = w + (u * sc) - (v * tc);
     return dP.Length();
 }
+
+void CMath::TransformMatrix(const CTransform& transform, matrix3x4_t& out) {
+    QuaternionMatrix(transform.m_Orientation, transform.m_Position, out);
+}
+
+void CMath::QuaternionMatrix(const Quaternion& q, const Vector& origin, matrix3x4_t& out) { out = q.ToMatrix(origin); }

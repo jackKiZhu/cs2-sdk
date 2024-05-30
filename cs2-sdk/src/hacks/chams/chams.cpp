@@ -24,6 +24,8 @@
 
 #include <logger/logger.hpp>
 
+#include <math/math.hpp>
+
 void CChams::Initialize() {
     static constexpr char glowVisible[] = R"#(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}
 			format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
@@ -58,7 +60,7 @@ void CChams::Initialize() {
     id.pad[0] = 0x469806E97412167C;
     id.pad[1] = 0xE73790B53EE6F2AF;
 
-    if (!kv->Load(glowVisible, &id, nullptr)) return; // crasj
+    if (!kv->Load(glowVisible, &id, nullptr)) return;  // crasj
 
     CStrongHandle<CMaterial2> mat;
     CMaterialSystem::Get()->CreateMaterial(&mat, "glow_vis", kv, 0, 1);
@@ -74,49 +76,45 @@ void CChams::Shutdown() {}
 
 bool CChams::IsEnabled() { return g_Vars.m_Chams; }
 
+static void DrawBacktrack(C_CSPlayerPawn* pawn, matrix3x4_t* matrix) {
+    const TargetData_t& lagcomp = CLagComp::Get().data;
+    if (!lagcomp.player || pawn != lagcomp.pawn) return;
+    if (lagcomp.player->records.empty()) return;
+    const auto& boneMatrix = lagcomp.records->front().boneMatrix;
+    if (boneMatrix.empty() || boneMatrix.size() <= BONE_ROOT_MOTION) return;
+    const BoneData_t& data = boneMatrix.at(BONE_ROOT_MOTION);
+    const matrix3x4_t backup = *matrix;
+
+    matrix->SetAxis(3, data.position);
+
+    *matrix = backup;
+}
+
 bool CChams::OnDrawObject(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw,
                           const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
                           const CMaterial2* material) {
     if (!IsEnabled() || !CGlobal::Get().pawn || !renderList || !renderList->m_pObject) return false;
 
-    CLogger::Log("OnDrawObject: {}", (uintptr_t)renderList->m_pObject);
-
     CBaseHandle hOwner = renderList->m_pObject->ownerHandle;
     if (!hOwner.IsValid()) return false;
-    C_CSPlayerPawn* entity = CGameResourceService::Get()->GetGameEntitySystem()->GetBaseEntity<C_CSPlayerPawn>(hOwner.GetEntryIndex());
-    if (!entity || !entity->IsPlayerPawn() || entity->m_iTeamNum() == CGlobal::Get().pawn->m_iTeamNum()) return false;
+    C_CSPlayerPawn* pawn = CGameResourceService::Get()->GetGameEntitySystem()->GetBaseEntity<C_CSPlayerPawn>(hOwner.GetEntryIndex());
+    if (!pawn || !pawn->IsPlayerPawn() || pawn->m_iTeamNum() == CGlobal::Get().pawn->m_iTeamNum()) return false;
 
-    auto skeleton = entity->m_pGameSceneNode()->GetSkeleton();
+    // DrawBacktrack(pawn, renderList->m_pTransform);
+    [&]() {
+        const TargetData_t& lagcomp = CLagComp::Get().data;
+        if (!lagcomp.player || pawn != lagcomp.pawn) return;
+        if (lagcomp.player->records.empty()) return;
+        const auto& boneMatrix = lagcomp.records->front().boneMatrix;
+        if (boneMatrix.empty() || boneMatrix.size() <= BONE_ROOT_MOTION) return;
+        const BoneData_t& data = boneMatrix.at(BONE_ROOT_MOTION);
+        const matrix3x4_t backup = *renderList->m_pTransform;
 
-    auto ptr = (uintptr_t)renderList->m_pObject;
-    // scan some bytes near ptr to find some specific data
-    //for (int i = 0; i < 0x500; i++) {
-    //    if (*(uintptr_t*)(ptr + i) == (uintptr_t)skeleton) {
-    //        CLogger::Log("Found skeleton at offset {}", i);
-    //        break;
-    //    }
+        renderList->m_pTransform->SetAxis(3, data.position);
+        OverrideMaterial(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material);
 
-    //    if (*(uintptr_t*)(ptr + i) == (uintptr_t)entity->m_pGameSceneNode()) {
-    //        CLogger::Log("Found skeleton at offset {}", i);
-    //        break;
-    //    }
-    //}
-
-    // CSkeletonInstance* skeleton = meshDraw->sceneAnimatableObject->skeleton;
-    // if (!skeleton || !skeleton->m_modelState().bones) return false;
-    // CModel* model = skeleton->m_modelState().m_hModel().Get();
-    // if (!model) return false;
-    // uint32_t boneCount = model->BoneCount();
-    // if (boneCount == 0) return false;
-
-    // if (entity == CLagComp::Get().data.pawn && CLagComp::Get().data.bestRecord) {
-    //     // keep track of the original pointer, replace with best record pointer matrix then restore
-    //     BoneData_t* backup = skeleton->m_modelState().bones;
-    //     skeleton->m_modelState().bones = CLagComp::Get().data.bestRecord->boneMatrix.data();
-    //     OverrideMaterial(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer, unk, unk2);
-    //     CGameHooks::Get().g_DrawArray.CallOriginal<void>(animatableSceneObjectDesc, dx11, meshDraw, dataCount, sceneView, sceneLayer,
-    //     unk, unk2); skeleton->m_modelState().bones = backup;
-    // }
+        *renderList->m_pTransform = backup;
+    }();
 
     return OverrideMaterial(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material);
 }
@@ -180,5 +178,6 @@ bool CChams::OverrideMaterial(ISceneObjectDesc* const desc, IRenderContext* ctx,
     CMaterial2* mat = materials[MAT_FLAT];
     renderList->m_pMaterial = mat;
     renderList->m_rgba = g_Vars.m_ChamsColor;
+    CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material);
     return true;
 }
