@@ -3,12 +3,12 @@
 #include <math/types/vector.hpp>
 
 struct Ray_t {
-    Vector start;
-    Vector end;
-    Vector mins;
-    Vector maxs;
-    PAD(0x4);
-    uint8_t type;
+    Vector start; // 0x0
+    Vector end;   // 0xC
+    Vector mins;  // 0x18
+    Vector maxs;  // 0x24
+    PAD(0x4);     // 0x30
+    uint8_t type; // 0x34
 };
 
 struct SurfaceData_t {
@@ -35,29 +35,44 @@ struct GameTrace_t {
     C_BaseEntity* hitEntity; // 0x8
     TraceHitboxData_t* hitboxData; // 0x10
     PAD(0x38); // 0x18
-    uint32_t contents; 
-    PAD(0x24); 
-    Vector start; 
-    Vector end; 
-    Vector normal;
-    Vector position;
-    PAD(0x4);
-    float fraction; 
-    int dwordb0; 
-    uint16_t wordb4;
-    char allSolid; 
-    PAD(0x4D);
+    uint32_t contents;             // 0x50
+    PAD(0x24);          // 0x54
+    Vector start;                  // 0x78
+    Vector end;         // 0x84
+    Vector normal;                 // 0x90
+    Vector position;    // 0x9C
+    PAD(0x4);                      // 0xA8
+    float fraction;     // 0xAC
+    int dwordb0;                   // 0xB0
+    uint16_t wordb4;    // 0xB4
+    char allSolid;                 // 0xB6
+    char startSolid;               // 0xB7
+    PAD(0x4C);
 };
 
 struct TraceFilter_t {
-    uint64_t mask;
-    PAD(0x8 * 2);
-    uint32_t skipHandles[4];
+    uint64_t vt;  // 0x0
+    uint64_t mask;  // 0x8
+    PAD(0x8);      // 0x10
+    uint32_t skipHandles[4];  // 0x18
     uint16_t collisions[2];
     PAD(0x5);
 
     virtual ~TraceFilter_t(){};
     virtual bool Unk() { return true; };
+};
+
+struct Filter_t {
+    uint64_t vt;      // 0x0
+    uint64_t mask;    // 0x8
+    PAD(0x10);        // 0x10
+    uint32_t skipHandle;  // 0x20
+    uint32_t skipHandle2; // 0x24
+    uint32_t skipOwnerHandle;  // 0x28
+    uint32_t skipOwnerHandle2;  // 0x2C
+    uint32_t unk;               // 0x30
+    uint16_t unk2;              // 0x34
+    uint8_t unk3[3];               // 0x36
 };
 
 class C_BaseEntity;
@@ -68,6 +83,7 @@ class CEngineTrace {
 
     bool TraceShape(Ray_t* ray, const Vector& start, const Vector& end, TraceFilter_t* filter, GameTrace_t* trace);
     bool TraceShape(const Vector& start, const Vector& end, C_BaseEntity* skip, uint64_t mask, char a6, GameTrace_t* trace);
+    //bool TraceShape(const Vector& start, const Vector& end, C_BaseEntity* skip, uint64_t mask, char a6, GameTrace_t* trace);
 };
 
 

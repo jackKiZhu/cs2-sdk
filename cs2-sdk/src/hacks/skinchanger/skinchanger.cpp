@@ -9,6 +9,7 @@
 #include <interfaces/econitemsystem.hpp>
 #include <interfaces/cgameevent.hpp>
 #include <interfaces/localize.hpp>
+#include <interfaces/globalvars.hpp>
 
 #include <cache/cache.hpp>
 #include <cache/entities/player.hpp>
@@ -110,26 +111,27 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
 
         if (isKnife) {
             itemView->m_iItemDefinitionIndex() = loadoutItemDefinition->m_nDefIndex;
+
             const char* knifeModel = loadoutItemDefinition->m_pszBaseDisplayModel;
-            CUtlStringToken token(std::to_string(loadoutItemDefinition->m_nDefIndex).c_str());
-            const CUtlStringToken oToken = weapon->m_nSubclassID();
-            //weapon->m_nSubclassID() = token;
-            CCSWeaponBaseVData* vdata = weapon->GetWeaponData();
-            //vdata->subclassID = token.szDebugName;
-            // vdata + 0x10 = str(m_nDefIndex)
-            // vdata + 0xC20 itemType ?
-
-            //weapon->UpdateSubclass();
-            /*
-            auto& penis = *(const char**)(std::uintptr_t(weapon->get_weapon_data()) + 0x10);
-            penis = item_definition_loadout->get_weapon_name();
-            weapon->get_weapon_data()->name() = item_definition_loadout->get_weapon_name();
-            */
-
+            // update models
             weapon->SetModel(knifeModel);
             if (viewmodel->m_hWeapon() == weaponHandle) {
                 viewmodel->SetModel(knifeModel);
             }
+
+            CCSWeaponBaseVData* vdata = weapon->GetWeaponData();
+            if (vdata) {
+                CUtlStringToken subclassID(std::to_string(loadoutItemDefinition->m_nDefIndex).c_str());
+                // const CUtlStringToken oSubclassID = weapon->m_nSubclassID();
+                weapon->m_nSubclassID() = subclassID;
+                // vdata->subclassID = token.szDebugName;
+
+                if (viewmodel->m_hWeapon() == weaponHandle) 
+                    viewmodel->m_nSubclassID() = subclassID;
+
+                weapon->UpdateSubclass();
+            }
+
             viewmodel->animationGraphInstance->animGraphNetworkedVariables = nullptr;
         } else {
             // Use legacy weapon models only for skins that require them.
@@ -170,14 +172,15 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
         CViewmodelMaterialRecord* currentRecord = viewmodelMaterialInfo->GetRecord(VIEWMODEL_MATERIAL_GLOVES);
         if (!currentRecord) return;
 
-        if (currentRecord->handle != glovesHandles[2] && glovesHandles[2] == glovesHandles[1] && glovesHandles[1] == glovesHandles[0])
+        if (currentRecord->handle != glovesHandles[2] && glovesHandles[2] == glovesHandles[1] && glovesHandles[1] == glovesHandles[0] &&
+            glovesUpdateFrames == 0)
             glovesUpdateFrames = 3;
 
-        // shift each handle
-        for (int i = 0; i < 2; i++) glovesHandles[i] = glovesHandles[i + 1];
+        glovesHandles[0] = glovesHandles[1];
+        glovesHandles[1] = glovesHandles[2];
         glovesHandles[2] = currentRecord->handle;
 
-        if (glovesView.m_iItemID() != loadoutGlovesView->m_iItemID()) {
+        if (glovesView.m_iItemID() != loadoutGlovesView->m_iItemID() || glovesView.m_iItemDefinitionIndex() != loadoutGlovesView->m_iItemDefinitionIndex()) {
             glovesUpdateFrames = 3;
             glovesView.m_iItemDefinitionIndex() = loadoutGlovesView->m_iItemDefinitionIndex();
             glovesView.m_iItemID() = loadoutGlovesView->m_iItemID();

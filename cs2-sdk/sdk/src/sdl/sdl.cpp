@@ -11,9 +11,9 @@ namespace sdl {
         return fn.Call<decltype(&SetRelativeMouseMode)>(enabled);
     }
 
-    int SetWindowGrab(void* window, int grabbed) {
-        static const auto fn = CMemory::GetProcAddress(CConstants::SDL_LIB, "SDL_SetWindowGrab");
-        return fn.Call<decltype(&SetWindowGrab)>(window, grabbed);
+    int SetWindowMouseGrab(void* window, int grabbed) {
+        static const auto fn = CMemory::GetProcAddress(CConstants::SDL_LIB, "SDL_SetWindowMouseGrab");
+        return fn.Call<decltype(&SetWindowMouseGrab)>(window, grabbed);
     }
 
     void WarpMouseInWindow(void* window, float x, float y) {

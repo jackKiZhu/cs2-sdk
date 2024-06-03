@@ -66,4 +66,5 @@ namespace signatures {
     extern CSigScan UpdateSubclass;
     extern CSigScan CAnimationGraphInstance;
     extern CSigScan UpdateCompositeMaterial;
+    extern CSigScan TraceNoRay;
 }  // namespace signatures

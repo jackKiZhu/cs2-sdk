@@ -66,7 +66,7 @@ void CMenu::Toggle(bool state) {
         const ImVec2 screenCenter = ImGui::GetIO().DisplaySize * 0.5f;
 
         sdl::SetRelativeMouseMode(!m_Open);
-        sdl::SetWindowGrab(inputSystem->GetSDLWindow(), !m_Open);
+        sdl::SetWindowMouseGrab(inputSystem->GetSDLWindow(), !m_Open);
         sdl::WarpMouseInWindow(nullptr, screenCenter.x, screenCenter.y);
     }
 }
@@ -75,8 +75,8 @@ void CMenu::RenderWatermark() {
     auto drawList = CRenderer::GetBackgroundDrawList();
 
     char framerate[128];
-    snprintf(framerate, IM_ARRAYSIZE(framerate), "Welcome [%d]\nFPS: %d\n\n%s %s", CEngineClient::Get()->GetEngineBuildNumber(),
-             static_cast<int>(ImGui::GetIO().Framerate), __DATE__, __TIME__);
+    snprintf(framerate, IM_ARRAYSIZE(framerate), "Welcome [%d]\nFPS: %d", CEngineClient::Get()->GetEngineBuildNumber(),
+             static_cast<int>(ImGui::GetIO().Framerate));
 
     drawList->AddText({17, 9}, IM_COL32(0, 0, 0, 255), framerate);
     drawList->AddText({16, 8}, IM_COL32(27, 227, 200, 255), framerate);

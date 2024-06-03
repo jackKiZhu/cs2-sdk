@@ -116,7 +116,10 @@ TargetData_t CLagComp::Find() {
 
         GameTrace_t trace;
         CEngineTrace::Get()->TraceShape(CGlobal::Get().eyePos, eyePos, CGlobal::Get().pawn, 0x1C1003, 4, &trace);
-        if (trace.fraction < 0.97f) {
+        if (trace.hitEntity != pawn /*&& trace.fraction < 0.9f*/) {
+
+            CLogger::Log("{} : {} {} {}", controller->m_sSanitizedPlayerName(), trace.fraction, (bool)trace.allSolid, (bool)trace.startSolid);
+
             cachedPlayer->Reset();
             continue;
         }

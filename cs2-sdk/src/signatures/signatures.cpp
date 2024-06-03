@@ -143,8 +143,7 @@ namespace signatures {
 
     CSigScan GetInventoryManager("InventoryManager", CConstants::CLIENT_LIB,
                                  {
-                                     {SDK_SIG("E8 ? ? ? ? 48 8B CB 48 8D 78 50"),
-                                      [](CPointer& ptr) { ptr.Absolute(1, 0).Absolute(3, 0); }},
+                                     {SDK_SIG("E8 ? ? ? ? 48 8B CB 48 8D 78 50"), [](CPointer& ptr) { ptr.Absolute(1, 0).Absolute(3, 0); }},
                                  });
 
     CSigScan GetCCSGCClientSystem("CCSGCClientSystem", CConstants::CLIENT_LIB,
@@ -360,7 +359,7 @@ namespace signatures {
 
     CSigScan UpdateSubclass("UpdateSubclass", CConstants::CLIENT_LIB,
                             {
-                                {SDK_SIG("40 53 48 83 EC 30 48 8B 41 10 48 8B D9 8B 50 30")},
+                                {SDK_SIG("40 53 48 83 EC 20 48 8B D9 E8 ? ? ? ? 48 83 BB ? ? ? ? ? 74 17")},
                             });
 
     CSigScan CAnimationGraphInstance("CAnimationGraphInstance", CConstants::ANIMATIONSYSTEM_LIB,
@@ -372,4 +371,9 @@ namespace signatures {
                                      {
                                          {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC ? 44 0F B6 F2")},
                                      });
+
+    CSigScan TraceNoRay("TraceNoRay", CConstants::CLIENT_LIB,
+                        {
+                            {SDK_SIG("48 83 EC ? F3 0F 10 05 ? ? ? ? 48 8B 84 24 ? ? ? ? F3 0F 10 0D")},
+                        });
 }  // namespace signatures
