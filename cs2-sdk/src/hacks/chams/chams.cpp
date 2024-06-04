@@ -97,10 +97,12 @@ bool CChams::OnDrawObject(ISceneObjectDesc* const desc, IRenderContext* ctx, CMe
                           const CMaterial2* material) {
     if (!IsEnabled() || !CGlobal::Get().pawn || !renderList || !renderList->m_pObject) return false;
 
-    CBaseHandle hOwner = renderList->m_pObject->ownerHandle;
+    CBaseHandle hOwner = renderList->m_pObject->m_hExternalOwner;
     if (!hOwner.IsValid()) return false;
     C_CSPlayerPawn* pawn = CGameResourceService::Get()->GetGameEntitySystem()->GetBaseEntity<C_CSPlayerPawn>(hOwner.GetEntryIndex());
     if (!pawn || !pawn->IsPlayerPawn() || pawn->m_iTeamNum() == CGlobal::Get().pawn->m_iTeamNum()) return false;
+
+    if (renderList) CLogger::Log("DrawArray: {:#x}", (uintptr_t)renderList->m_pObject);
 
     // DrawBacktrack(pawn, renderList->m_pTransform);
     [&]() {

@@ -5,20 +5,17 @@
 #include <math/types/matrix3x4.hpp>
 #include <bindings/baseentity.hpp>
 
-class ISceneObjectDesc
-{
+class ISceneObjectDesc {
    public:
     void* vftable;
 };
 
-class CRenderAttributes
-{
+class CRenderAttributes {
    public:
     PAD(0x320);
 };
 
-class IRenderContext
-{
+class IRenderContext {
    public:
     void* vftable;
     IRenderContext* primaryContext;
@@ -34,52 +31,58 @@ class CSceneSystemStencilState;
 class CSceneSystemBakedLightingInfo;
 class CMaterial2;
 
-#pragma pack(1)
+#pragma pack(push, 1)
 class CSceneObject {
    public:
-    void* vftable;
-    union {
-        CMeshInstance* m_pMeshInstanceData;
-        void* m_pObjectData;
-    };
-    ISceneObjectDesc* m_pDesc;
-    void* m_pRefData;
-    float m_flStartFadeDistanceSquared;
-    float m_flFarCullDistanceSquared;
-    uint16_t m_nObjectTypeFlags;
-    uint16_t m_nGameRenderCounter;
-    uint8_t m_tint[3];
-    uint8_t m_nMeshGroupMaskSmall;
-    uint8_t m_nDebugLevel : 2;
-    uint8_t m_nSizeCullBloat : 2;
-    uint8_t m_nBoundsType : 1;
-    uint8_t m_nID;
-    uint8_t m_nNumTransformBlocks;
-    uint8_t m_nObjectClass;
-    PAD(0xC);
-    matrix3x4a_t m_transform;
-    void* m_pPVS;
-    void* m_pExtraData;
-    uint64_t m_nOriginalRenderableFlags;
-    uint64_t m_nRenderableFlags;
-    void* m_pWorld;
-    uint32_t m_hExternalOwner;
-    CUtlStringToken m_nLayerMatchID;
-};
-#pragma pack()
-
-class CSceneAnimatableObject : public CSceneObject {
-    PAD(0xB8 - sizeof(CSceneObject));
+    void* vftable;              // 0x0
+    void* heapPtr;              // 0x8
+    void* m_pMeshInstanceData;  // 0x10
+    void* m_pDesc;              // 0x18
+    void* m_pRefData;           // 0x20
+   private:
+    PAD(0x8);
 
    public:
-    CHandle<C_BaseEntity> ownerHandle;
-
+    matrix3x4_t m_transform;  // 0x30
    private:
-    PAD(0x40);
-};
+    PAD(0x26);
 
-class CMeshDrawPrimitive_t
-{
+   public:
+    uint16_t m_nObjectTypeFlags;    // 0x86
+    uint16_t m_nGameRenderCounter;  // 0x88
+    uint8_t m_clr[3];               // 0x8a
+   private:
+    PAD(0x3);
+
+   public:
+    void* m_pPVS;        // 0x90
+    void* m_pExtraData;  // 0x98
+   private:
+    PAD(0x10);
+
+   public:
+    void* m_pWorld;                          // 0xb0
+    CHandle<C_BaseEntity> m_hExternalOwner;  // 0xb8
+   private:
+    PAD(0x14);
+};  // Size: 0xd0
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+class CSceneAnimatableObject : public CSceneObject {
+    CUtlVector<matrix3x4a_t> m_worldSpaceRenderBones;  // 0xd0
+    CUtlVector<float> m_flexControllerWeights;         // 0xe8
+    int m_nPerVertexBoneInfluenceCount;                // 0x100
+   private:
+    PAD(0xc);
+
+   public:
+    void* m_pProceduralBoneTransforms;  // 0x110
+    // incomplete.
+};  // Size: 0x118
+#pragma pack(pop)
+
+class CMeshDrawPrimitive_t {
    public:
     void SetShaderType(const char* shaderName);
     void SetMaterialFunction(const char* functionName, int value);
@@ -94,9 +97,9 @@ class CMeshDrawPrimitive_t
     const CSceneAnimatableObject* m_pObject;
     const CMaterial2* m_pMaterial;
     const CSceneSystemStencilState* m_pStencilStateOverride;
-    //int16_t m_nEnvironmentMapId;
-    //int16_t m_nLightProbeVolumeId;
-    //PAD(0x4);
+    // int16_t m_nEnvironmentMapId;
+    // int16_t m_nLightProbeVolumeId;
+    // PAD(0x4);
     const CSceneSystemBakedLightingInfo* m_pBakedLightingInfo;
     uint16_t m_perInstanceBakedLightingParams[4];
     Color_t m_rgba;
@@ -108,23 +111,18 @@ class CMeshDrawPrimitive_t
     PAD(0x2);
 };
 
-class ISceneView
-{
+class ISceneView {
    public:
     PAD(0xB98);
 };
 
-class ISceneLayer
-{
+class ISceneLayer {
    public:
     void* vftable;
     PAD(0x6B8);
 };
 
-struct SceneSystemPerFrameStats_t
-{
-
-};
+struct SceneSystemPerFrameStats_t {};
 
 class CMaterial2 {
    public:

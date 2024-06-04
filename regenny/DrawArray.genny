@@ -1,0 +1,51 @@
+type int 4 [[i32]]
+type void 0
+type float 4 [[f32]]
+type uint16 2 [[u16]]
+type uint8 1 [[u8]]
+type uint32 4 [[u32]]
+type char 1
+type uint64 8 [[u64]]
+
+struct matrix3x4_t {
+   float m[3][4];
+}
+
+struct CUtlStringToken {
+   uint32 hashCode;
+   char* name;
+}
+
+struct CUtlVector {
+   int size;
+   char pad[4];
+   void* data;
+   char pad[8];
+}
+
+struct CSceneObject 0xD0 {
+	void* vftable;
+	void* heapAlloc;
+	void* m_pMeshInstanceData;
+	void* m_pDesc;
+	void* m_pRefData;
+	
+	matrix3x4_t m_transform @ 0x30;
+	
+	uint16 m_nObjectTypeFlags @ 0x86;
+	uint16 m_nGameRenderCounter;
+	uint8 m_clr[3];
+	
+	void* m_pPVS @ 0x90;
+	void* m_pExtraData @ 0x98;
+
+	void* m_pWorld @ 0xB0;
+	uint32 m_hExternalOwner @ 0xB8;
+}
+
+struct CSceneAnimatableObject : CSceneObject {
+	CUtlVector m_worldSpaceRenderBones @ 0xD0;
+	CUtlVector m_flexControllerWeights;
+	int m_nPerVertexBoneInfluenceCount;
+	void* m_pProceduralBoneTransforms @ 0x110;
+}
