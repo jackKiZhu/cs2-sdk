@@ -133,6 +133,12 @@ CEconItem* CCSPlayerInventory::GetSOCDataForItem(uint64_t itemID) {
     return SOCData;
 }
 
+void CCSPlayerInventory::SendInventoryUpdateEvent() { 
+  return vt::CallMethod<void>(this, 17); 
+}
+
+void CCSPlayerInventory::SendPanoramaUpdateEvent() { return vt::CallMethod<void>(this, 18); }
+
 SOID_t& CCSPlayerInventory::GetOwner() { return CPointer(this).GetField<SOID_t>(0x10); }
 
 CUtlVector<C_EconItemView*>& CCSPlayerInventory::GetItemVector() { return CPointer(this).GetField<CUtlVector<C_EconItemView*>>(0x20); }

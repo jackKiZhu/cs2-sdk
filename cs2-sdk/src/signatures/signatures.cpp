@@ -87,10 +87,16 @@ namespace signatures {
                                            {SDK_SIG("40 53 57 41 56 48 83 EC ? 49 8B 00")},
                                        });
 
-    CSigScan GetUserCmd("GetUserCmd", CConstants::CLIENT_LIB,
-                        {
-                            {SDK_SIG("40 57 48 83 EC ? 41 8B F8")},
-                        });
+    CSigScan DiagnosticMessageResponse("DiagnosticMessageResponse", CConstants::CLIENT_LIB,
+                                       {
+                                           {SDK_SIG("89 54 24 ? 53 56 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 48 8B D9")},
+                                       });
+
+    CSigScan CNetChannel("CNetChannel", CConstants::CLIENT_LIB,
+                         {
+                             {SDK_SIG("48 8B 05 ? ? ? ? 48 8B 00 48 8B 0D ? ? ? ? FF 90 ? ? ? ? 0F B6 C0 85 C0 74 ? 48 8D 0D"),
+                              [](CPointer& ptr) { ptr.Absolute(3, 0).Dereference(); }},
+                         });
 
     CSigScan CanFire("C_BasePlayerWeapon::CanFire", CConstants::CLIENT_LIB,
                      {
@@ -204,7 +210,7 @@ namespace signatures {
 
     CSigScan GetPaintKits("GetPaintKits", CConstants::CLIENT_LIB,
                           {
-                              {SDK_SIG("49 8B 83 ? ? ? ? 45 39 04 02 74 ? 49 8B 7C 02"),
+                              {SDK_SIG("49 8B 83 ? ? ? ? 45 39 04 02 74 ? 4A 8B 7C 10"),
                                [](CPointer& ptr) { ptr.Offset(3).Dereference(); }},
                           });
 
@@ -281,15 +287,15 @@ namespace signatures {
                             {SDK_SIG("48 8B C4 53 41 54 41 55 48 81 EC ? ? ? ? 4D 63 E1")},
                         });
 
-    CSigScan CalculateCRC("CalculateCRC", CConstants::CLIENT_LIB,
+    CSigScan WriteMessage("WriteMessage", CConstants::CLIENT_LIB,
                           {
                               {SDK_SIG("48 89 5C 24 ? 48 89 6C 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 BF")},
                           });
 
-    CSigScan SetCRC("SetCRC", CConstants::CLIENT_LIB,
-                    {
-                        {SDK_SIG("48 89 5C 24 ? 55 56 57 48 83 EC ? 49 8B C0")},
-                    });
+    CSigScan SetMessageData("SetMessageData", CConstants::CLIENT_LIB,
+                            {
+                                {SDK_SIG("48 89 5C 24 ? 55 56 57 48 83 EC ? 49 8B C0")},
+                            });
 
     CSigScan SerializePartialToArray(
         "SerializePartialToArray", CConstants::CLIENT_LIB,
@@ -376,4 +382,59 @@ namespace signatures {
                         {
                             {SDK_SIG("48 83 EC ? F3 0F 10 05 ? ? ? ? 48 8B 84 24 ? ? ? ? F3 0F 10 0D")},
                         });
+
+    CSigScan UpdateAggregateSceneObject("UpdateAggregateSceneObject", CConstants::SCENESYSTEM_LIB,
+                                        {
+                                            {SDK_SIG("48 89 5C 24 18 48 89 6C 24 20 56 57 41 55")},
+                                        });
+
+    CSigScan CMsgQAngle("CMsgQAngle", CConstants::CLIENT_LIB,
+                        {
+                            {SDK_SIG("E8 ? ? ? ? 48 89 46 ? 48 8B 4E ? BA"), [](CPointer& ptr) { ptr.Absolute(1, 0); }},
+                        });
+
+    CSigScan CMsgVector("CMsgVector", CConstants::CLIENT_LIB,
+                        {
+                            {SDK_SIG("E8 ? ? ? ? 48 89 46 ? 48 8B 4E ? F3 41 0F 10 46 ? 83 49 ? ? 8B 41 ? F3 0F 11 41 ? 83 C8 ? F3 41 0F "
+                                     "10 4E ? 89 41 ? 83 C8 ? F3 0F 11 49 ? F3 41 0F 10 46 ? 89 41 ? F3 0F 11 41 ? BA"),
+                             [](CPointer& ptr) { ptr.Absolute(1, 0); }},
+                        });
+
+    CSigScan GetClientInterp("GetClientInterp", CConstants::CLIENT_LIB,
+                             {
+                                 {SDK_SIG("48 83 EC ? 0F 29 74 24 ? 48 8D 0D")},
+                             });
+
+    CSigScan Keyvalues3FreeAllocation("Keyvalues3FreeAllocation", CConstants::TIER_LIB,
+                                      {
+                                          {SDK_SIG("40 53 41 57 48 83 EC ? 44 8B FA")},
+                                      });
+
+    CSigScan Keyvalues3SetType("Keyvalues3SetType", CConstants::TIER_LIB,
+                               {
+                                   {SDK_SIG("40 53 48 83 EC ? 48 8B 01 48 8B D9 44 0F B6 CA")},
+                               });
+
+    CSigScan GetPlayerPing("GetPlayerPing", CConstants::CLIENT_LIB,
+                           {
+                               {SDK_SIG("40 55 41 56 48 83 EC ? 4C 8B F2 83 F9 ? 0F 87 ? ? ? ? 48 63 C1 48 8D 15 ? ? ? ? 8B 8C 82 ? ? ? ? "
+                                        "48 03 CA FF E1 48 89 5C 24 ? 4C 8D 05 ? ? ? ? 48 89 74 24 ? 48 8D 54 24 ? 49 8B 76 ? 48 89 7C 24 "
+                                        "? 49 8B 7E ? 48 8B CF 48 8B 1F FF 53 ? 48 8B 44 24")},
+                           });
+
+    CSigScan PlayerPingRender("PlayerPingRender", CConstants::CLIENT_LIB,
+                              {
+                                  {SDK_SIG("40 53 56 41 57 48 83 EC ? 48 8B F1 E8 ? ? ? ? 48 83 BE")},
+                              });
+
+    CSigScan GlowServices("GlowServices", CConstants::CLIENT_LIB,
+                          {
+                              {SDK_SIG("48 89 6C 24 ? 57 41 56 41 57 48 81 EC ? ? ? ? 4C 8B F2")},
+                          });
+
+    CSigScan GetConvarValue("GetConvarValue", CConstants::CLIENT_LIB,
+                            {
+                                {SDK_SIG("E8 ? ? ? ? 48 8B C8 48 85 C0 75 ? 48 8B 05 ? ? ? ? 48 8B 48 ? 8B 03"),
+                                 [](CPointer& ptr) { ptr.Absolute(1, 0); }},
+                            });
 }  // namespace signatures

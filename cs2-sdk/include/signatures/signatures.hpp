@@ -12,7 +12,8 @@ namespace signatures {
     extern CSigScan GetFunctions;
     extern CSigScan GetFunctions2;
     extern CSigScan CSVCMsg_UserMessage_Setup;
-    extern CSigScan GetUserCmd;
+    extern CSigScan DiagnosticMessageResponse;
+    extern CSigScan CNetChannel;
     extern CSigScan CanFire;
     extern CSigScan GetEngineTrace;
     extern CSigScan TraceShape;
@@ -47,8 +48,8 @@ namespace signatures {
     extern CSigScan SetMaterialShaderType;
     extern CSigScan SetMaterialFunction;
     extern CSigScan DrawObject;
-    extern CSigScan CalculateCRC;
-    extern CSigScan SetCRC;
+    extern CSigScan WriteMessage;
+    extern CSigScan SetMessageData;
     extern CSigScan SerializePartialToArray;
     extern CSigScan BoneCount;
     extern CSigScan BoneFlags;
@@ -67,4 +68,14 @@ namespace signatures {
     extern CSigScan CAnimationGraphInstance;
     extern CSigScan UpdateCompositeMaterial;
     extern CSigScan TraceNoRay;
+    extern CSigScan UpdateAggregateSceneObject;
+    extern CSigScan CMsgQAngle;
+    extern CSigScan CMsgVector;
+    extern CSigScan GetClientInterp;
+    extern CSigScan Keyvalues3FreeAllocation;
+    extern CSigScan Keyvalues3SetType;
+    extern CSigScan GetPlayerPing;
+    extern CSigScan PlayerPingRender;
+    extern CSigScan GlowServices;
+    extern CSigScan GetConvarValue;
 }  // namespace signatures

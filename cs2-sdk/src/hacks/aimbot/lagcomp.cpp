@@ -7,6 +7,7 @@
 #include <interfaces/ccsgoinput.hpp>
 #include <interfaces/globalvars.hpp>
 #include <interfaces/cvar.hpp>
+#include <interfaces/engineclient.hpp>
 
 #include <bindings/playerpawn.hpp>
 #include <bindings/playercontroller.hpp>
@@ -101,7 +102,8 @@ TargetData_t CLagComp::Find() {
         if (!cachedEntity->IsValid() || cachedEntity->GetType() != CCachedBaseEntity::Type::PLAYER) continue;
 
         CCachedPlayer* cachedPlayer = dynamic_cast<CCachedPlayer*>(cachedEntity.get());
-        if (!cachedPlayer || !cachedPlayer->IsEnemyWithTeam(CGlobal::Get().player->GetTeam()) || cachedPlayer == CGlobal::Get().player) continue;
+        if (!cachedPlayer || !cachedPlayer->IsEnemyWithTeam(CGlobal::Get().player->GetTeam()) || cachedPlayer == CGlobal::Get().player)
+            continue;
 
         CCSPlayerController* controller = cachedPlayer->Get();
         if (!controller->m_bPawnIsAlive()) continue;
@@ -114,12 +116,14 @@ TargetData_t CLagComp::Find() {
         const float distance = eyePos.DistTo(CGlobal::Get().eyePos);
         if (CGlobal::Get().vdata && distance > CGlobal::Get().vdata->m_flRange()) continue;
 
-        GameTrace_t trace;
-        CEngineTrace::Get()->TraceShape(CGlobal::Get().eyePos, eyePos, CGlobal::Get().pawn, 0x1C1003, 4, &trace);
+        GameTrace_t trace = GameTrace_t();
+        TraceFilter_t filter = TraceFilter_t(0x1C3003, CGlobal::Get().pawn, nullptr, 4);
+
+        CEngineTrace::Get()->TraceShape(CGlobal::Get().eyePos, eyePos,
+                                        CGlobal::Get().pawn,
+                                        0x1C3003, 4,
+                                        &trace);
         if (trace.hitEntity != pawn /*&& trace.fraction < 0.9f*/) {
-
-            CLogger::Log("{} : {} {} {}", controller->m_sSanitizedPlayerName(), trace.fraction, (bool)trace.allSolid, (bool)trace.startSolid);
-
             cachedPlayer->Reset();
             continue;
         }
@@ -130,7 +134,7 @@ TargetData_t CLagComp::Find() {
         const Vector eyeDir = pawn->m_angEyeAngles().ToVector().Normalized();
 
         size_t i = 0;
-        if (!g_Vars.m_Backtrack) {
+        if ((!g_Vars.m_Backtrack || !g_Vars.m_AimAtRecords) && !cachedPlayer->records.empty()) {
             CRecord& record = cachedPlayer->records.back();
             if (!record.IsValid()) continue;
 
@@ -190,7 +194,9 @@ TargetData_t CLagComp::Find() {
 }
 
 void CLagComp::Update() {
-    const float lastValidSimtime = LastValidSimtime();
+    static auto sv_maxunlag = CCVar::Get()->GetCvarByName("sv_maxunlag");
+    const int maxTicks = TIME_TO_TICKS(sv_maxunlag->GetValue<float>());
+    const bool alive = CGlobal::Get().controller->m_bPawnIsAlive();
 
     const std::lock_guard<std::mutex> lock(CMatchCache::GetLock());
     for (const auto& it : CMatchCache::GetCachedEntities()) {
@@ -203,7 +209,7 @@ void CLagComp::Update() {
         }
 
         CCSPlayerController* controller = cachedPlayer->Get();
-        if (!controller->m_bPawnIsAlive()) {
+        if (!alive || !controller->m_bPawnIsAlive()) {
             cachedPlayer->records.clear();
             continue;
         }
@@ -214,43 +220,116 @@ void CLagComp::Update() {
             continue;
         }
 
-        for (CRecord& record : cachedPlayer->records)
-            if (record.valid && record.simulationTime < lastValidSimtime) record.valid = false;
-
         CRecord record(pawn);
-        if (record.valid) cachedPlayer->records.push_back(std::move(record));
+        if (!record.valid || !cachedPlayer->records.empty() && cachedPlayer->records.back().simulationTime == record.simulationTime)
+            continue;
 
-        // remove every record that are invalid
-        std::erase_if(cachedPlayer->records, [](const CRecord& record) { return !record.valid; });
+        cachedPlayer->records.push_back(std::move(record));
 
-        cachedPlayer->records.erase(std::unique(cachedPlayer->records.begin(), cachedPlayer->records.end(),
-                                                [](const CRecord& a, const CRecord& b) { return a.simulationTime == b.simulationTime && a.origin == b.origin; }),
-                                    cachedPlayer->records.end());
+        if (cachedPlayer->records.size() > maxTicks - 1)
+            cachedPlayer->records.erase(cachedPlayer->records.begin(), cachedPlayer->records.end() - (maxTicks - 1));
     }
 }
 
-float CLagComp::LastValidSimtime() {
-    static auto sv_maxunlag = CCVar::Get()->GetCvarByName("sv_maxunlag");
-    // more to do
-    float time = CGlobalVars::Get()->currentTime - sv_maxunlag->GetValue<float>();
-    int tick = static_cast<int>(time / (1.f / 64.f) + 0.5f);
-    float fraction = time / (1.f / 64.f) - tick;
+void CLagComp::PreModifyInput(CInputFrame* msg, CCSGOInputHistoryEntryPB* historyEntry) {
+    calculatedInterpolations = false;
+    if (!CEngineClient::Get()->IsInGame()) return;
+    if (!historyEntry) return;
+    if (!g_Vars.m_Backtrack) return;
+    if (!data.player || data.player->records.empty() || !data.bestRecord) return;
+    if (!CGlobal::Get().pawn) return;
+    CGameSceneNode* node = CGlobal::Get().pawn->m_pGameSceneNode();
+    if (!node) return;
 
-    Tickfrac_t tf{tick, 1.f};
-    InterpInfo_t cl, sv0, sv1;
-    if (!CGlobal::Get().pawn->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return time;
+    // const float cl_interp = CLagComp::Get().GetClientInterp();
+    Tickfrac_t tf;
+    tf.tick = TIME_TO_TICKS(CLagComp::Get().data.bestRecord->simulationTime);
+    tf.fraction = 0.f;
 
-    float newTime = cl.srcTick * (1.f / 64.f);
+    backup = *msg;
+    restore = true;
 
-    CLogger::Log("LastValidSimtime: {} -> {}", time, newTime);
-
-    return newTime;
+    msg->player = tf;
+    msg->render = tf;
 }
 
-std::tuple<float, float, float> CLagComp::GetOptimalSimtime() {
-    CRecord* first = nullptr;
-    CRecord* second = nullptr;
-    float fraction = 0.f;
+void CLagComp::PostModifyInput(CInputFrame* msg, CCSGOInputHistoryEntryPB* historyEntry) {
+    if (!CEngineClient::Get()->IsInGame()) return;
+    if (!historyEntry) return;
+    if (!g_Vars.m_Backtrack) return;
+    if (!data.player || data.player->records.empty() || !data.bestRecord) return;
+    if (!CGlobal::Get().pawn) return;
+    CGameSceneNode* node = CGlobal::Get().pawn->m_pGameSceneNode();
+    if (!node) return;
+    if (!historyEntry->cl_interp || !historyEntry->sv_interp0 || !historyEntry->sv_interp1) return;
+
+    if (restore) {
+        *msg = backup;
+        historyEntry->nRenderTickCount = backup.render.tick;
+        historyEntry->flRenderTickFraction = backup.render.fraction;
+        historyEntry->nPlayerTickCount = backup.player.tick;
+        historyEntry->flPlayerTickFraction = backup.player.fraction;
+        restore = false;
+    }
+}
+
+void CLagComp::Test() {
+    if (!CEngineClient::Get()->IsInGame()) return;
+    if (!g_Vars.m_Backtrack) return;
+    if (!data.player || data.player->records.empty() || !data.bestRecord) return;
+    if (!CGlobal::Get().pawn) return;
+    if (CGlobal::Get().cmd->csgoUserCmd.attack1HistoryIndex == -1) return;
+    CGameSceneNode* node = CGlobal::Get().pawn->m_pGameSceneNode();
+    if (!node) return;
+    // if (!historyEntry->cl_interp || !historyEntry->sv_interp0 || !historyEntry->sv_interp1) return;
+    const auto& frameHistory = CCSGOInput::Get()->frameHistory;
+    if (frameHistory.m_Size <= 0) return;
+
+    
+    CInputFrame* frameInput = frameHistory.AtPtr(frameHistory.m_Size - 1);
+    const Tickfrac_t playerBackup = frameInput->player;
+
+    frameInput->player.tick = TIME_TO_TICKS(CLagComp::Get().data.bestRecord->simulationTime);
+    frameInput->player.fraction = 0.f;
+
+    InterpInfo_t cl, sv0, sv1;
+    if (!node->CalculateInterpInfos(&cl, &sv0, &sv1, &frameInput->player)) {
+        CLogger::Log("Failed to calculate interpolation infos");
+        //return;
+    }
+
+    frameInput->player = playerBackup;
+
+    CCSGOInputHistoryEntryPB* entry = CGlobal::Get().cmd->GetInputHistoryEntry(CGlobal::Get().cmd->csgoUserCmd.attack1HistoryIndex);
+    if (!entry) {
+        CLogger::Log("Failed to get input history entry");
+        return;
+    }
+
+    // fix visual bugs and bad aim punch cache
+    entry->flRenderTickFraction = frameInput->render.fraction;
+    entry->nRenderTickCount = frameInput->render.tick;
+
+    // if (entry->pTargetViewCmd) entry->pTargetViewCmd->viewAngles;
+    //  if (entry->pViewCmd)
+
+    if (entry->cl_interp) {
+        entry->cl_interp->srcTick = cl.srcTick;
+        entry->cl_interp->fraction = cl.fraction;
+    }
+
+    if (entry->sv_interp0) {
+        entry->sv_interp0->srcTick = sv0.srcTick;
+        entry->sv_interp0->fraction = sv0.fraction;
+    }
+
+    if (entry->sv_interp1) {
+        entry->sv_interp1->srcTick = sv1.srcTick;
+        entry->sv_interp1->fraction = sv1.fraction;
+    }
+}
+
+std::tuple<float, float, float> CLagComp::GetSubtickSimtime() {
     std::tuple<float, float, float> result = {0.f, 0.f, -1.f};
 
     if (!data.player || !data.pawn || !data.bestRecord || !data.records || data.records->empty()) return result;
@@ -284,8 +363,8 @@ std::tuple<float, float, float> CLagComp::GetOptimalSimtime() {
                                                              prev->boneMatrix[parent].position);
     const float nextDist = CMath::Get().DistanceBetweenLines(CGlobal::Get().eyePos, end, next->boneMatrix[data.bestBone].position,
                                                              next->boneMatrix[parent].position);
-    first = prevDist < nextDist ? prev : data.bestRecord;
-    second = prevDist < nextDist ? data.bestRecord : next;
+    CRecord* first = prevDist < nextDist ? prev : data.bestRecord;
+    CRecord* second = prevDist < nextDist ? data.bestRecord : next;
     std::get<0>(result) = first->simulationTime;
     std::get<1>(result) = second->simulationTime;
     std::get<2>(result) = 0.f;
@@ -293,7 +372,12 @@ std::tuple<float, float, float> CLagComp::GetOptimalSimtime() {
     if (first == second) return result;
 
     const float bestFullDist = (prevDist < nextDist ? prevDist : nextDist) + bestDist;
-    fraction = prevDist < nextDist ? prevDist / bestFullDist : bestDist / bestFullDist;
+    const float fraction = prevDist < nextDist ? prevDist / bestFullDist : bestDist / bestFullDist;
     std::get<2>(result) = fraction;
     return result;
+}
+
+float CLagComp::GetClientInterp() {
+    const float cl_interp = signatures::GetClientInterp.GetPtrAs<float (*)()>()();
+    return cl_interp * TICK_INTERVAL;
 }

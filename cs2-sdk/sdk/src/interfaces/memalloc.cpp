@@ -1,18 +1,17 @@
 #include <pch.hpp>
 
 #include <interfaces/memalloc.hpp>
-#include <signatures/signatures.hpp>
-#include <memory/memory.hpp>
-#include <constants/constants.hpp>
 
-void* CMemAlloc::Alloc(size_t size) {
-    static auto fn = CMemory::GetProcAddress(CConstants::TIER_LIB, "MemAlloc_AllocFunc").Get<void* (*)(size_t)>();
-    if (!fn) return nullptr;
-    return fn(size);
+#include <virtual/virtual.hpp>
+
+void* IMemAlloc::Alloc(size_t size) {
+    return vt::CallMethod<void*>(this, 1, size);
 }
 
-void CMemAlloc::Free(void* ptr) {
-    static auto fn = CMemory::GetProcAddress(CConstants::TIER_LIB, "MemAlloc_FreeFunc").Get<void (*)(void*)>();
-    if (!fn) return;
-    fn(ptr);
+void IMemAlloc::Free(void* ptr) {
+    return vt::CallMethod<void>(this, 3, ptr);
+}
+
+void IMemAlloc::ReAlloc(void* ptr, size_t size) {
+    return vt::CallMethod<void>(this, 2, ptr, size);
 }

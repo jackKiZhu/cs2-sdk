@@ -10,11 +10,10 @@ CInputSystem* CInputSystem::Get() {
     return inst.Get<CInputSystem*>();
 }
 
-bool CInputSystem::IsRelativeMouseMode() {
+bool CInputSystem::IsMouseLocked() {
     // Offset in 'CInputSystem::SetRelativeMouseMode'.
     // Function is right above 'CInputSystem::DebugSpew'.
-
-    return CPointer(this).GetField<bool>(0x4F);
+    return *reinterpret_cast<bool*>(reinterpret_cast<std::uintptr_t>(this) + 0x52);
 }
 
 void* CInputSystem::GetSDLWindow() {
@@ -24,5 +23,5 @@ void* CInputSystem::GetSDLWindow() {
     // Offset in 'CInputSystem::SetCursorClip'.
     // xref: "SetCursorClip:  %s SDL_SetWindowGrab on 0x%p (%s) %s\n".
 
-    return CPointer(this).GetField<void*>(platform::Constant(0x26A8, 0x2708));
+    return CPointer(this).GetField<void*>(0x26A8);
 }

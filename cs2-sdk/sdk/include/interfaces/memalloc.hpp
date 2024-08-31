@@ -1,14 +1,18 @@
 #pragma once
 
-class CMemAlloc
+#include <memory/memory.hpp>
+#include <constants/constants.hpp>
+
+class IMemAlloc
 {
   public:
-    static CMemAlloc& Get() {
-       static CMemAlloc instance;
-       return instance;
+    static IMemAlloc* Get() {
+       static const auto instance = CMemory::GetProcAddress(CConstants::TIER_LIB, "g_pMemAlloc");
+        return *instance.Get<IMemAlloc**>();
     }
 
     void* Alloc(size_t size);
     void Free(void* ptr);
+    void ReAlloc(void* ptr, size_t size);
   
 };

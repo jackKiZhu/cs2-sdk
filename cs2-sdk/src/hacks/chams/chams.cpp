@@ -27,7 +27,7 @@
 #include <math/math.hpp>
 
 void CChams::Initialize() {
-    static constexpr char glowVisible[] = R"#(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}
+    static constexpr char bloom[] = R"#(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}
 			format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
 			{
                 shader = "solidcolor.vfx"
@@ -52,26 +52,69 @@ void CChams::Initialize() {
                 g_vSelfIllumTint = [ 10.000000, 10.000000, 10.000000, 10.000000 ]
 			} )#";
 
-    void* buffer = CMemAlloc::Get().Alloc(0x100 + sizeof(CKeyValues));
-    memset(buffer, 0, 0x100 + sizeof(CKeyValues));
-    CKeyValues* kv = std::bit_cast<CKeyValues*>(uintptr_t(buffer) + 0x100);
-    KVID_t id;
-    id.name = "generic";
-    id.pad[0] = 0x469806E97412167C;
-    id.pad[1] = 0xE73790B53EE6F2AF;
+    static constexpr char glow2[] = R"#(
+            <!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}
+            format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+            {
+                shader = "csgo_unlitgeneric.vfx"
+                g_tColor = resource:"materials/decals/snow01_color_tga_b05c3296.vtex"
+                g_tNormal = resource:"materials/ground/snow01_normal_psd_b04107b2.vtex"
+                g_tRoughness = resource:"materials/default/default_normal_tga_b3f4ec4c.vtex"
+                g_tMetalness = resource:"characters/models/shared/materials/animset_t_vmat_g_tmetalness_5be93c08.vtex"
+                g_tAmbientOcclusion = resource:"materials/models/particle/fleks_snow_01_vmat_g_tambientocclusion_7446266e.vtex"
+                g_vTexCoordScrollSpeed = [0.100000, 0.000000, 0.000000, 0.000000]
+                TextureRoughness = [0.01961, 0.101961, 0.101961, 0.000000]
+                g_flPearlescentScale = 1
+                g_flMetalness = 10.0
+                F_BLEND_MODE = 1
+                F_TRANSLUCENT = 1
+                F_IGNOREZ = 0
+                F_DISABLE_Z_WRITE = 0
+                F_DISABLE_Z_BUFFERING = 0
+                F_RENDER_BACKFACES = 1
+                g_vColorTint = [1.0, 1.0, 1.0, 0.0]
+            }     
+)#";
 
-    if (!kv->Load(glowVisible, &id, nullptr)) return;  // crash
+    static constexpr char glow[] = R"#(
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}
+            format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+            {
+                shader = "csgo_effects.vfx"
+                g_tColor = resource:"materials/dev/primary_white_color_tga_21186c76.vtex"
+                g_tNormal = resource:"materials/default/default_normal_tga_7652cb.vtex"
+                g_tMask1 = resource:"materials/default/default_mask_tga_344101f8.vtex"
+                g_tMask2 = resource:"materials/default/default_mask_tga_344101f8.vtex"
+                g_tMask3 = resource:"materials/default/default_mask_tga_344101f8.vtex"
+                g_flOpacityScale = 0.45
+                g_flFresnelExponent = 0.75
+                g_flFresnelFalloff = 1
+                g_flFresnelMax = 0.0
+                g_flFresnelMin = 1
+                F_ADDITIVE_BLEND = 1
+                F_BLEND_MODE = 1
+                F_TRANSLUCENT = 1
+                F_IGNOREZ = 0
+                F_DISABLE_Z_WRITE = 0
+                F_DISABLE_Z_BUFFERING = 0
+                F_RENDER_BACKFACES = 1
+                g_vColorTint = [1.0, 1.0, 1.0, 0.0]
+            }
+)#";
 
+    CKeyValues3 bloomKV(bloom);
+    CKeyValues3 glow2KV(glow2);
+    CKeyValues3 glowKV(glow);
     CStrongHandle<CMaterial2> mat;
-    CMaterialSystem::Get()->CreateMaterial(&mat, "glow_vis", kv, 0, 1);
-    materials[MAT_FLAT] = mat.Get();
 
-    CMemAlloc::Get().Free(buffer);
-    // CreateMaterial("primary_white", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true, false);
-    // materials[MAT_FLAT_Z] = CreateMaterial("primary_white_z", "materials/dev/primary_white.vmat", "csgo_unlitgeneric.vfx", true, true,
-    // true); materials[MAT_REGULAR] = mat.Get(); // CreateMaterial("regular_white", "materials/dev/primary_white.vmat",
-    // "csgo_litgeneric.vfx", true, true, false); materials[MAT_REGULAR_Z] = CreateMaterial("regular_white_z",
-    // "materials/dev/primary_white.vmat", "csgo_litgeneric.vfx", true, true, true);
+    CMaterialSystem::Get()->CreateMaterial(&mat, "bloom", &bloomKV, 0, 1);
+    materials[MAT_BLOOM] = mat.Get();
+
+    CMaterialSystem::Get()->CreateMaterial(&mat, "glow2", &glow2KV, 0, 1);
+    materials[MAT_GLOW2] = mat.Get();
+
+    CMaterialSystem::Get()->CreateMaterial(&mat, "glow", &glowKV, 0, 1);
+    materials[MAT_GLOW] = mat.Get();
 }
 
 void CChams::Shutdown() {}
@@ -102,90 +145,40 @@ bool CChams::OnDrawObject(ISceneObjectDesc* const desc, IRenderContext* ctx, CMe
     C_CSPlayerPawn* pawn = CGameResourceService::Get()->GetGameEntitySystem()->GetBaseEntity<C_CSPlayerPawn>(hOwner.GetEntryIndex());
     if (!pawn || !pawn->IsPlayerPawn() || pawn->m_iTeamNum() == CGlobal::Get().pawn->m_iTeamNum()) return false;
 
-    if (renderList) CLogger::Log("DrawArray: {:#x}", (uintptr_t)renderList->m_pObject);
+    // if (renderList) CLogger::Log("DrawArray: {:#x}", (uintptr_t)renderList->m_pObject);
 
     // DrawBacktrack(pawn, renderList->m_pTransform);
     [&]() {
         return;
-
+        const CSceneAnimatableObject* obj = renderList->m_pObject;
         const TargetData_t& lagcomp = CLagComp::Get().data;
         if (!lagcomp.player || pawn != lagcomp.pawn) return;
         if (lagcomp.player->records.empty()) return;
         const auto& boneMatrix = lagcomp.records->front().boneMatrix;
-        if (boneMatrix.empty() || boneMatrix.size() <= BONE_ROOT_MOTION) return;
-        const BoneData_t& data = boneMatrix.at(BONE_ROOT_MOTION);
-        const matrix3x4_t backup = *renderList->m_pTransform;
+        if (boneMatrix.size() != obj->m_worldSpaceRenderBones.m_Size) return;
+        matrix3x4a_t* backup = std::bit_cast<matrix3x4a_t*>(_malloca(obj->m_worldSpaceRenderBones.m_Size * sizeof(matrix3x4a_t)));
+        if (!backup) return;
+        memcpy(backup, obj->m_worldSpaceRenderBones.m_Data, obj->m_worldSpaceRenderBones.m_Size * sizeof(matrix3x4a_t));
 
-        renderList->m_pTransform->SetAxis(3, data.position);
+        // matrix4x2 -> matrix3x4
+        for (size_t i = 0; i < boneMatrix.size(); ++i) {
+            const BoneData_t& data = boneMatrix.at(i);
+            obj->m_worldSpaceRenderBones.m_Data[i] = data.ToMatrix();
+        }
+
         OverrideMaterial(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material);
 
-        *renderList->m_pTransform = backup;
+        memcpy(obj->m_worldSpaceRenderBones.m_Data, backup, obj->m_worldSpaceRenderBones.m_Size * sizeof(matrix3x4a_t));
+        _freea(backup);
     }();
 
     return OverrideMaterial(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material);
 }
 
-CStrongHandle<CMaterial2> CChams::CreateMaterial(const char* name) {
-    static constexpr char vmtBuffer[] =
-        R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
-	{
-		Shader = "csgo_unlitgeneric.vfx"
-		F_DISABLE_Z_BUFFERING = 0
-		g_flBumpStrength = 1
-		g_vColorTint = [1.000000, 1.000000, 1.000000, 0.000000]
-		g_vGlossinessRange = [0.000000, 1.000000, 0.000000, 0.000000]
-		g_vNormalTexCoordScale = [1.000000, 1.000000, 0.000000, 0.000000]
-		g_vTexCoordOffset = [0.000000, 0.000000, 0.000000, 0.000000]
-		g_vTexCoordScale = [1.000000, 1.000000, 0.000000, 0.000000]
-		g_tColor = resource:"materials/dev/primary_white_color_tga_f7b257f6.vtex"
-		g_tNormal = resource:"materials/default/default_normal_tga_7652cb.vtex"
-		g_tRoughness = resource:"materials/default/default_normal_tga_b3f4ec4c.vtex"
-	})";
-
-    CKeyValues* kv = std::bit_cast<CKeyValues*>(CMemAlloc::Get().Alloc(0x100 + sizeof(CKeyValues)));
-    KVID_t id;
-    id.name = "generic";
-    id.pad[0] = 0x469806E97412167C;
-    id.pad[1] = 0xE73790B53EE6F2AF;
-
-    if (!kv->Load(vmtBuffer, &id, nullptr)) return nullptr;
-
-    CStrongHandle<CMaterial2> mat;
-    CMaterialSystem::Get()->CreateMaterial(&mat, name, kv, 0, 1);
-    CMemAlloc::Get().Free(kv);
-    return mat;
-}
-
-CMaterial2* CChams::CreateMaterial(const char* name, const char* materialVMAT, const char* shaderType, bool blendMode, bool translucent,
-                                   bool disableZ) {
-    void* buffer = CMemAlloc::Get().Alloc(0x200);
-    CMeshDrawPrimitive_t* data = (CMeshDrawPrimitive_t*)(std::bit_cast<byte*>(buffer) + 0x50);
-    CMaterial2** prototype;
-
-    CMaterialSystem::Get()->FindOrCreateFromResource(&prototype, materialVMAT);
-    if (prototype == nullptr) {
-        CMemAlloc::Get().Free(buffer);
-        return nullptr;
-    }
-
-    CMaterialSystem::Get()->SetCreateDataByMaterial(&prototype, data);
-    data->SetShaderType(shaderType);
-    data->SetMaterialFunction("F_DISABLE_Z_BUFFERING", disableZ ? 1 : 0);
-    data->SetMaterialFunction("F_BLEND_MODE", blendMode ? 1 : 0);
-    data->SetMaterialFunction("F_TRANSLUCENT", translucent ? 1 : 0);
-
-    CMaterial2** mat;
-    CMaterialSystem::Get()->CreateMaterial(&mat, name, data, 0, 1);
-    void* ptrToFree = (void*)((uintptr_t)data - 0x50);
-    CMemAlloc::Get().Free(buffer);
-    return *mat;
-}
-
 bool CChams::OverrideMaterial(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw,
                               const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
                               const CMaterial2* material) {
-    CMaterial2* mat = materials[MAT_FLAT];
-    renderList->m_pMaterial = mat;
+    renderList->m_pMaterial = materials[g_Vars.m_ChamsMat];
     renderList->m_rgba = g_Vars.m_ChamsColor;
     CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material);
     return true;

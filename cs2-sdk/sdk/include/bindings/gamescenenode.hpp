@@ -4,18 +4,8 @@
 
 class CSkeletonInstance;
 
-struct InterpInfo_t
-{
-    int srcTick;
-    int dstTick;
-    float fraction;
-};
-
-struct Tickfrac_t
-{
-    int tick;
-    float fraction;
-};
+struct InterpInfo_t;
+struct Tickfrac_t;
 
 class CGameSceneNode {
    public:

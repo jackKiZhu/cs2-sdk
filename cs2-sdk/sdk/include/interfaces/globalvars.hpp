@@ -22,18 +22,8 @@ class CGlobalVars {
     PAD(0x158);          
     char* currentMap;
     char* currentMapName; 
-
-    auto GetCurrentTickRounded() { 
-        float ratio = currentTickRatio;
-        int tick = currentTick;
-        if (ratio >= 1.f - RATIO_THRESHOLD) 
-            return std::make_pair(tick + 1, 0.f);
-        else if (ratio <= RATIO_THRESHOLD) 
-			return std::make_pair(tick, 0.f);
-		return std::make_pair(tick, ratio);
-    }
 };
 
-#define TICK_INTERVAL 1.f / 64.f
+#define TICK_INTERVAL (1.f / 64.f)
 #define TICKS_TO_TIME(ticks) (TICK_INTERVAL * static_cast<float>(ticks))
 #define TIME_TO_TICKS(time) static_cast<int>(0.5f + static_cast<float>(time) / TICK_INTERVAL)

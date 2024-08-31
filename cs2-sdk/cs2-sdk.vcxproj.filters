@@ -94,7 +94,6 @@
     <ClCompile Include="sdk\src\interfaces\memalloc.cpp" />
     <ClCompile Include="src\hacks\visuals\visuals.cpp" />
     <ClCompile Include="sdk\src\types\keyvalues.cpp" />
-    <ClCompile Include="sdk\src\types\utlbuffer.cpp" />
     <ClCompile Include="src\hacks\aimbot\lagcomp.cpp" />
     <ClCompile Include="sdk\src\types\model.cpp" />
     <ClCompile Include="sdk\src\bindings\collisionproperty.cpp" />
@@ -102,6 +101,9 @@
     <ClCompile Include="include\hash\murmurhash2.cpp" />
     <ClCompile Include="src\math\types\vector.cpp" />
     <ClCompile Include="src\math\types\quaternion.cpp" />
+    <ClCompile Include="src\hooks\vmtguard.cpp" />
+    <ClCompile Include="src\hooks\anticheat\symbols.cpp" />
+    <ClCompile Include="sdk\src\types\utlbuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.hpp" />
@@ -231,5 +233,13 @@
     <ClInclude Include="sdk\include\interfaces\cnetworkgameclient.hpp" />
     <ClInclude Include="sdk\include\types\dynamiclight.hpp" />
     <ClInclude Include="include\hash\murmurhash2.hpp" />
+    <ClInclude Include="include\hooks\anticheat\symbols.hpp" />
+    <ClInclude Include="sdk\include\types\utllinkedlist.hpp" />
+    <ClInclude Include="sdk\include\types\utlfixedmemory.hpp" />
+    <ClInclude Include="sdk\include\types\convar.hpp" />
+    <ClInclude Include="sdk\include\types\strtools.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="include\hooks\anticheat\minwin.asm" />
   </ItemGroup>
 </Project>

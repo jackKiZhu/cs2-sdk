@@ -7,6 +7,8 @@ class CModule {
 
     auto GetHandle() const { return m_Handle; }
     auto GetName() const { return m_Name.c_str(); }
+    auto GetBaseAddress() const { return m_Begin; }
+    auto GetSize() const { return m_Size; }
 
     // Returns false if module not loaded.
     bool Retrieve();

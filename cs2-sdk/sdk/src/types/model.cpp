@@ -32,3 +32,11 @@ uint32_t CModel::BoneCount() {
   static auto fn = signatures::BoneCount.GetPtrAs<uint32_t (*)(void*)>();
   return fn ? fn(this) : 0;
 }
+
+matrix3x4_t BoneData_t::ToMatrix() const { 
+    CTransform t;
+    t.m_Position = position;
+    t.m_Orientation = rotation;
+    // TODO: we loose scale 
+    return t.ToMatrix();
+}

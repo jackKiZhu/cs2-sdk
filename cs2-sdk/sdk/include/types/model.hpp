@@ -60,6 +60,8 @@ struct BoneData_t {
     Vector position;
     float scale;
     Quaternion rotation;
+
+    matrix3x4_t ToMatrix() const;
 };
 
 class CModel {

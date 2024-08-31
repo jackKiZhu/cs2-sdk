@@ -99,14 +99,14 @@ void CCachedPlayer::DrawESP() {
         }
     }
 
-    if (g_Vars.m_Skeleton) {
+    if (g_Vars.m_Skeleton && pawn != CGlobal::Get().pawn) {
         if (CGameSceneNode* gameSceneNode = pawn->m_pGameSceneNode(); gameSceneNode) {
             if (CSkeletonInstance* skeleton = gameSceneNode->GetSkeleton(); skeleton) {
                 BoneData_t* bones = skeleton->m_modelState().bones;
                 if (CModel* model = skeleton->m_modelState().m_hModel().Get(); model && bones) {
                     if (const uint32_t boneCount = model->BoneCount(); boneCount > 0) {
                         for (uint32_t bone = 0; bone < boneCount; ++bone) {
-                            //CLogger::Log("{} - {}", bone, model->GetBoneName(bone));
+                            // CLogger::Log("{} - {}", bone, model->GetBoneName(bone));
 
                             if (!(model->GetBoneFlags(bone) & FLAG_HITBOX)) continue;
 
@@ -127,11 +127,25 @@ void CCachedPlayer::DrawESP() {
         }
     }
 
-    if (g_Vars.m_Backtrack && g_Vars.m_PlayerBoxes) {
-        for (const auto& record : records) {
-            ImVec2 screenPos;
-            if (CMath::Get().WorldToScreen(record.eyePos, screenPos)) {
-                drawList->AddCircleFilled(screenPos, 2.f, IM_COL32(255, 255, 255, 255));
+    if (g_Vars.m_Backtrack && g_Vars.m_BacktrackSkeleton) {
+        if (!records.empty() && pawn->m_pGameSceneNode() && pawn->m_pGameSceneNode()->GetSkeleton()) {
+            if (CModel* model = pawn->m_pGameSceneNode()->GetSkeleton()->m_modelState().m_hModel().Get(); model) {
+                const bool isTarget = CLagComp::Get().data.player == this;
+                const auto& bones = isTarget && CLagComp::Get().data.bestRecord ? CLagComp::Get().data.bestRecord->boneMatrix : records.front().boneMatrix;
+                if (const uint32_t boneCount = model->BoneCount(); boneCount > 0) {
+                    for (uint32_t bone = 0; bone < boneCount; ++bone) {
+                        if (!(model->GetBoneFlags(bone) & FLAG_HITBOX)) continue;
+
+                        const uint32_t parent = model->GetBoneParent(bone);
+                        if (parent == -1) continue;
+
+                        ImVec2 boneScreenPos, parentScreenPos;
+                        if (CMath::Get().WorldToScreen(bones[bone].position, boneScreenPos) &&
+                            CMath::Get().WorldToScreen(bones[parent].position, parentScreenPos)) {
+                            drawList->AddLine(boneScreenPos, parentScreenPos, isTarget ? IM_COL32(0, 125, 255, 255) : IM_COL32(255, 255, 255, 120));
+                        }
+                    }
+                }
             }
         }
     }

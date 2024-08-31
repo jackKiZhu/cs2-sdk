@@ -38,6 +38,8 @@
 
 #include <types/utlbuffer.hpp>
 
+#include <interfaces/cvar.hpp>
+
 #include <vars/vars.hpp>
 
 static CHook g_MouseInputEnabled;
@@ -81,46 +83,10 @@ static void hkGetMatricesForView(void* rcx, CViewSetup* view, VMatrix* pWorldToV
     CESP::Get().Update();
 }
 
-static bool RecomputeMoveCRC(CCSGOUserCmdPB* cmdPB) {
-    const char* prevChecksum = cmdPB->baseCmd->moveCRC;
-
-    static auto SerializePartialToArray = signatures::SerializePartialToArray.GetPtrAs<bool (*)(void*, CUtlBuffer&, int)>();
-    static auto CalculateCRC = signatures::CalculateCRC.GetPtrAs<void (*)(void*, const void*, size_t)>();
-    static auto SetCRC = signatures::SetCRC.GetPtrAs<void (*)(void*, void*, void*)>();
-
-    CUtlBuffer buffer = CUtlBuffer(0, 0, 0);
-    const int CRCSize = cmdPB->baseCmd->Checksum();
-    buffer.EnsureCapacity(CRCSize + 1);
-    if (!SerializePartialToArray(cmdPB->baseCmd, buffer, CRCSize)) {
-        CLogger::Log("Failed to serialize partial to array");
-        return false;
-    }
-
-    uint64_t crc[4];
-    memset(crc, 0, sizeof(crc));
-    CalculateCRC(crc, &buffer, CRCSize);
-
-    uint64_t* v95 = (uint64_t*)(*(uint64_t*)&cmdPB->baseCmd->hasBits & 0xFFFFFFFFFFFFFFFC);
-    if (cmdPB->baseCmd->hasBits & 1) 
-      v95 = (uint64_t*)*v95;
-
-    SetCRC(cmdPB->baseCmd, crc, v95);
-
-    if (crc[3] > 0x10 && crc[0]) {
-        CMemAlloc::Get().Free((void*)crc[0]);
-    }
-
-    CLogger::Log("checksum: {} -> {}\n", (uintptr_t)prevChecksum, (uintptr_t)cmdPB->baseCmd->moveCRC);
-
-
-
-    // CMemAlloc::Get().Free();
-
-    return true;
-}
-
 static CHook g_CreateMove;
 static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
+    CLagComp::Get().Reset();
+
     if (!CEngineClient::Get()->IsInGame()) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
     if (rcx->moves.m_Size == 0) return g_CreateMove.CallOriginal<void>(rcx, subtick, active);
     CUserCmd* cmd = rcx->GetUserCmd();
@@ -133,40 +99,49 @@ static void hkCreateMove(CCSGOInput* rcx, int subtick, char active) {
     auto targetData = CLagComp::Get().Find();
     CAimbot::Get().Run(targetData);
 
-#if 0
-    static bool shouldInputJump = false;
-    if (!grounded) {
-        shouldInputJump = CInputHandler::Get().IsReleased(IN_JUMP) || shouldInputJump;
-    } else {
-        if (CInputHandler::Get().IsHeld(IN_JUMP)) {
-            CInputHandler::Get().Press(IN_JUMP, 0.9f);
-            CLogger::Log("Inputting jump at subtick {}", move->subtickCount - 1);
-            shouldInputJump = false;
-        }
-    }
-#endif
+#if WORKING
+    CMoveData* move = rcx->GetMoveData(0);
+    if (move) {
+        move->Release(IN_ATTACK, 0);
 
-    // static auto GetBool = signatures::GetBool.GetPtrAs<bool* (*)(uintptr_t, int)>();
-    // if (GetBool) {
-    //     uintptr_t grenadeCvar = signatures::GrenadePtr.GetPtr().Get();
-    //     bool* grenadePreview = GetBool(grenadeCvar, -1);
-    //     if ( grenadePreview )
-    //     {
-    //         *grenadePreview = true;
-    //         CLogger::Log("Grenade preview enabled");
-    //     }
-    // }
+        if (CCSGOInput::IsButtonPressed(&move->buttonsHeld, IN_DUCK) && (rcx->sequenceNumber % 3) == 0) {
+            move->buttonsPressed |= IN_JUMP;
+            move->buttonsReleased |= IN_JUMP;
+            move->buttonsHeld &= ~IN_JUMP;
+            CLogger::Log("{}: Jump", rcx->sequenceNumber);
+        }
+
+        // move->buttonsHeld &= ~IN_JUMP;
+        // move->buttonsPressed &= ~IN_JUMP;
+        // move->buttonsReleased &= ~IN_JUMP;
+    }
+#else
+
+    // rcx->Scroll(IN_JUMP);
+    // rcx->Release(IN_ATTACK);
+
+
+
+#endif
 
     // CLogger::Log("Pre checksum: {}", (uintptr_t)cmd->csgoUserCmd.baseCmd->moveCRC);
 
     g_CreateMove.CallOriginal<bool>(rcx, subtick, active);
 
-    // cmd->csgoUserCmd.baseCmd->buttons->scroll |= IN_JUMP;
-    // cmd->GetBaseCmdButtons();
+    // CLagComp::Get().Test();
 
-    const CInButtonState originalButtons = cmd->buttons;
-
-    // RecomputeMoveCRC(&cmd->csgoUserCmd);
+    // const CInButtonState oldButtons = cmd->buttons;
+// modify
+#if 0
+    cmd->buttons.scroll |= IN_JUMP;
+    
+    if (!cmd->csgoUserCmd.baseCmd->ComputeCRC()) {
+        cmd->buttons = oldButtons;
+    } else {
+        cmd->GetBaseCmdButtons();
+        // maybe set ccsgoinput buttons
+    }
+#endif
 
     // after this, all the subticks have been processed into the protobufs messages
     // it is better to change the message _before_ calling original but for that you need to meddle with CMoveData and i can't bother.
@@ -231,26 +206,33 @@ static void* hkSetModel(void* rcx, const char* model) {
 static CHook g_IsLoadoutAllowed;
 static bool hkIsLoadoutAllowed() { return true; }
 
-static void hkDrawArray(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw, const ISceneView* view,
-                         ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats, const CMaterial2* material) {
+static void hkDrawArray(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw,
+                        const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
+                        const CMaterial2* material) {
     if (!CEngineClient::Get()->IsInGame())
-        return CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view,
-                                                                 layer, perFrameStats, material);
+        return CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats,
+                                                                material);
 
     if (!CChams::Get().OnDrawObject(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats, material))
-        return CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view,
-                                                                 layer, perFrameStats, material);
-
-    //CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats,
-    //                                                  material);
+        return CGameHooks::Get().g_DrawArray.CallOriginal<void>(desc, ctx, renderList, numRenderablesToDraw, view, layer, perFrameStats,
+                                                                material);
 }
 
 static CHook g_InputParser;
-static void hkInputParser(void* inputMsg, CCSGOInputHistoryEntryPB* historyEntry, bool a3, void* a4, void* a5, C_CSPlayerPawn* pawn) {
-    g_InputParser.CallOriginal<void>(inputMsg, historyEntry, a3, a4, a5, pawn);
+static void hkInputParser(CInputFrame* inputMsg, CCSGOInputHistoryEntryPB* historyEntry, bool attackOnly, void* a4, void* a5,
+                          C_CSPlayerPawn* pawn) {
+    return g_InputParser.CallOriginal<void>(inputMsg, historyEntry, attackOnly, a4, a5, pawn);
 
     if (pawn == CGlobal::Get().pawn) {
-        CAimbot::Get().Test(historyEntry);
+        CLagComp::Get().PreModifyInput(inputMsg, historyEntry);
+    }
+
+    g_InputParser.CallOriginal<void>(inputMsg, historyEntry, attackOnly, a4, a5, pawn);
+
+    // restore player tick here
+
+    if (pawn == CGlobal::Get().pawn) {
+        CLagComp::Get().PostModifyInput(inputMsg, historyEntry);
     }
 }
 
@@ -260,10 +242,96 @@ static void* hkCAnimationGraphInstance(void* rcx, void* rdx, void* data) {
     if (const char* model = *(const char**)((uintptr_t)data + 0x8); model && strstr(model, "weapons/models/knife")) {
         void* m_animGraphNetworkedVars = *(void**)((uintptr_t)rdx + 0x30);
         m_animGraphNetworkedVars = nullptr;
-        CLogger::Log("CAnimationGraphInstance: {}", model);
+        // CLogger::Log("CAnimationGraphInstance: {}", model);
     }
 
     return g_CAnimationGraphInstance.CallOriginal<void*>(rcx, rdx, data);
+}
+
+static CHook g_UpdateAggregateSceneObject;
+static void* hkUpdateAggregateSceneObject(void* rcx, void* rdx) {
+    void* result = g_UpdateAggregateSceneObject.CallOriginal<void*>(rcx, rdx);
+
+    // quite literally is only going to be accessed here
+    class CAggregateSceneObjectData {
+       public:
+        PAD(0x38);
+        Color_t color;
+        PAD(0x8);
+    };
+
+    class CAggregateSceneObject {
+       public:
+        PAD(0x120);
+        int count;
+        PAD(0x4);
+        CAggregateSceneObjectData* data;
+    };
+
+    CAggregateSceneObject* obj = (CAggregateSceneObject*)rcx;
+    for (int i = 0; i < obj->count; ++i) {
+        CAggregateSceneObjectData& data = obj->data[i];
+        data.color = g_Vars.m_WorldColor;
+    }
+
+    return result;
+}
+
+static CHook g_PlayerPingRender;
+static void hkPlayerPingRender(void* a1, char a2) {
+    g_PlayerPingRender.CallOriginal<void>(a1, a2);
+
+    CLogger::Log("PlayerPingRender: {:#x} {} called from {:#x}", uintptr_t(a1), a2, uintptr_t(_ReturnAddress()));
+}
+
+static CHook g_GlowServices;
+static bool hkGlowServices(void* e, void* local, float* clr, float* spike, float* silent, float* endTime1, float* endTime2, bool* glow) {
+    bool result = g_GlowServices.CallOriginal<bool>(e, local, clr, spike, silent, endTime1, endTime2, glow);
+    if (!CEngineClient::Get()->IsInGame() || !CGlobal::Get().pawn) return result;
+
+    if (g_Vars.m_EnableIfSpectating && CGlobal::Get().pawn->IsObserverPawn()) {
+        *glow = true;
+        return true;
+    }
+
+    return result;
+}
+
+static CHook g_SampleInput;
+static void hkSampleInput(CCSGOInput* input, int subtick, float angleSpeed, char a4) {
+    g_SampleInput.CallOriginal<bool>(input, subtick, angleSpeed, a4);
+
+    CMoveData* move = input->GetMoveData(0);
+    // if (move && false) {
+    //     move->buttonsHeld &= ~IN_ATTACK;
+    //     move->buttonsPressed &= ~IN_ATTACK;
+    //     move->buttonsReleased &= ~IN_ATTACK;
+
+    //    if (CCSGOInput::IsButtonPressed(&move->buttonsHeld, IN_JUMP) /*&& !(move->prevButtonsHeld & IN_JUMP)*/ &&
+    //        (input->sequenceNumber % 3) == 0) {
+    //        move->buttonsPressed |= IN_JUMP;
+
+    //        move->buttonsReleased |= IN_JUMP;
+    //        move->buttonsHeld &= ~IN_JUMP;
+    //        CLogger::Log("{}: Jump", input->sequenceNumber);
+    //    }
+
+    //    move->buttonsHeld &= ~IN_JUMP;
+    //    move->buttonsPressed &= ~IN_JUMP;
+    //    move->buttonsReleased &= ~IN_JUMP;
+    //}
+}
+
+static CHook g_GetConvarValue;
+static void* hkGetConvarValue(void* rcx, int a2) {
+    static bool t = true;
+    ConVar* cvar = *(ConVar**)(uintptr_t(rcx) + 0x8);
+    uint32_t hash = FNV1A::Hash(cvar->m_Name);
+    // if (hash == FNV1A::HashConst("cl_showusercmd")) {
+    //     return &t;
+    // }
+
+    return g_GetConvarValue.CallOriginal<void*>(rcx, a2);
 }
 
 void CGameHooks::Initialize() {
@@ -271,13 +339,13 @@ void CGameHooks::Initialize() {
 
     CMatchCache::Get().Initialize();
 
-    g_MouseInputEnabled.VHook(CCSGOInput::Get(), platform::Constant(13, 14), SDK_HOOK(hkMouseInputEnabled));
-    g_CreateMove.VHook(CCSGOInput::Get(), platform::Constant(5, 5), SDK_HOOK(hkCreateMove));
-    // g_CreateMove2.VHook(CCSGOInput::Get(), platform::Constant(15, 15), SDK_HOOK(hkCreateMove2));
+    g_MouseInputEnabled.VHook(CCSGOInput::Get(), platform::Constant(16, 16), SDK_HOOK(hkMouseInputEnabled));
+    // g_SampleInput.VHook(CCSGOInput::Get(), 4, SDK_HOOK(hkSampleInput));
+    g_CreateMove.VHook(CCSGOInput::Get(), 5, SDK_HOOK(hkCreateMove));
     g_OnAddEntity.VHook(CGameEntitySystem::Get(), platform::Constant(14, 15), SDK_HOOK(hkOnAddEntity));
     g_OnRemoveEntity.VHook(CGameEntitySystem::Get(), platform::Constant(15, 16), SDK_HOOK(hkOnRemoveEntity));
     g_FrameStageNotify.VHook(CSource2Client::Get(), platform::Constant(36, 37), SDK_HOOK(hkFrameStageNotify));
-    g_EquipItemInLoadout.VHook(CCSInventoryManager::Get(), platform::Constant(52, 53), SDK_HOOK(hkEquipItemInLoadout));
+    g_EquipItemInLoadout.VHook(CCSInventoryManager::Get(), platform::Constant(56, 56), SDK_HOOK(hkEquipItemInLoadout));
     g_GetMatricesForView.Hook(signatures::GetMatricesForView.GetPtrAs<void*>(), SDK_HOOK(hkGetMatricesForView));
     g_FireEventClientSide.Hook(signatures::FireEventClientSide.GetPtrAs<void*>(), SDK_HOOK(hkFireEventClientSide));
     g_SetModel.Hook(signatures::SetModel.GetPtrAs<void*>(), SDK_HOOK(hkSetModel));
@@ -285,10 +353,13 @@ void CGameHooks::Initialize() {
     g_DrawArray.Hook(signatures::DrawObject.GetPtrAs<void*>(), SDK_HOOK(hkDrawArray));
     g_InputParser.Hook(signatures::InputParser.GetPtrAs<void*>(), SDK_HOOK(hkInputParser));
     g_CAnimationGraphInstance.Hook(signatures::CAnimationGraphInstance.GetPtrAs<void*>(), SDK_HOOK(hkCAnimationGraphInstance));
+    g_UpdateAggregateSceneObject.Hook(signatures::UpdateAggregateSceneObject.GetPtrAs<void*>(), SDK_HOOK(hkUpdateAggregateSceneObject));
+    g_GlowServices.Hook(signatures::GlowServices.GetPtrAs<void*>(), SDK_HOOK(hkGlowServices));
+    g_GetConvarValue.Hook(signatures::GetConvarValue.GetPtrAs<void*>(), SDK_HOOK(hkGetConvarValue));
+    //  g_PlayerPingRender.Hook(signatures::PlayerPingRender.GetPtrAs<void*>(), SDK_HOOK(hkPlayerPingRender));
 }
 
-class CTakeDamageInfo
-{
+class CTakeDamageInfo {
    public:
     void* vftable;
     Vector m_vecDamageForce;

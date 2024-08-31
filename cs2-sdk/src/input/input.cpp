@@ -51,8 +51,8 @@ void CInputHandler::Poll(CCSGOInput* input) {
                 releaseInput.held = false;
                 releaseInput.when = subInput.when;
                 move->buttonsHeld &= ~subInput.button;
-                move->buttonsChanged |= subInput.button;
-                move->buttonsScroll |= subInput.button;
+                move->buttonsPressed |= subInput.button;
+                move->buttonsReleased |= subInput.button;
             } 
         }
     }

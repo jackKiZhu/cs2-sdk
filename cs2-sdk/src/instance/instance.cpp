@@ -10,6 +10,8 @@
 
 #include <constants/constants.hpp>
 
+#include <interfaces/cvar.hpp>
+
 #ifdef _WIN32
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #endif
@@ -24,6 +26,7 @@ void CInstance::Initialize() {
     auto start = std::chrono::high_resolution_clock::now();
     CMemory::Get().Initialize();
     CChams::Get().Initialize();
+    //CCVar::Get()->UnlockHiddenConvars();
     CHooks::Get().Initialize();
     auto end = std::chrono::high_resolution_clock::now();
 

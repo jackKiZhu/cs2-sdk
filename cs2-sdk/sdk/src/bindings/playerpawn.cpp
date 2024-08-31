@@ -31,6 +31,15 @@ bool C_CSPlayerPawnBase::CanAttack(const float serverTime) {
     return true;
 }
 
+uint32_t C_CSPlayerPawn::GetOwnerHandleIndex() {
+    uint32_t result = -1;
+
+    if (m_pCollision() && !(m_pCollision()->m_usSolidFlags() & 0x4)) 
+      result = this->m_hOwnerEntity().GetEntryIndex();
+
+    return result;
+}
+
 Vector* C_CSPlayerPawn::GetLastAimPunch() { 
   const CUtlVector<Vector>& aimPunches = m_aimPunchCache();
   const int index = aimPunches.m_Size - 1;

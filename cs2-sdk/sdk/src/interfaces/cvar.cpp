@@ -15,6 +15,14 @@ CCVar* CCVar::Get() {
     return inst.Get<CCVar*>();
 }
 
+void CCVar::UnlockHiddenConvars() {
+    for (int i = m_ConVars.Head(); i != m_ConVars.InvalidIndex(); i = m_ConVars.Next(i)) {
+        ConVar* convar = m_ConVars.Element(i);
+        if (convar == nullptr) continue;
+        convar->m_nFlags &= ~(FCVAR_HIDDEN | FCVAR_DEVELOPMENTONLY);
+    }
+}
+
 CCVar::CVarIterator_t CCVar::GetFirstCvarIterator() {
     CVarIterator_t iterator = -1;
 
@@ -54,8 +62,17 @@ ConVar* CCVar::GetCvarByName(const char* name) {
         }
 
         it = GetNextCvarIterator(it);
-    } while (it != static_cast<CVarIterator_t>(-1));
+    } while ((int16_t)it != -1);
 
     CLogger::Log("[cvar] Couldn't find cvar named '{}'.", name);
+    return nullptr;
+}
+
+ConVar* CCVar::GetCvarByHash(uint32_t hash) { 
+  	for (int i = m_ConVars.Head(); i != m_ConVars.InvalidIndex(); i = m_ConVars.Next(i)) {
+        ConVar* convar = m_ConVars.Element(i);
+            if (convar == nullptr) continue;
+        if (FNV1A::Hash(convar->m_Name) == hash) return convar;
+    }
     return nullptr;
 }

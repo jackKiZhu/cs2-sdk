@@ -31,6 +31,8 @@ struct Vars_t {
     bool m_DrawFov;
 
     bool m_Backtrack = true;
+    bool m_AimAtRecords = false;
+    bool m_BacktrackSkeleton = true;
 
     float m_RecoilX = 0.7f;
     float m_RecoilY = 0.4f;
@@ -40,9 +42,8 @@ struct Vars_t {
     float m_Fov = 0.f;
     float m_ViewmodelFov = 0.f;
 
-    float m_NightMode = 0.f;
-
     bool m_Chams = true;
+    int m_ChamsMat = 0;
     bool m_ChamsXQZ = true;
     Color_t m_ChamsColor = Color_t(0, 255, 125);
 

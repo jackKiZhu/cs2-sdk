@@ -31,6 +31,8 @@ class CCSPlayerInventory {
     std::pair<uint64_t, uint32_t> GetHighestIDs();
     C_EconItemView* GetItemViewForItem(uint64_t itemID);
     CEconItem* GetSOCDataForItem(uint64_t itemID);
+    void SendInventoryUpdateEvent();
+    void SendPanoramaUpdateEvent();
 
     SOID_t& GetOwner();
     CUtlVector<C_EconItemView*>& GetItemVector();

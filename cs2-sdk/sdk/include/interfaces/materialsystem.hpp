@@ -70,7 +70,8 @@ class CSceneObject {
 
 #pragma pack(push, 1)
 class CSceneAnimatableObject : public CSceneObject {
-    CUtlVector<matrix3x4a_t> m_worldSpaceRenderBones;  // 0xd0
+   public:
+    CUtlVector<matrix3x4_t> m_worldSpaceRenderBones;  // 0xd0
     CUtlVector<float> m_flexControllerWeights;         // 0xe8
     int m_nPerVertexBoneInfluenceCount;                // 0x100
    private:

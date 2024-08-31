@@ -56,5 +56,6 @@ class C_CSPlayerPawn : public C_CSPlayerPawnBase {
     SCHEMA(int, m_iShotsFired, "C_CSPlayerPawn", "m_iShotsFired");
     SCHEMA(bool, m_bIsScoped, "C_CSPlayerPawn", "m_bIsScoped");
 
+    uint32_t GetOwnerHandleIndex();
     Vector* GetLastAimPunch();
 };

@@ -1,0 +1,9 @@
+type int 4 [[i32]]
+type str 1 [[utf8]]
+type void 0 
+
+struct Foo 0x68 {
+    // void* heap1 @ 0x8
+    // void* heap2 @ 0x18
+    // void* heap3 @ 0x18
+}

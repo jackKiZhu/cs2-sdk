@@ -22,11 +22,9 @@ class CChams {
 
     enum MaterialType_t
     {
-      MAT_FLAT,
-      MAT_FLAT_Z, 
-
-      MAT_REGULAR,
-      MAT_REGULAR_Z,
+      MAT_BLOOM,
+      MAT_GLOW, 
+      MAT_GLOW2, 
 
       MAT_TYPE_COUNT
     };
@@ -40,11 +38,7 @@ class CChams {
                       const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
                       const CMaterial2* material);
 
-    CStrongHandle<CMaterial2> CreateMaterial(const char* name);
-
    private:
-    CMaterial2* CreateMaterial(const char* name, const char* materialVMAT, const char* shaderType, bool blendMode, bool translucent, bool disableZ);
-
     bool OverrideMaterial(ISceneObjectDesc* const desc, IRenderContext* ctx, CMeshDrawPrimitive_t* renderList, int numRenderablesToDraw,
                           const ISceneView* view, ISceneLayer* layer, SceneSystemPerFrameStats_t* const perFrameStats,
                           const CMaterial2* material);

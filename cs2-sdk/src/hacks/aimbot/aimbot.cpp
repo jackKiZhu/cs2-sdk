@@ -1,5 +1,7 @@
 #include <pch.hpp>
 
+#include <algorithm>
+
 #include <hacks/global/global.hpp>
 #include <hacks/aimbot/aimbot.hpp>
 #include <hacks/aimbot/lagcomp.hpp>
@@ -73,7 +75,7 @@ void CAimbot::Run(const TargetData_t& data) {
     }
 
     if (g_Vars.m_EnableTriggerbot && !wantsRecoil && hitPawn && hitPawn->IsEnemy(CGlobal::Get().pawn)) {
-        lastMove.Scroll(IN_ATTACK);
+        //lastMove.Scroll(IN_ATTACK);
     }
 
     const bool inDuel = g_Vars.m_EnableInDuel && (target ? target->dot >= g_Vars.m_ReactionTreshold : false);
@@ -110,12 +112,6 @@ void CAimbot::Run(const TargetData_t& data) {
     shouldAim = target ? fov <= g_Vars.m_AimFov && CGlobalVars::Get()->currentTime - lastActiveTime <= 0.2f : false;
 
     if (target && shouldAim) {
-        if (g_Vars.m_Backtrack) {
-            auto cmd = CGlobal::Get().cmd;
-            if (cmd->csgoUserCmd.nAttack1StartHistoryIndex != -1)
-                backtrackTick = cmd->GetInputHistoryEntry(cmd->csgoUserCmd.nAttack1StartHistoryIndex)->nPlayerTickCount;
-        }
-
         if (hitPawn && fov <= g_Vars.m_DelayFov && hitPawn != target->Get()->m_hPawn().Get()) {
             // prevent shoot
         }
@@ -131,16 +127,11 @@ void CAimbot::Run(const TargetData_t& data) {
         if (fabsf(curDelta.x) > fabsf(smoothedDelta.x)) lastMove.viewAngles.x = smoothedAngle.x;
         if (fabsf(curDelta.y) > fabsf(smoothedDelta.y)) lastMove.viewAngles.y = smoothedAngle.y;
     } else {
-        Invalidate();
+        pid[0].Reset();
+        pid[1].Reset();
     }
 
     lastMove.viewAngles.NormalizeAngle();
-}
-
-void CAimbot::Update() {
-    // targetScreen = ImVec2(0, 0);
-    // if (!target) return;
-    // CMath::Get().WorldToScreen(targetPos, targetScreen);
 }
 
 void CAimbot::Render() {
@@ -168,51 +159,6 @@ void CAimbot::Render() {
     if (target) {
         // drawList->AddCircle(targetScreen, 5.f, IM_COL32(255, 255, 255, 255));
     }
-}
-
-void CAimbot::Test(CCSGOInputHistoryEntryPB* historyEntry) {
-    if (!g_Vars.m_Backtrack) return;
-    if (!target || target->records.empty()) return;
-
-    CCSGOInputHistoryEntryPB* subtick = historyEntry;
-    if (!subtick || !subtick->pViewCmd || !subtick->cl_interp || !subtick->sv_interp0 || !subtick->sv_interp1) return;
-
-    if (subtick->nPlayerTickCount != backtrackTick) return; // not a shot cmd
-
-    const auto [simTime1, simTime2, fraction] = CLagComp::Get().GetOptimalSimtime();
-    if (fraction == -1.f) return;
-
-    constexpr float interval = 1.f / 64.f;
-
-    INetworkGameClient* client = INetworkGameClient::Get();
-    if (!client) return;
-
-    CNetworkGameClient* network = client->GetNetworkClient();
-    if (!network) return;
-
-    float simTime = fraction > 1.f - interval ? simTime2 : simTime1;
-    //simTime += network->GetClientInterp();
-    int tick = static_cast<int>((simTime / interval) + 0.5f);
-
-    Tickfrac_t tf{tick, 1.f};
-    InterpInfo_t cl, sv0, sv1;
-    if (!target->Get()->m_hPawn().Get()->m_pGameSceneNode()->CalculateInterpInfos(&cl, &sv0, &sv1, &tf)) return;
-
-    CLogger::Log("[Backtrack] tick [{} + {:.1f}] to tick [{} + 1.f]", subtick->nPlayerTickCount, fraction, tf.tick, tf.fraction);
-
-    subtick->nRenderTickCount = cl.dstTick;
-
-    subtick->cl_interp->srcTick = cl.srcTick;
-    subtick->cl_interp->dstTick = cl.dstTick;
-    subtick->cl_interp->fraction = cl.fraction;
-
-    subtick->sv_interp0->srcTick = sv0.srcTick;
-    subtick->sv_interp0->dstTick = sv0.dstTick;
-    subtick->sv_interp0->fraction = sv0.fraction;
-
-    subtick->sv_interp1->srcTick = sv1.srcTick;
-    subtick->sv_interp1->dstTick = sv1.dstTick;
-    subtick->sv_interp1->fraction = sv1.fraction;
 }
 
 void CAimbot::Invalidate() {

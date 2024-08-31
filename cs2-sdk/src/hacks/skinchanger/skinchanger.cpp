@@ -112,13 +112,6 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
         if (isKnife) {
             itemView->m_iItemDefinitionIndex() = loadoutItemDefinition->m_nDefIndex;
 
-            const char* knifeModel = loadoutItemDefinition->m_pszBaseDisplayModel;
-            // update models
-            weapon->SetModel(knifeModel);
-            if (viewmodel->m_hWeapon() == weaponHandle) {
-                viewmodel->SetModel(knifeModel);
-            }
-
             CCSWeaponBaseVData* vdata = weapon->GetWeaponData();
             if (vdata) {
                 CUtlStringToken subclassID(std::to_string(loadoutItemDefinition->m_nDefIndex).c_str());
@@ -126,11 +119,22 @@ void CSkinChanger::OnFrameStageNotify(int stage) {
                 weapon->m_nSubclassID() = subclassID;
                 // vdata->subclassID = token.szDebugName;
 
-                if (viewmodel->m_hWeapon() == weaponHandle) 
-                    viewmodel->m_nSubclassID() = subclassID;
+                if (viewmodel->m_hWeapon() == weaponHandle) viewmodel->m_nSubclassID() = subclassID;
 
                 weapon->UpdateSubclass();
+
+                vdata->m_szName() = loadoutItemDefinition->m_pszBaseDisplayModel;
+                vdata->Update();
             }
+
+            const char* knifeModel = loadoutItemDefinition->m_pszBaseDisplayModel;
+            // update models
+            weapon->SetModel(knifeModel);
+            if (viewmodel->m_hWeapon() == weaponHandle) {
+                viewmodel->SetModel(knifeModel);
+            }
+
+          
 
             viewmodel->animationGraphInstance->animGraphNetworkedVariables = nullptr;
         } else {
@@ -254,7 +258,7 @@ void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) {
     CEconItemDefinition* currentDefinition = currentView->GetStaticData();
     if (!currentDefinition) return;
 
-    // CLogger::Log("Equipping {}", CLocalize::Get()->FindSafe(currentDefinition->m_pszBaseDisplayModel));
+    CLogger::Log("Equipping {}", CLocalize::Get()->FindSafe(currentDefinition->m_pszBaseDisplayModel));
 
     if (currentDefinition->IsGloves(false) || currentDefinition->IsKnife(false) ||
         currentDefinition->m_nDefIndex == toEquipView->m_iItemDefinitionIndex())
@@ -267,6 +271,7 @@ void CSkinChanger::OnEquipItemInLoadout(int team, int slot, uint64_t itemID) {
     if (!curSOCData) return;
 
     inventory->SOUpdated(inventory->GetOwner(), (CSharedObject*)curSOCData, eSOCacheEvent_Incremental);
+    inventory->SendInventoryUpdateEvent();
 }
 
 void CSkinChanger::OnSetModel(C_BaseModelEntity* entity, const char*& model) {

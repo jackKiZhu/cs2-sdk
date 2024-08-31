@@ -62,7 +62,7 @@ void CMenu::Toggle(bool state) {
     m_Open = state;
 
     auto inputSystem = CInputSystem::Get();
-    if (inputSystem && inputSystem->IsRelativeMouseMode()) {
+    if (inputSystem && !inputSystem->IsMouseLocked()) {
         const ImVec2 screenCenter = ImGui::GetIO().DisplaySize * 0.5f;
 
         sdl::SetRelativeMouseMode(!m_Open);
@@ -143,15 +143,19 @@ void CMenu::RenderMainMenu() {
 
         ImGui::Checkbox("Triggerbot", &g_Vars.m_EnableTriggerbot);
         ImGui::Checkbox("Backtrack", &g_Vars.m_Backtrack);
+        ImGui::Checkbox("Aim At Records", &g_Vars.m_AimAtRecords);
+        ImGui::Checkbox("Backtrack Skeleton", &g_Vars.m_BacktrackSkeleton);
         ImGui::Spacing();
 
-        ImGui::SliderFloat("World brightness", &g_Vars.m_NightMode, 0.f, 1.f);
+        //ImGui::SliderFloat("World brightness", &g_Vars.m_NightMode, 0.f, 1.f);
         ColorEdit4("##World color", g_Vars.m_WorldColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
         ImGui::SliderFloat("FOV", &g_Vars.m_Fov, 0.f, 20.f);
         ImGui::SliderFloat("Viewmodel FOV", &g_Vars.m_ViewmodelFov, 0.f, 20.f);
         ImGui::Checkbox("Chams", &g_Vars.m_Chams);
         ImGui::SameLine();
-        ColorEdit4("##Chams color", g_Vars.m_ChamsColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+        ColorEdit4("##Chams color", g_Vars.m_ChamsColor,
+                   ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaBar);
+        ImGui::Combo("Chams material", &g_Vars.m_ChamsMat, "Bloom\0Glow\0Custom\0");
 
         if (ImGui::Button("Unload", {-FLT_MIN, 0})) Shutdown(), CSkinChanger::Get().Shutdown(), CInstance::Get().FreeLibrary();
     }

@@ -35,6 +35,8 @@ void CHooks::Shutdown() {
 
     CInputHooks::Get().Shutdown();
 
+    instrumentation::shutdown();
+
     if (funchook_uninstall(CHook::s_FuncHookContext, 0) != FUNCHOOK_ERROR_SUCCESS) {
         return CLogger::Log("[fh] funchook_uninstall() failed!");
     }

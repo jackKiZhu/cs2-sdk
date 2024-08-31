@@ -1,0 +1,18 @@
+type int 4 [[i32]]
+type float 4 [[f32]]
+type double 8 [[f64]]
+type char 0 [[char*]]
+type str 8 [[utf8*]]
+type wstr 8 [[utf16*]]
+type void 0
+
+struct IconGenerator {
+	str name @ 0x8
+	int idk @ 0x28
+	str utlstring @ 0x40
+	int idk2 @ 0x80
+	double platFloatTime @ 0xF0
+	int requestCount @ 0x118
+	int frameCount @ 0x110
+	float frameCount @ 0x114
+}

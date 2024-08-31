@@ -21,10 +21,6 @@ bool C_CSWeaponBaseGun::CanPrimaryAttack(const int weaponType, const float serve
             attackTick++;
         attackTickRatio = 0.f;
     }
-
-    const auto& [tick, ratio] = CGlobalVars::Get()->GetCurrentTickRounded();
-    if (tick > attackTick) return true;
-    if (tick == attackTick) return attackTickRatio <= ratio;
 	return false; 
 }
 
@@ -42,9 +38,6 @@ bool C_CSWeaponBaseGun::CanSecondaryAttack(const int weaponType, const float ser
         attackTickRatio = 0.f;
     }
 
-    const auto& [tick, ratio] = CGlobalVars::Get()->GetCurrentTickRounded();
-    if (tick > attackTick) return true;
-    if (tick == attackTick) return attackTickRatio <= ratio;
     return false;
 }
 

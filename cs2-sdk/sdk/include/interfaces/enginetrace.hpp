@@ -1,6 +1,9 @@
 #pragma once
 
 #include <math/types/vector.hpp>
+#include <array>
+
+class C_CSPlayerPawn;
 
 struct Ray_t {
     Vector start; // 0x0
@@ -53,26 +56,18 @@ struct GameTrace_t {
 struct TraceFilter_t {
     uint64_t vt;  // 0x0
     uint64_t mask;  // 0x8
-    PAD(0x8);      // 0x10
-    uint32_t skipHandles[4];  // 0x18
-    uint16_t collisions[2];
-    PAD(0x5);
+    std::array<std::int64_t, 2> v1;
+    std::array<std::int32_t, 4> skipHandles;
+    std::array<std::int16_t, 2> collisions;
+    std::int16_t m_v2;
+    std::uint8_t m_v3;
+    std::uint8_t m_v4;
+    std::uint8_t m_v5;
+
+    TraceFilter_t(std::uint64_t mask, C_CSPlayerPawn* skip1, C_CSPlayerPawn* skip2, int layer);
 
     virtual ~TraceFilter_t(){};
     virtual bool Unk() { return true; };
-};
-
-struct Filter_t {
-    uint64_t vt;      // 0x0
-    uint64_t mask;    // 0x8
-    PAD(0x10);        // 0x10
-    uint32_t skipHandle;  // 0x20
-    uint32_t skipHandle2; // 0x24
-    uint32_t skipOwnerHandle;  // 0x28
-    uint32_t skipOwnerHandle2;  // 0x2C
-    uint32_t unk;               // 0x30
-    uint16_t unk2;              // 0x34
-    uint8_t unk3[3];               // 0x36
 };
 
 class C_BaseEntity;

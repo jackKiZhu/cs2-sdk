@@ -8,7 +8,7 @@ class C_CSWeaponBaseGun;
 
 class CBasePlayerController : public C_BaseEntity {
    public:
-    SCHEMA(int, m_nTickBase, "CBasePlayerController", "m_nTickBase");
+    SCHEMA(uint32_t, m_nTickBase, "CBasePlayerController", "m_nTickBase");
     SCHEMA(CHandle<C_CSPlayerPawn>, m_hPawn, "CBasePlayerController", "m_hPawn");
     SCHEMA(CHandle<C_CSPlayerPawn>, m_hPredictedPawn, "CBasePlayerController", "m_hPredictedPawn");
     SCHEMA(bool, m_bIsLocalPlayerController, "CBasePlayerController", "m_bIsLocalPlayerController");

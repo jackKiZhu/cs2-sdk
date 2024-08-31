@@ -61,9 +61,28 @@ class CLagComp {
 
     TargetData_t Find();
     void Update();
+    void Reset() {
+        data.player = nullptr;
+        data.controller = nullptr;
+        data.pawn = nullptr;
+        data.records = nullptr;
+        data.bestRecord = nullptr;
+        data.bestRecordIndex = 0;
+        data.bestBone = 6;
+        data.aimPos = {};
+    }
+    void PreModifyInput(CInputFrame* msg, CCSGOInputHistoryEntryPB* historyEntry);
+    void PostModifyInput(CInputFrame* msg, CCSGOInputHistoryEntryPB* historyEntry);
+    void Test();
 
-    float LastValidSimtime();
-    std::tuple<float, float, float> GetOptimalSimtime();
+    std::tuple<float, float, float> GetSubtickSimtime();
+    float GetClientInterp();
 
     TargetData_t data;
+
+   private:
+    bool calculatedInterpolations;
+    bool restore = false;
+    CInputFrame backup;
+    InterpInfo_t cl, sv0, sv1;
 };

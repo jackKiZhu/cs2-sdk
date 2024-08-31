@@ -47,8 +47,10 @@ class CCSWeaponBaseVData : public CBasePlayerWeaponVData
     SCHEMA(int, m_WeaponType, "CCSWeaponBaseVData", "m_WeaponType");
     SCHEMA(float, m_flRange, "CCSWeaponBaseVData", "m_flRange");
     SCHEMA(CFiringModeFloat, m_flMaxSpeed, "CCSWeaponBaseVData", "m_flMaxSpeed");
+    SCHEMA(const char*, m_szName, "CCSWeaponBaseVData", "m_szName");
 
     bool IsGun();
+    void Update();
 
     PAD(0x10);
     const char* subclassID;

@@ -4,6 +4,6 @@ class CInputSystem {
    public:
     static CInputSystem* Get();
 
-    bool IsRelativeMouseMode();
+    bool IsMouseLocked();
     void* GetSDLWindow();
 };
